@@ -17,11 +17,10 @@ import CalendarMonthIcon from '@mui/icons-material/CalendarMonth'
 import CleaningServicesIcon from '@mui/icons-material/CleaningServices'
 import PetsIcon from '@mui/icons-material/Pets'
 import CampaignIcon from '@mui/icons-material/Campaign'
-import { loadTasks, addTask as addStoredTask, saveTasks, getMeta, setMeta, bump } from './storage'
+import LooksOneIcon from '@mui/icons-material/LooksOne'
+import { loadTasks, addTask as addStoredTask, saveTasks, bump } from './storage'
 import AddTaskDialog, { RECURRENCE_OPTIONS } from './AddTaskDialog'
 import MonthCalendar from './MonthCalendar'
-
-const RESET_KEY = 'nalas-minion-reset-date'
 
 // Electron uses a frameless title bar (titleBarStyle: 'hiddenInset'), so the
 // top bar doubles as the OS drag handle there. The preload bridge only exists
@@ -79,6 +78,54 @@ function isDueOn(task, date = new Date()) {
   }
 }
 
+const DAY_MS = 86400000
+// Timezone-safe index of a date's local calendar day (days since the epoch).
+const dayIndex = (d) => Math.floor(Date.UTC(d.getFullYear(), d.getMonth(), d.getDate()) / DAY_MS)
+
+// A string identifying the occurrence "bucket" a task's recurrence falls into on
+// a given date. When a completed chore's bucket differs from the current one, its
+// schedule has rolled over to a fresh occurrence and it should un-check itself
+// ("renew"). One-time chores share a single constant bucket, so once done they
+// never renew.
+function occurrenceBucket(recurrence, date) {
+  // Offset by 4 so week/biweek buckets start on Monday (epoch day 4,
+  // 1970-01-05, was a Monday) rather than the epoch's Thursday.
+  const day = dayIndex(date)
+  switch (recurrence) {
+    case 'daily':
+      return `d${day}`
+    case 'weekly':
+      return `w${Math.floor((day - 4) / 7)}`
+    case 'biweekly':
+      return `b${Math.floor((day - 4) / 14)}`
+    case 'monthly':
+      return `m${date.getFullYear()}-${date.getMonth()}`
+    case 'once':
+    default:
+      return 'once'
+  }
+}
+
+// Un-check ("renew") any completed *recurring* chore finished in an earlier
+// occurrence than now — daily each calendar day, weekly every 7 days, and so on.
+// One-time chores keep their checked state. Returns the same array reference when
+// nothing changed, so callers can skip a needless save/re-render.
+function renewTasks(tasks, now = new Date()) {
+  let changed = false
+  const next = tasks.map((task) => {
+    if (!task.done) return task
+    const recurrence = task.recurrence || 'once'
+    if (recurrence === 'once') return task
+    const completedBucket = task.completedAt
+      ? occurrenceBucket(recurrence, new Date(task.completedAt))
+      : null
+    if (completedBucket === occurrenceBucket(recurrence, now)) return task
+    changed = true
+    return { ...task, done: false, completedAt: null }
+  })
+  return changed ? next : tasks
+}
+
 // Compact label for a due date stored as a "YYYY-MM-DDTHH:mm" string, e.g.
 // "Today 2:30 PM" or "Jun 14, 9:00 AM". Returns null for missing/invalid input.
 function dueLabel(dueAt) {
@@ -132,12 +179,17 @@ function TaskRow({ task, onToggle, onRemove }) {
               {task.assignee && (
                 <Chip size="small" variant="outlined" icon={<PersonIcon />} label={task.assignee} />
               )}
-              {task.recurrence && task.recurrence !== 'once' && (
+              {/* One-time vs. recurring indicator: a plain "One-time" tag, or a
+                  colored "Renews …" tag for chores that come back on a schedule. */}
+              {!task.recurrence || task.recurrence === 'once' ? (
+                <Chip size="small" variant="outlined" icon={<LooksOneIcon />} label="One-time" />
+              ) : (
                 <Chip
                   size="small"
+                  color="info"
                   variant="outlined"
                   icon={<RepeatIcon />}
-                  label={recurrenceLabel(task.recurrence)}
+                  label={`Renews ${recurrenceLabel(task.recurrence).toLowerCase()}`}
                 />
               )}
               {dueLabel(task.dueAt) && (
@@ -178,18 +230,14 @@ export default function App() {
   const skipNextSave = useRef(false)
 
   // Pull the task list from MongoDB on mount. Start empty when nothing is
-  // stored — chores are added by the user via the + button. Then apply the
-  // daily reset so checkmarks clear once the calendar day has rolled over.
+  // stored — chores are added by the user via the + button. Then renew any
+  // recurring chores whose occurrence has rolled over since they were completed
+  // (the load-time save below writes the freshened state back to Mongo).
   useEffect(() => {
     let cancelled = false
     ;(async () => {
       try {
-        let initial = (await loadTasks()) ?? []
-
-        if ((await getMeta(RESET_KEY)) !== todayKey()) {
-          initial = initial.map((t) => ({ ...t, done: false }))
-          await setMeta(RESET_KEY, todayKey())
-        }
+        const initial = renewTasks((await loadTasks()) ?? [])
         if (!cancelled) setTasks(initial)
       } catch (err) {
         // No localStorage fallback by design: show an empty list and make the
@@ -216,18 +264,15 @@ export default function App() {
     saveTasks(tasks).catch((err) => console.error('Failed to save tasks to MongoDB:', err))
   }, [tasks, loaded])
 
-  // Reset checkmarks at midnight while the app stays open. Schedule a timer for
-  // the next local midnight, and also re-check whenever the tab regains focus
+  // Renew recurring chores at midnight while the app stays open. Schedule a timer
+  // for the next local midnight, and also re-check whenever the tab regains focus
   // (covers the machine sleeping through midnight, where a timer would drift).
+  // renewTasks returns the same array when nothing rolled over, so setTasks is a
+  // no-op (no re-render, no save) on the common case.
   useEffect(() => {
     let timeoutId
 
-    const resetIfNewDay = async () => {
-      if ((await getMeta(RESET_KEY)) !== todayKey()) {
-        await setMeta(RESET_KEY, todayKey())
-        setTasks((prev) => prev.map((t) => ({ ...t, done: false })))
-      }
-    }
+    const renewNow = () => setTasks((prev) => renewTasks(prev))
 
     const scheduleMidnight = () => {
       const now = new Date()
@@ -235,13 +280,13 @@ export default function App() {
         now.getFullYear(), now.getMonth(), now.getDate() + 1, 0, 0, 0, 0,
       )
       timeoutId = setTimeout(() => {
-        resetIfNewDay()
+        renewNow()
         scheduleMidnight()
       }, nextMidnight - now + 1000)
     }
 
     const onVisible = () => {
-      if (document.visibilityState === 'visible') resetIfNewDay()
+      if (document.visibilityState === 'visible') renewNow()
     }
 
     scheduleMidnight()
@@ -275,8 +320,18 @@ export default function App() {
   const pickDay = (date) =>
     setSelectedDay((prev) => (prev && sameDay(prev, date) ? null : date))
 
+  // Check/uncheck a chore. Stamp completedAt when checking so recurring chores
+  // know which occurrence they were finished in (and clear it when unchecking).
+  // The change flows through the persist effect below, so the check is written to
+  // MongoDB immediately.
   const toggle = (id) =>
-    setTasks((prev) => prev.map((t) => (t.id === id ? { ...t, done: !t.done } : t)))
+    setTasks((prev) =>
+      prev.map((t) =>
+        t.id === id
+          ? { ...t, done: !t.done, completedAt: !t.done ? new Date().toISOString() : null }
+          : t,
+      ),
+    )
   const remove = (id) => setTasks((prev) => prev.filter((t) => t.id !== id))
 
   const addTask = ({ text, recurrence, assignee, dueAt }) => {
