@@ -63,9 +63,8 @@ export async function setMeta(key, value) {
   })
 }
 
-// Fire a "bump" push notification (delivered via ntfy from the server). `type`
-// says which project/app triggered it so a shared topic can serve several apps;
-// defaults to housework for this one.
-export async function bump(type = 'housework') {
-  await api('/bump', { method: 'POST', body: JSON.stringify({ type }) })
+// Fire a "bump" push notification (delivered via ntfy from the server). The
+// server fills in the source/event, so no body is needed here.
+export async function bump() {
+  await api('/bump', { method: 'POST' })
 }

@@ -1,29 +1,38 @@
-// Push notifications for the "Bump" button, delivered via ntfy.sh.
+// Sends a push notification via ntfy.sh (https://ntfy.sh).
 //
-// Shared by the long-running Node server (server/index.cjs) and the Netlify
-// function (netlify/functions/api.cjs) so desktop/self-hosted and the cloud
-// deploy send identical pushes. Config comes from env with sensible defaults:
-//   NTFY_TOPIC  the ntfy topic to publish to (default: the household topic)
-//   NTFY_URL    the ntfy server base URL (default: https://ntfy.sh)
+// Setup: install the ntfy app on your phone, subscribe to the topic named in
+// the NTFY_TOPIC env var, and you'll get a push whenever this runs.
+//
+// Shared across projects (matches TommysThoughts' server/notify): any caller can
+// notify the same phone with { source, event } (or a custom title/message).
+// Configure per-deploy:
+//   NTFY_TOPIC   - the secret topic to publish to (required)
+//   NTFY_SERVER  - defaults to https://ntfy.sh
+//
+// Used by both the long-running Node server (server/index.cjs) and the Netlify
+// function (netlify/functions/api.cjs) so every path sends identical pushes.
 
-const NTFY_BASE = process.env.NTFY_URL || 'https://ntfy.sh'
-const NTFY_TOPIC = process.env.NTFY_TOPIC || 'Ali_Tommy_Bump_Buddies'
+async function notify({ source = "Nala's Minions", event = 'bump', message, title } = {}) {
+  const topic = process.env.NTFY_TOPIC
+  if (!topic) throw new Error('NTFY_TOPIC is not configured')
+  const server = process.env.NTFY_SERVER || 'https://ntfy.sh'
 
-// Publish a bump. ntfy takes a plain POST: the message is the body, while
-// Title/Priority/Tags ride along as headers (which must stay ASCII). `type`
-// (e.g. "housework") lets several projects share one topic while still saying
-// which app was bumped.
-async function sendBump(type) {
-  const kind = String(type || 'housework').replace(/[^\x20-\x7e]/g, '').trim().slice(0, 40) || 'housework'
-  const res = await fetch(`${NTFY_BASE}/${encodeURIComponent(NTFY_TOPIC)}`, {
+  const notifyTitle = title || `${source}: ${event}`
+  const notifyBody = message || `Someone triggered "${event}" on ${source}.`
+
+  const response = await fetch(`${server}/${topic}`, {
     method: 'POST',
-    headers: { Title: 'Bump!', Priority: 'high', Tags: 'bell' },
-    body: `Someone bumped ${kind} 🐾`,
+    headers: {
+      Title: notifyTitle,
+      Tags: 'bell',
+      Priority: 'default',
+    },
+    body: notifyBody,
   })
-  if (!res.ok) {
-    const detail = await res.text().catch(() => '')
-    throw new Error(`ntfy ${res.status}: ${detail.slice(0, 200)}`.trim())
+  if (!response.ok) {
+    const text = await response.text().catch(() => '')
+    throw new Error(`ntfy error: ${response.status} ${text}`.trim())
   }
 }
 
-module.exports = { sendBump }
+module.exports = { notify }

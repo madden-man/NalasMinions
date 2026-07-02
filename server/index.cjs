@@ -14,7 +14,7 @@ require('dotenv').config({ path: path.join(__dirname, '..', '.env') })
 const http = require('http')
 const fs = require('fs')
 const mongo = require('../electron/mongo.cjs')
-const { sendBump } = require('./notify.cjs')
+const { notify } = require('./notify.cjs')
 
 const PORT = process.env.PORT || 3001
 const DIST = path.join(__dirname, '..', 'dist')
@@ -99,7 +99,7 @@ async function handler(req, res) {
   if (p === '/api/bump' && method === 'POST') {
     try {
       const body = await readBody(req).catch(() => null)
-      await sendBump(body && body.type)
+      await notify(body || {})
       return sendJson(res, 200, { ok: true })
     } catch (err) {
       console.error('[server] bump error:', err.message)

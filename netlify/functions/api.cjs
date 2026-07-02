@@ -7,11 +7,11 @@
 // client (src/storage.js) needs no changes.
 //
 // Env vars are configured in the Netlify dashboard (Site settings → Environment
-// variables), not from .env: MONGODB_URI (required for tasks), and optionally
-// NTFY_TOPIC / NTFY_URL for the bump push.
+// variables), not from .env: MONGODB_URI (required for tasks), NTFY_TOPIC
+// (required for the bump push), and optionally NTFY_SERVER.
 
 const mongo = require('../../electron/mongo.cjs')
-const { sendBump } = require('../../server/notify.cjs')
+const { notify } = require('../../server/notify.cjs')
 
 const json = (statusCode, body) => ({
   statusCode,
@@ -39,7 +39,7 @@ exports.handler = async (event) => {
   try {
     // Bump works without a database, so handle it before the Mongo gate.
     if (sub === '/bump' && method === 'POST') {
-      await sendBump(parseBody()?.type)
+      await notify(parseBody() || {})
       return json(200, { ok: true })
     }
 

@@ -23,11 +23,6 @@ import MonthCalendar from './MonthCalendar'
 
 const RESET_KEY = 'nalas-minion-reset-date'
 
-// External "bump" link. In the web build this opens in a new tab; in Electron the
-// window-open handler in electron/main.cjs routes target="_blank" opens to the
-// system browser via shell.openExternal, so the same markup works in both.
-const BUMP_URL = 'https://tommysthoughts.com/bumper?type=housework'
-
 // Electron uses a frameless title bar (titleBarStyle: 'hiddenInset'), so the
 // top bar doubles as the OS drag handle there. The preload bridge only exists
 // in Electron, so its presence tells the two builds apart.
@@ -296,11 +291,10 @@ export default function App() {
     )
   }
 
-  // Fire the bump push notification. Fire-and-forget: the button still navigates
-  // to BUMP_URL (new tab / system browser), and a failed notify shouldn't block
-  // that or throw in the click handler.
+  // Fire the bump push notification (ntfy, via the server). Fire-and-forget: a
+  // failed notify shouldn't throw in the click handler.
   const handleBump = () => {
-    bump('housework').catch((err) => console.error('Failed to send bump notification:', err))
+    bump().catch((err) => console.error('Failed to send bump notification:', err))
   }
 
   // Empty-state copy depends on why the list is empty (no tasks at all, nothing
@@ -364,9 +358,6 @@ export default function App() {
               color="secondary"
               startIcon={<CampaignIcon />}
               onClick={handleBump}
-              href={BUMP_URL}
-              target="_blank"
-              rel="noopener noreferrer"
               sx={{ ml: 1, fontWeight: 700, WebkitAppRegion: 'no-drag' }}
             >
               Bump
