@@ -22,6 +22,12 @@
   node_bundler = "esbuild"
   external_node_modules = ["mongodb"]
 
+# Chore reminder sweep: keeps each chore's next ntfy reminder queued. Hourly is
+# the finest interval Netlify offers, which is plenty since ntfy fires reminders
+# at the exact due time — this just keeps the queue topped up.
+[functions."reminders"]
+  schedule = "@hourly"
+
 # Route the app's /api/* calls to the serverless function (rewrite, not redirect).
 [[redirects]]
   from = "/api/*"

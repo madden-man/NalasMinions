@@ -8,16 +8,22 @@
 //
 // Env vars are configured in the Netlify dashboard (Site settings → Environment
 // variables), not from .env: MONGODB_URI (required for tasks), NTFY_TOPIC
-// (required for the bump push), and optionally NTFY_SERVER.
+// (required for bump + reminders), and optionally NTFY_SERVER / REMINDER_TZ.
 
 const mongo = require('../../electron/mongo.cjs')
 const { notify } = require('../../server/notify.cjs')
+const { ensureReminderScheduled } = require('../../server/schedule.cjs')
 
 const json = (statusCode, body) => ({
   statusCode,
   headers: { 'Content-Type': 'application/json; charset=utf-8' },
   body: JSON.stringify(body),
 })
+
+// Reminder markers live in the `meta` collection so client task saves can't
+// clobber them.
+const getMarker = (taskId) => mongo.getMeta(`reminder:${taskId}`)
+const setMarker = (taskId, value) => mongo.setMeta(`reminder:${taskId}`, value)
 
 exports.handler = async (event) => {
   // Normalize the path whether Netlify passes the original request path
@@ -49,7 +55,15 @@ exports.handler = async (event) => {
 
     if (sub === '/tasks' && method === 'GET') return json(200, { tasks: await mongo.loadTasks() })
     if (sub === '/tasks' && method === 'POST') {
-      await mongo.addTask(parseBody())
+      const task = parseBody()
+      await mongo.addTask(task)
+      // Queue a reminder right away so a chore due soon doesn't wait for the
+      // hourly sweep. Best-effort: a notify failure shouldn't fail the add.
+      try {
+        await ensureReminderScheduled(task, { notify, getMarker, setMarker })
+      } catch (err) {
+        console.error('[fn api] reminder schedule failed:', err.message)
+      }
       return json(201, { ok: true })
     }
     if (sub === '/tasks' && method === 'PUT') {

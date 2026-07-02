@@ -15,8 +15,14 @@ const http = require('http')
 const fs = require('fs')
 const mongo = require('../electron/mongo.cjs')
 const { notify } = require('./notify.cjs')
+const { ensureReminderScheduled } = require('./schedule.cjs')
 
 const PORT = process.env.PORT || 3001
+
+// Reminder markers live in the `meta` collection (keyed by task id) so client
+// task saves can't clobber them.
+const getMarker = (taskId) => mongo.getMeta(`reminder:${taskId}`)
+const setMarker = (taskId, value) => mongo.setMeta(`reminder:${taskId}`, value)
 const DIST = path.join(__dirname, '..', 'dist')
 
 const MIME = {
@@ -117,7 +123,15 @@ async function handler(req, res) {
         return sendJson(res, 200, { tasks: await mongo.loadTasks() })
       }
       if (p === '/api/tasks' && method === 'POST') {
-        await mongo.addTask(await readBody(req)) // upsert one task
+        const task = await readBody(req)
+        await mongo.addTask(task) // upsert one task
+        // Queue a reminder right away so a chore due soon doesn't wait for the
+        // hourly sweep. Best-effort: a notify failure shouldn't fail the add.
+        try {
+          await ensureReminderScheduled(task, { notify, getMarker, setMarker })
+        } catch (err) {
+          console.error('[server] reminder schedule failed:', err.message)
+        }
         return sendJson(res, 201, { ok: true })
       }
       if (p === '/api/tasks' && method === 'PUT') {
