@@ -1,0 +1,54 @@
+{
+  "name": "nalas-minion-todo",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Nala's Minion Todo List — household tasks, runs on Mac desktop, iPad, and phone.",
+  "main": "electron/main.cjs",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "server": "node server/index.cjs",
+    "dev:web": "concurrently -k \"npm run server\" \"vite\"",
+    "build": "vite build",
+    "start": "node server/index.cjs",
+    "preview": "vite preview",
+    "electron:dev": "concurrently -k \"vite\" \"wait-on tcp:5173 && cross-env ELECTRON_DEV=1 electron .\"",
+    "electron:build": "vite build && electron-builder"
+  },
+  "dependencies": {
+    "@emotion/react": "^11.11.4",
+    "@emotion/styled": "^11.11.5",
+    "@fontsource/roboto": "^5.0.13",
+    "@mui/icons-material": "^5.15.20",
+    "@mui/material": "^5.15.20",
+    "dotenv": "^9.0.2",
+    "electron-store": "^8.2.0",
+    "mongodb": "^7.3.0",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1"
+  },
+  "devDependencies": {
+    "@vitejs/plugin-react": "^4.3.1",
+    "concurrently": "^8.2.2",
+    "cross-env": "^7.0.3",
+    "electron": "^31.7.7",
+    "electron-builder": "^24.13.3",
+    "vite": "^4.5.3",
+    "wait-on": "^7.2.0"
+  },
+  "build": {
+    "appId": "com.nala.miniontodo",
+    "productName": "Nala's Minion Todo List",
+    "files": [
+      "dist/**/*",
+      "electron/**/*"
+    ],
+    "directories": {
+      "output": "release"
+    },
+    "mac": {
+      "target": "dmg",
+      "category": "public.app-category.productivity"
+    }
+  }
+}
