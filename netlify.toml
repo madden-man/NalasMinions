@@ -1,0 +1,35 @@
+# Netlify deploy config for the web build.
+#
+# The previous failure was Netlify running `npm start` — the persistent Node
+# server in server/index.cjs never exits, so the build timed out. Here the build
+# just compiles the static site with Vite, and the /api/* routes are served by a
+# serverless function (netlify/functions/api.cjs) instead of a long-running
+# server. Set MONGODB_URI (and optionally NTFY_TOPIC / NTFY_URL) under
+# Site settings → Environment variables in the Netlify dashboard.
+
+[build]
+  command = "npm run build"
+  publish = "dist"
+  functions = "netlify/functions"
+
+[build.environment]
+  # Modern Node for both the build and the function runtime (global fetch, etc.).
+  NODE_VERSION = "20"
+
+[functions]
+  # mongodb does dynamic requires that esbuild can't statically bundle, so keep
+  # it external and let Netlify copy it into the function from node_modules.
+  node_bundler = "esbuild"
+  external_node_modules = ["mongodb"]
+
+# Route the app's /api/* calls to the serverless function (rewrite, not redirect).
+[[redirects]]
+  from = "/api/*"
+  to = "/.netlify/functions/api/:splat"
+  status = 200
+
+# SPA fallback: serve index.html for any non-file, non-API path.
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200

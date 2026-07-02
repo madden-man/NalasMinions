@@ -12,6 +12,9 @@
     "build": "vite build",
     "start": "node server/index.cjs",
     "preview": "vite preview",
+    "test": "node --test",
+    "test:electron": "cross-env ELECTRON_RUN_AS_NODE=1 electron --test",
+    "test:all": "npm test && npm run test:electron",
     "electron:dev": "concurrently -k \"vite\" \"wait-on tcp:5173 && cross-env ELECTRON_DEV=1 electron .\"",
     "electron:build": "vite build && electron-builder"
   },

@@ -14,6 +14,7 @@ require('dotenv').config({ path: path.join(__dirname, '..', '.env') })
 const http = require('http')
 const fs = require('fs')
 const mongo = require('../electron/mongo.cjs')
+const { sendBump } = require('./notify.cjs')
 
 const PORT = process.env.PORT || 3001
 const DIST = path.join(__dirname, '..', 'dist')
@@ -92,7 +93,21 @@ async function handler(req, res) {
   // CORS preflight.
   if (method === 'OPTIONS') return sendJson(res, 204, {})
 
-  // Everything under /api needs MongoDB.
+  // Bump → push notification. Kept independent of MongoDB so it works even when
+  // the database isn't configured, and so other projects can reuse it by POSTing
+  // a different { type }.
+  if (p === '/api/bump' && method === 'POST') {
+    try {
+      const body = await readBody(req).catch(() => null)
+      await sendBump(body && body.type)
+      return sendJson(res, 200, { ok: true })
+    } catch (err) {
+      console.error('[server] bump error:', err.message)
+      return sendJson(res, 502, { error: err.message })
+    }
+  }
+
+  // Everything else under /api needs MongoDB.
   if (p.startsWith('/api/')) {
     if (!mongo.isEnabled()) {
       return sendJson(res, 503, { error: 'MONGODB_URI is not set — see .env.example' })

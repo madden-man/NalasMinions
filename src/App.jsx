@@ -16,11 +16,17 @@ import ViewListIcon from '@mui/icons-material/ViewList'
 import CalendarMonthIcon from '@mui/icons-material/CalendarMonth'
 import CleaningServicesIcon from '@mui/icons-material/CleaningServices'
 import PetsIcon from '@mui/icons-material/Pets'
-import { loadTasks, addTask as addStoredTask, saveTasks, getMeta, setMeta } from './storage'
+import CampaignIcon from '@mui/icons-material/Campaign'
+import { loadTasks, addTask as addStoredTask, saveTasks, getMeta, setMeta, bump } from './storage'
 import AddTaskDialog, { RECURRENCE_OPTIONS } from './AddTaskDialog'
 import MonthCalendar from './MonthCalendar'
 
 const RESET_KEY = 'nalas-minion-reset-date'
+
+// External "bump" link. In the web build this opens in a new tab; in Electron the
+// window-open handler in electron/main.cjs routes target="_blank" opens to the
+// system browser via shell.openExternal, so the same markup works in both.
+const BUMP_URL = 'https://tommysthoughts.com/bumper?type=housework'
 
 // Electron uses a frameless title bar (titleBarStyle: 'hiddenInset'), so the
 // top bar doubles as the OS drag handle there. The preload bridge only exists
@@ -290,6 +296,13 @@ export default function App() {
     )
   }
 
+  // Fire the bump push notification. Fire-and-forget: the button still navigates
+  // to BUMP_URL (new tab / system browser), and a failed notify shouldn't block
+  // that or throw in the click handler.
+  const handleBump = () => {
+    bump('housework').catch((err) => console.error('Failed to send bump notification:', err))
+  }
+
   // Empty-state copy depends on why the list is empty (no tasks at all, nothing
   // today, or nothing on the picked calendar day).
   const dayPicked = effectiveView === 'monthly' && selectedDay
@@ -345,6 +358,20 @@ export default function App() {
             color={remaining === 0 ? 'success' : 'default'}
             sx={{ bgcolor: 'rgba(255,255,255,0.18)', color: 'inherit', '& .MuiChip-icon': { color: 'inherit' } }}
           />
+          <Tooltip title="Bump housework">
+            <Button
+              variant="contained"
+              color="secondary"
+              startIcon={<CampaignIcon />}
+              onClick={handleBump}
+              href={BUMP_URL}
+              target="_blank"
+              rel="noopener noreferrer"
+              sx={{ ml: 1, fontWeight: 700, WebkitAppRegion: 'no-drag' }}
+            >
+              Bump
+            </Button>
+          </Tooltip>
           <Tooltip title="Add chore">
             <IconButton
               edge="end"
