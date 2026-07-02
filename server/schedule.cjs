@@ -120,13 +120,31 @@ function nextReminderEpoch(task, nowMs, tz = REMINDER_TZ) {
 // re-send. Deps are injected to keep this usable from the Netlify sweep and the
 // write endpoints, and testable. Returns the scheduled occurrence's ISO string,
 // or null when nothing was (re)scheduled.
-async function ensureReminderScheduled(task, { nowMs = Date.now(), tz, notify, getMarker, setMarker }) {
+async function ensureReminderScheduled(
+  task,
+  { nowMs = Date.now(), tz, notify, cancelScheduled, getMarker, setMarker },
+) {
   const epoch = nextReminderEpoch(task, nowMs, tz)
-  if (epoch == null) return null
+  const marker = await getMarker(task.id)
+  // A queued push is still cancelable while its time is in the future.
+  const pendingId = marker && marker.id && Date.parse(marker.at) > nowMs ? marker.id : null
+
+  // Nothing to remind about anymore (finished one-off, due time removed, …):
+  // drop any still-pending push and clear the marker.
+  if (epoch == null) {
+    if (pendingId) {
+      if (cancelScheduled) await cancelScheduled(pendingId)
+      await setMarker(task.id, null)
+    }
+    return null
+  }
 
   const atISO = new Date(epoch).toISOString()
-  const marker = await getMarker(task.id)
   if (marker && marker.at === atISO) return null // already queued for this occurrence
+
+  // The occurrence moved (edited due time/recurrence, or rolled over) — cancel
+  // the stale queued push before scheduling the new one.
+  if (pendingId && cancelScheduled) await cancelScheduled(pendingId)
 
   // ntfy rejects delays under 10s, so anything essentially due now goes out
   // immediately instead of scheduled.

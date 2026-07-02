@@ -14,7 +14,7 @@ require('dotenv').config({ path: path.join(__dirname, '..', '.env') })
 const http = require('http')
 const fs = require('fs')
 const mongo = require('../electron/mongo.cjs')
-const { notify } = require('./notify.cjs')
+const { notify, cancelScheduled } = require('./notify.cjs')
 const { ensureReminderScheduled } = require('./schedule.cjs')
 
 const PORT = process.env.PORT || 3001
@@ -23,6 +23,17 @@ const PORT = process.env.PORT || 3001
 // task saves can't clobber them.
 const getMarker = (taskId) => mongo.getMeta(`reminder:${taskId}`)
 const setMarker = (taskId, value) => mongo.setMeta(`reminder:${taskId}`, value)
+
+// Keep a chore's ntfy reminder in sync. Best-effort: a notify failure must not
+// fail the underlying task write.
+async function scheduleReminder(task) {
+  if (!task || !task.id) return
+  try {
+    await ensureReminderScheduled(task, { notify, cancelScheduled, getMarker, setMarker })
+  } catch (err) {
+    console.error('[server] reminder sync failed:', err.message)
+  }
+}
 const DIST = path.join(__dirname, '..', 'dist')
 
 const MIME = {
@@ -126,16 +137,16 @@ async function handler(req, res) {
         const task = await readBody(req)
         await mongo.addTask(task) // upsert one task
         // Queue a reminder right away so a chore due soon doesn't wait for the
-        // hourly sweep. Best-effort: a notify failure shouldn't fail the add.
-        try {
-          await ensureReminderScheduled(task, { notify, getMarker, setMarker })
-        } catch (err) {
-          console.error('[server] reminder schedule failed:', err.message)
-        }
+        // hourly sweep.
+        await scheduleReminder(task)
         return sendJson(res, 201, { ok: true })
       }
       if (p === '/api/tasks' && method === 'PUT') {
-        await mongo.saveTasks(await readBody(req)) // bulk sync the whole array
+        const tasks = await readBody(req)
+        await mongo.saveTasks(tasks) // bulk sync the whole array
+        // Re-sync reminders so an edited due time / recurrence (or a completed
+        // one-off) reschedules or cancels its push without waiting for the sweep.
+        if (Array.isArray(tasks)) for (const t of tasks) await scheduleReminder(t)
         return sendJson(res, 200, { ok: true })
       }
       if (p.startsWith('/api/meta/')) {

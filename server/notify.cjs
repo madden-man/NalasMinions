@@ -38,4 +38,19 @@ async function notify({ source = "Nala's Minions", event = 'bump', message, titl
   return data && data.id ? data.id : null
 }
 
-module.exports = { notify }
+// Cancel a previously scheduled (not-yet-delivered) ntfy message by its id, so a
+// reminder for a chore that was edited, completed, or deleted doesn't still fire
+// at the old time. Best-effort: unknown/already-delivered ids just no-op.
+async function cancelScheduled(id) {
+  if (!id) return
+  const topic = process.env.NTFY_TOPIC
+  if (!topic) return
+  const server = process.env.NTFY_SERVER || 'https://ntfy.sh'
+  try {
+    await fetch(`${server}/${topic}/${id}`, { method: 'DELETE' })
+  } catch {
+    /* best-effort */
+  }
+}
+
+module.exports = { notify, cancelScheduled }

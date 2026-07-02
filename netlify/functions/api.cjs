@@ -11,7 +11,7 @@
 // (required for bump + reminders), and optionally NTFY_SERVER / REMINDER_TZ.
 
 const mongo = require('../../electron/mongo.cjs')
-const { notify } = require('../../server/notify.cjs')
+const { notify, cancelScheduled } = require('../../server/notify.cjs')
 const { ensureReminderScheduled } = require('../../server/schedule.cjs')
 
 const json = (statusCode, body) => ({
@@ -24,6 +24,17 @@ const json = (statusCode, body) => ({
 // clobber them.
 const getMarker = (taskId) => mongo.getMeta(`reminder:${taskId}`)
 const setMarker = (taskId, value) => mongo.setMeta(`reminder:${taskId}`, value)
+
+// Keep a chore's ntfy reminder in sync. Best-effort: a notify failure must not
+// fail the underlying task write.
+async function scheduleReminder(task) {
+  if (!task || !task.id) return
+  try {
+    await ensureReminderScheduled(task, { notify, cancelScheduled, getMarker, setMarker })
+  } catch (err) {
+    console.error('[fn api] reminder sync failed:', err.message)
+  }
+}
 
 exports.handler = async (event) => {
   // Normalize the path whether Netlify passes the original request path
@@ -59,15 +70,15 @@ exports.handler = async (event) => {
       await mongo.addTask(task)
       // Queue a reminder right away so a chore due soon doesn't wait for the
       // hourly sweep. Best-effort: a notify failure shouldn't fail the add.
-      try {
-        await ensureReminderScheduled(task, { notify, getMarker, setMarker })
-      } catch (err) {
-        console.error('[fn api] reminder schedule failed:', err.message)
-      }
+      await scheduleReminder(task)
       return json(201, { ok: true })
     }
     if (sub === '/tasks' && method === 'PUT') {
-      await mongo.saveTasks(parseBody())
+      const tasks = parseBody()
+      await mongo.saveTasks(tasks)
+      // Re-sync reminders so an edited due time / recurrence (or a completed
+      // one-off) reschedules or cancels its push without waiting for the sweep.
+      if (Array.isArray(tasks)) for (const t of tasks) await scheduleReminder(t)
       return json(200, { ok: true })
     }
 

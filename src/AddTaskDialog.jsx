@@ -17,7 +17,11 @@ export const RECURRENCE_OPTIONS = [
 // Who a chore can be assigned to.
 export const ASSIGNEES = ['Tommy', 'Alison']
 
-export default function AddTaskDialog({ open, onClose, onAdd }) {
+// Add or edit a chore. Pass `task` to edit an existing one (prefills the form and
+// switches the title/button); omit it to add a new chore. `onSubmit` receives the
+// field values; the parent decides whether that's an insert or an update.
+export default function AddTaskDialog({ open, onClose, onSubmit, task = null }) {
+  const isEdit = Boolean(task)
   const [name, setName] = useState('')
   const [recurrence, setRecurrence] = useState('once')
   const [assignee, setAssignee] = useState(ASSIGNEES[0])
@@ -25,22 +29,22 @@ export default function AddTaskDialog({ open, onClose, onAdd }) {
   // due date. Stored on the task as `dueAt`.
   const [due, setDue] = useState('')
 
-  // Reset the form each time the dialog opens so it never shows stale input.
+  // Seed the form each time the dialog opens: from the edited task, or blank
+  // defaults for a new chore. Never shows stale input.
   useEffect(() => {
-    if (open) {
-      setName('')
-      setRecurrence('once')
-      setAssignee(ASSIGNEES[0])
-      setDue('')
-    }
-  }, [open])
+    if (!open) return
+    setName(task?.text ?? '')
+    setRecurrence(task?.recurrence ?? 'once')
+    setAssignee(task?.assignee ?? ASSIGNEES[0])
+    setDue(task?.dueAt ?? '')
+  }, [open, task])
 
   const trimmed = name.trim()
 
   const submit = (e) => {
     e.preventDefault()
     if (!trimmed) return
-    onAdd({ text: trimmed, recurrence, assignee, dueAt: due || null })
+    onSubmit({ text: trimmed, recurrence, assignee, dueAt: due || null })
     onClose()
   }
 
@@ -52,7 +56,7 @@ export default function AddTaskDialog({ open, onClose, onAdd }) {
       maxWidth="xs"
       PaperProps={{ component: 'form', onSubmit: submit }}
     >
-      <DialogTitle sx={{ fontWeight: 700 }}>New chore</DialogTitle>
+      <DialogTitle sx={{ fontWeight: 700 }}>{isEdit ? 'Edit chore' : 'New chore'}</DialogTitle>
       <DialogContent>
         <Stack spacing={3} sx={{ mt: 1 }}>
           <TextField
@@ -127,7 +131,7 @@ export default function AddTaskDialog({ open, onClose, onAdd }) {
           Cancel
         </Button>
         <Button type="submit" variant="contained" disabled={!trimmed}>
-          Add chore
+          {isEdit ? 'Save changes' : 'Add chore'}
         </Button>
       </DialogActions>
     </Dialog>

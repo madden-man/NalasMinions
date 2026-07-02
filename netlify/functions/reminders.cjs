@@ -11,7 +11,7 @@
 // optional (defaults to the household zone in server/schedule.cjs).
 
 const mongo = require('../../electron/mongo.cjs')
-const { notify } = require('../../server/notify.cjs')
+const { notify, cancelScheduled } = require('../../server/notify.cjs')
 const { ensureReminderScheduled } = require('../../server/schedule.cjs')
 
 const getMarker = (taskId) => mongo.getMeta(`reminder:${taskId}`)
@@ -29,7 +29,13 @@ exports.handler = async () => {
     tasks = await mongo.loadTasks()
     for (const task of tasks) {
       try {
-        const at = await ensureReminderScheduled(task, { nowMs: now, notify, getMarker, setMarker })
+        const at = await ensureReminderScheduled(task, {
+          nowMs: now,
+          notify,
+          cancelScheduled,
+          getMarker,
+          setMarker,
+        })
         if (at) {
           scheduled++
           console.log(`[reminders] queued "${task.text}" for ${at}`)
