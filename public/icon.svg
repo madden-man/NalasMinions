@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="0 0 512 512">
+  <!-- App icon for Nala's Minions. Full-bleed gradient background (safe as a
+       maskable icon) with a centred check mark well inside the 80% safe zone. -->
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#8e6ad0"/>
+      <stop offset="1" stop-color="#6a3fb0"/>
+    </linearGradient>
+  </defs>
+  <rect width="512" height="512" fill="url(#bg)"/>
+  <!-- teal accent disc behind the check -->
+  <circle cx="256" cy="256" r="150" fill="#26a69a" opacity="0.18"/>
+  <!-- bold white check, centred, within the maskable safe zone -->
+  <path d="M170 262 L232 322 L348 196"
+        fill="none" stroke="#ffffff" stroke-width="42"
+        stroke-linecap="round" stroke-linejoin="round"/>
+</svg>

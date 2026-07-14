@@ -18,15 +18,17 @@ import CleaningServicesIcon from '@mui/icons-material/CleaningServices'
 import PetsIcon from '@mui/icons-material/Pets'
 import CampaignIcon from '@mui/icons-material/Campaign'
 import LooksOneIcon from '@mui/icons-material/LooksOne'
+import ShoppingCartOutlinedIcon from '@mui/icons-material/ShoppingCartOutlined'
 import { loadTasks, addTask as addStoredTask, saveTasks, bump } from './storage'
 import { renewTasks } from './renew'
+import { isGroceryTask } from './grocery'
 import AddTaskDialog, { RECURRENCE_OPTIONS } from './AddTaskDialog'
 import MonthCalendar from './MonthCalendar'
-
+import GroceryPage from './GroceryPage'
+import useRoute from './useRoute'
 // Electron uses a frameless title bar (titleBarStyle: 'hiddenInset'), so the
-// top bar doubles as the OS drag handle there. The preload bridge only exists
-// in Electron, so its presence tells the two builds apart.
-const isElectron = typeof window !== 'undefined' && Boolean(window.todoStore)
+// top bar doubles as the OS drag handle there.
+import { isElectron } from './platform'
 
 // Local calendar day, e.g. "2026-06-12". Used to detect a midnight rollover.
 function todayKey(d = new Date()) {
@@ -167,7 +169,15 @@ function TaskRow({ task, onToggle, onRemove, onEdit }) {
   )
 }
 
+// Tiny route switch: '/' is the chores list, '/grocery' the grocery list. The
+// path comes from useRoute (the URL path in the browser, the hash in Electron).
 export default function App() {
+  const [path, navigate] = useRoute()
+  if (path === '/grocery') return <GroceryPage navigate={navigate} />
+  return <ChoresPage navigate={navigate} />
+}
+
+function ChoresPage({ navigate }) {
   const theme = useTheme()
   // The calendar needs room for a 7-column grid beside the list; only offer the
   // monthly view once there's enough width to render it well.
@@ -261,14 +271,20 @@ export default function App() {
   // Aliased so the branches below read clearly.
   const effectiveView = view
 
+  // The special grocery task lives in the same collection (so it persists and
+  // syncs like everything else) but belongs to /grocery alone — it must stay in
+  // `tasks` so the bulk save doesn't delete it, while every chores view below
+  // works from this filtered list.
+  const choreTasks = useMemo(() => tasks.filter((t) => !isGroceryTask(t)), [tasks])
+
   // The tasks shown in the list area for the active view. Counts and progress
   // below track this set, so the header reflects what the user is looking at.
   const visibleTasks = useMemo(() => {
-    if (effectiveView === 'today') return tasks.filter((t) => isDueOn(t))
+    if (effectiveView === 'today') return choreTasks.filter((t) => isDueOn(t))
     if (effectiveView === 'monthly' && selectedDay)
-      return tasks.filter((t) => isDueOn(t, selectedDay))
-    return tasks
-  }, [tasks, effectiveView, selectedDay])
+      return choreTasks.filter((t) => isDueOn(t, selectedDay))
+    return choreTasks
+  }, [choreTasks, effectiveView, selectedDay])
 
   const remaining = useMemo(() => visibleTasks.filter((t) => !t.done).length, [visibleTasks])
   const progress = visibleTasks.length
@@ -339,7 +355,7 @@ export default function App() {
   // Empty-state copy depends on why the list is empty (no tasks at all, nothing
   // today, or nothing on the picked calendar day).
   const dayPicked = effectiveView === 'monthly' && selectedDay
-  const empty = !tasks.length
+  const empty = !choreTasks.length
     ? { primary: 'No chores yet', secondary: 'Tap + in the top right to add the first one.' }
     : dayPicked
     ? {
@@ -391,6 +407,16 @@ export default function App() {
             color={remaining === 0 ? 'success' : 'default'}
             sx={{ bgcolor: 'rgba(255,255,255,0.18)', color: 'inherit', '& .MuiChip-icon': { color: 'inherit' } }}
           />
+          <Tooltip title="Grocery list">
+            <IconButton
+              color="inherit"
+              aria-label="grocery list"
+              onClick={() => navigate('/grocery')}
+              sx={{ ml: 1, WebkitAppRegion: 'no-drag' }}
+            >
+              <ShoppingCartOutlinedIcon />
+            </IconButton>
+          </Tooltip>
           <Tooltip title="Bump housework">
             <Button
               variant="contained"
@@ -467,7 +493,7 @@ export default function App() {
                 month={calMonth}
                 onPrevMonth={() => setCalMonth((m) => new Date(m.getFullYear(), m.getMonth() - 1, 1))}
                 onNextMonth={() => setCalMonth((m) => new Date(m.getFullYear(), m.getMonth() + 1, 1))}
-                getCount={(date) => tasks.filter((t) => isDueOn(t, date)).length}
+                getCount={(date) => choreTasks.filter((t) => isDueOn(t, date)).length}
                 dayKey={todayKey}
                 todayKey={todayKey()}
                 selectedKey={selectedDay ? todayKey(selectedDay) : null}
@@ -512,7 +538,7 @@ export default function App() {
             size="small"
             color="inherit"
             onClick={() => setTasks((prev) => prev.filter((t) => !t.done))}
-            disabled={remaining === tasks.length}
+            disabled={remaining === choreTasks.length}
           >
             Clear completed
           </Button>
