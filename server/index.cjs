@@ -66,7 +66,9 @@ function readBody(req) {
     let raw = ''
     req.on('data', (chunk) => {
       raw += chunk
-      if (raw.length > 1e6) req.destroy() // ~1 MB guard
+      // ~8 MB guard — staple brand photos ride inside the tasks payload as
+      // base64 data URIs (compressed client-side to ~15–60 KB each).
+      if (raw.length > 8e6) req.destroy()
     })
     req.on('end', () => {
       try {

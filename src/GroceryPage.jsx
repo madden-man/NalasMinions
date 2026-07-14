@@ -6,6 +6,7 @@ import {
 } from '@mui/material'
 import ArrowBackIcon from '@mui/icons-material/ArrowBack'
 import DeleteOutlineIcon from '@mui/icons-material/DeleteOutline'
+import EditOutlinedIcon from '@mui/icons-material/EditOutlined'
 import AddIcon from '@mui/icons-material/Add'
 import ShoppingCartOutlinedIcon from '@mui/icons-material/ShoppingCartOutlined'
 import RepeatIcon from '@mui/icons-material/Repeat'
@@ -15,8 +16,10 @@ import { isElectron } from './platform'
 import { loadTasks, addTask as upsertTask } from './storage'
 import {
   isGroceryTask, createGroceryTask, renewGroceryItems, toggleGroceryItem, restockDate,
-  addOneOff, toggleOneOff, removeOneOff, clearBoughtOneOffs,
+  addStaple, updateStaple, removeStaple,
+  addOneOff, toggleOneOff, updateOneOff, removeOneOff, clearBoughtOneOffs,
 } from './grocery'
+import GroceryItemDialog from './GroceryItemDialog'
 
 // Short label for a brand link chip, e.g. "organicvalley.coop".
 const brandLabel = (url) => {
@@ -27,15 +30,68 @@ const brandLabel = (url) => {
   }
 }
 
-// One staple row from the recurring grocery task: checkbox = bought, with a
-// chip linking to the desired brand and one showing the restock cadence. When
-// bought, a third chip says when the item comes back onto the list.
-function StapleRow({ item, onToggle }) {
+// Hover preview for a brand link: the site's favicon and name with the full
+// URL underneath, so it's clear where the chip goes before clicking. The
+// favicon comes from Google's favicon service and simply hides itself if the
+// request fails (offline, blocked, no icon).
+function LinkPreview({ url }) {
+  return (
+    <Stack spacing={0.5} sx={{ p: 0.5, maxWidth: 280 }}>
+      <Stack direction="row" spacing={1} alignItems="center">
+        <Box
+          component="img"
+          src={`https://www.google.com/s2/favicons?domain=${encodeURIComponent(brandLabel(url))}&sz=32`}
+          alt=""
+          onError={(e) => {
+            e.currentTarget.style.display = 'none'
+          }}
+          sx={{ width: 20, height: 20, borderRadius: 0.5, bgcolor: 'common.white' }}
+        />
+        <Typography variant="subtitle2">{brandLabel(url)}</Typography>
+      </Stack>
+      <Typography variant="caption" sx={{ wordBreak: 'break-all', opacity: 0.8 }}>
+        {url}
+      </Typography>
+    </Stack>
+  )
+}
+
+// Edit + delete actions shared by both lists' rows.
+function RowActions({ name, onEdit, onRemove }) {
+  return (
+    <Stack direction="row" spacing={0}>
+      <Tooltip title="Edit">
+        <IconButton aria-label={`edit ${name}`} onClick={onEdit}>
+          <EditOutlinedIcon />
+        </IconButton>
+      </Tooltip>
+      <Tooltip title="Delete">
+        <IconButton edge="end" aria-label={`delete ${name}`} onClick={onRemove}>
+          <DeleteOutlineIcon />
+        </IconButton>
+      </Tooltip>
+    </Stack>
+  )
+}
+
+// One staple row from the recurring grocery task: checkbox = bought, a
+// thumbnail of the brand to buy (hover zooms it), and a chip showing the
+// restock cadence. When bought, another chip says when the item comes back
+// onto the list. Items that predate photos and still carry a brandUrl fall
+// back to the old link chip until a photo is set.
+function StapleRow({ item, onToggle, onEdit, onRemove }) {
   const bought = Boolean(item.purchasedAt)
   const back = restockDate(item)
   return (
-    <ListItem disablePadding divider>
-      <ListItemButton onClick={() => onToggle(item.id)} sx={{ py: 1.25 }}>
+    <ListItem
+      disablePadding
+      divider
+      secondaryAction={
+        <RowActions name={item.text} onEdit={() => onEdit(item)} onRemove={() => onRemove(item.id)} />
+      }
+    >
+      {/* Extra right padding clears the two secondary-action icons. */}
+      <ListItemButton onClick={() => onToggle(item.id)} sx={{ py: 1.25, pr: 12 }}>
         <ListItemIcon sx={{ minWidth: 44 }}>
           <Checkbox
             edge="start"
@@ -45,6 +101,35 @@ function StapleRow({ item, onToggle }) {
             inputProps={{ 'aria-label': `Mark ${item.text} bought` }}
           />
         </ListItemIcon>
+        {item.imageData && (
+          <Tooltip
+            arrow
+            placement="right"
+            title={
+              <Box
+                component="img"
+                src={item.imageData}
+                alt={item.text}
+                sx={{ display: 'block', maxWidth: 220, maxHeight: 220, borderRadius: 1 }}
+              />
+            }
+          >
+            <Box
+              component="img"
+              src={item.imageData}
+              alt=""
+              sx={{
+                width: 44,
+                height: 44,
+                objectFit: 'cover',
+                borderRadius: 1,
+                mr: 1.5,
+                flexShrink: 0,
+                opacity: bought ? 0.5 : 1,
+              }}
+            />
+          </Tooltip>
+        )}
         <ListItemText
           primary={item.text}
           primaryTypographyProps={{
@@ -56,20 +141,25 @@ function StapleRow({ item, onToggle }) {
           secondaryTypographyProps={{ component: 'div' }}
           secondary={
             <Stack direction="row" spacing={0.75} sx={{ mt: 0.5 }} useFlexGap flexWrap="wrap">
-              {/* The brand chip is a real link; stop the click so following it
-                  doesn't also toggle the row. */}
-              <Chip
-                size="small"
-                variant="outlined"
-                icon={<LaunchIcon />}
-                label={brandLabel(item.brandUrl)}
-                component="a"
-                href={item.brandUrl}
-                target="_blank"
-                rel="noopener noreferrer"
-                clickable
-                onClick={(e) => e.stopPropagation()}
-              />
+              {/* Legacy brand link, shown only until a photo replaces it. It's
+                  a real link; stop the click so following it doesn't also
+                  toggle the row. */}
+              {!item.imageData && item.brandUrl && (
+                <Tooltip arrow placement="top" title={<LinkPreview url={item.brandUrl} />}>
+                  <Chip
+                    size="small"
+                    variant="outlined"
+                    icon={<LaunchIcon />}
+                    label={brandLabel(item.brandUrl)}
+                    component="a"
+                    href={item.brandUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    clickable
+                    onClick={(e) => e.stopPropagation()}
+                  />
+                </Tooltip>
+              )}
               <Chip
                 size="small"
                 variant="outlined"
@@ -100,6 +190,9 @@ export default function GroceryPage({ navigate }) {
   const [grocery, setGrocery] = useState(null)
   const [stapleError, setStapleError] = useState(null)
   const [draft, setDraft] = useState('')
+  // The add/edit dialog: { kind: 'staple' | 'oneoff', item: object | null }
+  // (item null = adding), or null when closed.
+  const [dialog, setDialog] = useState(null)
   // The load effect persists its own changes (seed/renewal), so the save
   // effect below skips the state set that load performs.
   const skipNextSave = useRef(true)
@@ -156,6 +249,8 @@ export default function GroceryPage({ navigate }) {
 
   const toggleStaple = (itemId) =>
     setGrocery((prev) => (prev ? toggleGroceryItem(prev, itemId) : prev))
+  const deleteStaple = (itemId) =>
+    setGrocery((prev) => (prev ? removeStaple(prev, itemId) : prev))
 
   // Unbought staples first, mirroring the one-off list's ordering.
   const staples = useMemo(
@@ -195,6 +290,18 @@ export default function GroceryPage({ navigate }) {
     if (!text || !grocery) return
     setGrocery((prev) => (prev ? addOneOff(prev, text) : prev))
     setDraft('')
+  }
+
+  // Route the dialog's fields to the right list operation: add or update, for
+  // whichever kind of item the dialog was opened on.
+  const submitDialog = (fields) => {
+    if (!dialog) return
+    setGrocery((prev) => {
+      if (!prev) return prev
+      if (dialog.kind === 'staple')
+        return dialog.item ? updateStaple(prev, dialog.item.id, fields) : addStaple(prev, fields)
+      return dialog.item ? updateOneOff(prev, dialog.item.id, fields) : addOneOff(prev, fields.text)
+    })
   }
 
   return (
@@ -237,9 +344,19 @@ export default function GroceryPage({ navigate }) {
 
         {/* Staples — the recurring grocery task. Each item links to the brand
             we buy and reappears automatically once its duration runs out. */}
-        <Typography variant="subtitle2" color="text.secondary" sx={{ mb: 1 }}>
-          Staples · renew automatically
-        </Typography>
+        <Stack direction="row" alignItems="center" justifyContent="space-between" sx={{ mb: 1 }}>
+          <Typography variant="subtitle2" color="text.secondary">
+            Staples · renew automatically
+          </Typography>
+          <Button
+            size="small"
+            startIcon={<AddIcon />}
+            disabled={!grocery}
+            onClick={() => setDialog({ kind: 'staple', item: null })}
+          >
+            Add staple
+          </Button>
+        </Stack>
         <Paper elevation={1} sx={{ overflow: 'hidden', mb: 3 }}>
           <List disablePadding>
             {stapleError ? (
@@ -253,9 +370,19 @@ export default function GroceryPage({ navigate }) {
               <ListItem>
                 <ListItemText primary="Loading staples…" />
               </ListItem>
+            ) : staples.length === 0 ? (
+              <ListItem>
+                <ListItemText primary="No staples yet" secondary="Use Add staple above." />
+              </ListItem>
             ) : (
               staples.map((item) => (
-                <StapleRow key={item.id} item={item} onToggle={toggleStaple} />
+                <StapleRow
+                  key={item.id}
+                  item={item}
+                  onToggle={toggleStaple}
+                  onEdit={(it) => setDialog({ kind: 'staple', item: it })}
+                  onRemove={deleteStaple}
+                />
               ))
             )}
           </List>
@@ -298,16 +425,16 @@ export default function GroceryPage({ navigate }) {
                   disablePadding
                   divider
                   secondaryAction={
-                    <Tooltip title="Delete">
-                      <IconButton edge="end" aria-label="delete" onClick={() => remove(item.id)}>
-                        <DeleteOutlineIcon />
-                      </IconButton>
-                    </Tooltip>
+                    <RowActions
+                      name={item.text}
+                      onEdit={() => setDialog({ kind: 'oneoff', item })}
+                      onRemove={() => remove(item.id)}
+                    />
                   }
                 >
-                  {/* Unlike chores (row opens the edit dialog), a grocery row has
-                      nothing to edit — the whole row toggles the checkmark. */}
-                  <ListItemButton onClick={() => toggle(item.id)} sx={{ py: 1.25 }}>
+                  {/* Unlike chores (row opens the edit dialog), a grocery row
+                      toggles on tap — editing is the pencil on the right. */}
+                  <ListItemButton onClick={() => toggle(item.id)} sx={{ py: 1.25, pr: 12 }}>
                     <ListItemIcon sx={{ minWidth: 44 }}>
                       <Checkbox
                         edge="start"
@@ -347,6 +474,14 @@ export default function GroceryPage({ navigate }) {
           </Button>
         </Stack>
       </Container>
+
+      <GroceryItemDialog
+        open={Boolean(dialog)}
+        onClose={() => setDialog(null)}
+        onSubmit={submitDialog}
+        kind={dialog?.kind ?? 'oneoff'}
+        item={dialog?.item ?? null}
+      />
     </Box>
   )
 }

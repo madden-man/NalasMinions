@@ -14,8 +14,12 @@ import {
   renewGroceryItems,
   toggleGroceryItem,
   restockDate,
+  addStaple,
+  updateStaple,
+  removeStaple,
   addOneOff,
   toggleOneOff,
+  updateOneOff,
   removeOneOff,
   clearBoughtOneOffs,
 } from '../src/grocery.js'
@@ -81,6 +85,51 @@ test('restockDate: purchase time plus duration, null when not bought', () => {
   const item = { purchasedAt: '2026-07-01T12:00:00.000Z', durationDays: 7 }
   assert.equal(restockDate(item).toISOString(), '2026-07-08T12:00:00.000Z')
   assert.equal(restockDate({ ...item, purchasedAt: null }), null)
+})
+
+test('staples: add prepends unbought, update merges fields, remove drops', () => {
+  let t = addStaple(
+    createGroceryTask(),
+    { text: 'Coffee beans', brandUrl: 'https://www.peets.com/', durationDays: 14 },
+    NOW,
+  )
+  assert.equal(t.items[0].text, 'Coffee beans')
+  assert.equal(t.items[0].purchasedAt, null)
+  assert.equal(t.items.length, 4)
+
+  const id = t.items[0].id
+  t = updateStaple(t, id, { text: 'Coffee', durationDays: 10 })
+  assert.equal(t.items[0].text, 'Coffee')
+  assert.equal(t.items[0].durationDays, 10)
+  assert.equal(t.items[0].brandUrl, 'https://www.peets.com/') // untouched field
+
+  t = removeStaple(t, id)
+  assert.equal(t.items.length, 3)
+})
+
+test('staples: editing preserves bought state', () => {
+  let t = createGroceryTask()
+  const id = t.items[0].id
+  t = toggleGroceryItem(t, id, NOW)
+  t = updateStaple(t, id, { durationDays: 3 })
+  assert.equal(t.items[0].purchasedAt, NOW.toISOString())
+})
+
+test('staples: setting a brand photo merges like any other field', () => {
+  let t = createGroceryTask()
+  const id = t.items[0].id
+  t = updateStaple(t, id, { imageData: 'data:image/jpeg;base64,Zm9vYmFy' })
+  assert.equal(t.items[0].imageData, 'data:image/jpeg;base64,Zm9vYmFy')
+  assert.equal(t.items[0].durationDays, 7) // untouched
+  t = updateStaple(t, id, { imageData: null })
+  assert.equal(t.items[0].imageData, null)
+})
+
+test('one-offs: update edits the text in place', () => {
+  let t = addOneOff(createGroceryTask(), 'Limes', NOW)
+  t = updateOneOff(t, t.oneOffs[0].id, { text: 'Key limes' })
+  assert.equal(t.oneOffs[0].text, 'Key limes')
+  assert.equal(t.oneOffs[0].done, false)
 })
 
 test('one-offs: add prepends, toggle flips done, remove drops, clear keeps unbought', () => {

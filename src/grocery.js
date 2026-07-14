@@ -3,8 +3,10 @@
 // One task document (kind: 'grocery') lives in tommy-data.nalas-minions right
 // next to the chores, but it behaves differently: the chores page hides it and
 // /grocery renders it. Instead of a single done flag it carries an `items`
-// sub-array of staples — each one records the item, a link to the desired
-// brand (brandUrl), and how many days a purchase lasts (durationDays). Buying
+// sub-array of staples — each one records the item, a photo of the desired
+// brand (imageData, a compressed base64 data URI; older items may still carry
+// a legacy brandUrl link), and how many days a purchase lasts (durationDays).
+// Buying
 // an item stamps purchasedAt; once its duration elapses the item renews
 // (un-checks itself), which is what makes the task recurring. Pure and
 // framework-free so it can be unit-tested (test/grocery.test.mjs), mirroring
@@ -92,6 +94,29 @@ export function toggleGroceryItem(task, itemId, now = new Date()) {
   }
 }
 
+// Add a new staple to the top of the list. `fields` carries text, brandUrl,
+// and durationDays (the dialog validates them); the item starts unbought.
+export function addStaple(task, fields, now = new Date()) {
+  return {
+    ...task,
+    items: [{ id: `staple-${now.getTime()}`, ...fields, purchasedAt: null }, ...(task.items || [])],
+  }
+}
+
+// Merge edited fields (text / brandUrl / durationDays) into a staple. Bought
+// state is untouched — durationDays changes take effect from the existing
+// purchase timestamp.
+export function updateStaple(task, itemId, fields) {
+  return {
+    ...task,
+    items: (task.items || []).map((i) => (i.id === itemId ? { ...i, ...fields } : i)),
+  }
+}
+
+export function removeStaple(task, itemId) {
+  return { ...task, items: (task.items || []).filter((i) => i.id !== itemId) }
+}
+
 // --- one-off items --------------------------------------------------------
 //
 // Free-typed entries with no brand or duration. They live in the same task
@@ -110,6 +135,13 @@ export function toggleOneOff(task, itemId) {
   return {
     ...task,
     oneOffs: (task.oneOffs || []).map((i) => (i.id === itemId ? { ...i, done: !i.done } : i)),
+  }
+}
+
+export function updateOneOff(task, itemId, fields) {
+  return {
+    ...task,
+    oneOffs: (task.oneOffs || []).map((i) => (i.id === itemId ? { ...i, ...fields } : i)),
   }
 }
 
