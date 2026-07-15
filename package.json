@@ -13,8 +13,9 @@
     "start": "node server/index.cjs",
     "preview": "vite preview",
     "test": "node --test",
+    "test:ui": "vitest run",
     "test:electron": "cross-env ELECTRON_RUN_AS_NODE=1 electron --test",
-    "test:all": "npm test && npm run test:electron",
+    "test:all": "npm test && npm run test:ui && npm run test:electron",
     "electron:dev": "concurrently -k \"vite\" \"wait-on tcp:5173 && cross-env ELECTRON_DEV=1 electron .\"",
     "electron:build": "vite build && electron-builder"
   },
@@ -31,12 +32,17 @@
     "react-dom": "^18.3.1"
   },
   "devDependencies": {
+    "@testing-library/jest-dom": "^6.9.1",
+    "@testing-library/react": "^16.3.2",
+    "@testing-library/user-event": "^14.6.1",
     "@vitejs/plugin-react": "^4.3.1",
     "concurrently": "^8.2.2",
     "cross-env": "^7.0.3",
     "electron": "^31.7.7",
     "electron-builder": "^24.13.3",
+    "jsdom": "^29.1.1",
     "vite": "^4.5.3",
+    "vitest": "^4.1.10",
     "wait-on": "^7.2.0"
   },
   "build": {

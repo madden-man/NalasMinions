@@ -9,6 +9,7 @@ import DeleteOutlineIcon from '@mui/icons-material/DeleteOutline'
 import EditOutlinedIcon from '@mui/icons-material/EditOutlined'
 import AddIcon from '@mui/icons-material/Add'
 import ShoppingCartOutlinedIcon from '@mui/icons-material/ShoppingCartOutlined'
+import RestaurantMenuIcon from '@mui/icons-material/RestaurantMenu'
 import RepeatIcon from '@mui/icons-material/Repeat'
 import LaunchIcon from '@mui/icons-material/Launch'
 import ScheduleIcon from '@mui/icons-material/Schedule'
@@ -334,6 +335,16 @@ export default function GroceryPage({ navigate }) {
             color={totalToBuy === 0 ? 'success' : 'default'}
             sx={{ bgcolor: 'rgba(255,255,255,0.18)', color: 'inherit' }}
           />
+          <Tooltip title="Weekly menu">
+            <IconButton
+              color="inherit"
+              aria-label="weekly menu"
+              onClick={() => navigate('/menu')}
+              sx={{ ml: 1, WebkitAppRegion: 'no-drag' }}
+            >
+              <RestaurantMenuIcon />
+            </IconButton>
+          </Tooltip>
         </Toolbar>
       </AppBar>
 

@@ -19,12 +19,14 @@ import PetsIcon from '@mui/icons-material/Pets'
 import CampaignIcon from '@mui/icons-material/Campaign'
 import LooksOneIcon from '@mui/icons-material/LooksOne'
 import ShoppingCartOutlinedIcon from '@mui/icons-material/ShoppingCartOutlined'
+import RestaurantMenuIcon from '@mui/icons-material/RestaurantMenu'
 import { loadTasks, addTask as addStoredTask, saveTasks, bump } from './storage'
 import { renewTasks } from './renew'
 import { isGroceryTask } from './grocery'
 import AddTaskDialog, { RECURRENCE_OPTIONS } from './AddTaskDialog'
 import MonthCalendar from './MonthCalendar'
 import GroceryPage from './GroceryPage'
+import MenuPage from './MenuPage'
 import useRoute from './useRoute'
 // Electron uses a frameless title bar (titleBarStyle: 'hiddenInset'), so the
 // top bar doubles as the OS drag handle there.
@@ -169,11 +171,13 @@ function TaskRow({ task, onToggle, onRemove, onEdit }) {
   )
 }
 
-// Tiny route switch: '/' is the chores list, '/grocery' the grocery list. The
-// path comes from useRoute (the URL path in the browser, the hash in Electron).
+// Tiny route switch: '/' is the chores list, '/grocery' the grocery list,
+// '/menu' the weekly meal menu. The path comes from useRoute (the URL path in
+// the browser, the hash in Electron).
 export default function App() {
   const [path, navigate] = useRoute()
   if (path === '/grocery') return <GroceryPage navigate={navigate} />
+  if (path === '/menu') return <MenuPage navigate={navigate} />
   return <ChoresPage navigate={navigate} />
 }
 
@@ -407,6 +411,16 @@ function ChoresPage({ navigate }) {
             color={remaining === 0 ? 'success' : 'default'}
             sx={{ bgcolor: 'rgba(255,255,255,0.18)', color: 'inherit', '& .MuiChip-icon': { color: 'inherit' } }}
           />
+          <Tooltip title="Weekly menu">
+            <IconButton
+              color="inherit"
+              aria-label="weekly menu"
+              onClick={() => navigate('/menu')}
+              sx={{ ml: 1, WebkitAppRegion: 'no-drag' }}
+            >
+              <RestaurantMenuIcon />
+            </IconButton>
+          </Tooltip>
           <Tooltip title="Grocery list">
             <IconButton
               color="inherit"
