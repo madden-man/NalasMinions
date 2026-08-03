@@ -28,7 +28,20 @@ async function api(path, options = {}) {
   })
   if (!res.ok) {
     const detail = await res.text().catch(() => '')
-    throw new Error(`API ${options.method || 'GET'} ${path} -> ${res.status} ${detail}`.trim())
+    // A rejected request comes back as { error: "<why>" } — surface that on its
+    // own (an unparseable recipe paste, say, is a message for the user, not a
+    // status line). Anything else keeps the full request context for debugging.
+    let reason
+    try {
+      reason = JSON.parse(detail).error
+    } catch {
+      /* not JSON — fall through */
+    }
+    const err = new Error(
+      reason || `API ${options.method || 'GET'} ${path} -> ${res.status} ${detail}`.trim(),
+    )
+    err.status = res.status
+    throw err
   }
   return res.status === 204 ? null : res.json()
 }
@@ -48,6 +61,23 @@ export async function addTask(task) {
 // Sync the whole task array (used for toggle / delete / clear / daily reset).
 export async function saveTasks(tasks) {
   await api('/tasks', { method: 'PUT', body: JSON.stringify(tasks) })
+}
+
+// The weekly menu's meal catalog, straight from tommy-data.nalas-menu (in the
+// order stored there).
+export async function loadMeals() {
+  const { meals } = await api('/meals')
+  return Array.isArray(meals) ? meals : []
+}
+
+// Add a recipe to the menu from one pasted blob — a link to a recipe page, or
+// the recipe itself as text. The server does the parsing (server/recipe.cjs)
+// and stores it in nalas-menu; the stored meal comes back so the page can show
+// it without a reload. A paste it can't read rejects with a message saying
+// what's missing.
+export async function addMeal(input) {
+  const { meal } = await api('/meals', { method: 'POST', body: JSON.stringify({ input }) })
+  return meal
 }
 
 // Small key/value app state (currently just the daily-reset date).

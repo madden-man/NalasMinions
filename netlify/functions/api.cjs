@@ -13,6 +13,7 @@
 const mongo = require('../../electron/mongo.cjs')
 const { notify, cancelScheduled } = require('../../server/notify.cjs')
 const { ensureReminderScheduled } = require('../../server/schedule.cjs')
+const { mealFromInput } = require('../../server/recipe.cjs')
 
 const json = (statusCode, body) => ({
   statusCode,
@@ -80,6 +81,22 @@ exports.handler = async (event) => {
       // one-off) reschedules or cancels its push without waiting for the sweep.
       if (Array.isArray(tasks)) for (const t of tasks) await scheduleReminder(t)
       return json(200, { ok: true })
+    }
+
+    // The weekly menu's meal catalog.
+    if (sub === '/meals' && method === 'GET') return json(200, { meals: await mongo.loadMeals() })
+    // Add a recipe from a link or pasted text. Parsing happens here (the
+    // browser can't fetch another site), and a bad paste is the user's problem
+    // to fix, so those errors come back as 400 with the reason.
+    if (sub === '/meals' && method === 'POST') {
+      let meal
+      try {
+        const body = parseBody()
+        meal = await mealFromInput(body && body.input)
+      } catch (err) {
+        return json(400, { error: err.message })
+      }
+      return json(201, { meal: await mongo.addMeal(meal) })
     }
 
     if (sub.startsWith('/meta/')) {

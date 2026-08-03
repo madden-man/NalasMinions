@@ -1,20 +1,27 @@
-// Unit tests for the weekly meal menu (src/menu.js).
+// Unit tests for the weekly meal menu.
 //
-// MEALS carries each meal's grocery ingredients and cooking steps;
-// addMealToGrocery drops the ingredients onto the grocery task's one-off list,
-// skipping any already there. ESM because src/menu.js is an ES module.
+// The catalog itself now lives in MongoDB (tommy-data.nalas-menu); what's
+// checked here is the curated seed it's published from
+// (scripts/meals-data.cjs) — each meal carries its grocery ingredients and
+// cooking steps — plus addMealToGrocery (src/menu.js), which drops a meal's
+// ingredients onto the grocery task's one-off list, skipping any already there.
+// ESM because src/menu.js is an ES module; the seed data is required as CJS.
 
 import test from 'node:test'
 import assert from 'node:assert/strict'
 
+import { createRequire } from 'node:module'
+
 import { createGroceryTask, addOneOff, toggleOneOff } from '../src/grocery.js'
-import { MEALS, addMealToGrocery } from '../src/menu.js'
+import { addMealToGrocery } from '../src/menu.js'
+
+const { MEALS } = createRequire(import.meta.url)('../scripts/meals-data.cjs')
 
 const NOW = new Date('2026-07-15T12:00:00')
 const padThai = MEALS.find((m) => m.id === 'meal-pad-thai')
 const pizza = MEALS.find((m) => m.id === 'meal-flatbread-pizza')
 
-test('MEALS: every meal has a name, ingredients, and steps', () => {
+test('seed: every meal has a name, ingredients, and steps', () => {
   assert.ok(MEALS.length > 0)
   for (const meal of MEALS) {
     assert.ok(meal.id)
@@ -24,7 +31,13 @@ test('MEALS: every meal has a name, ingredients, and steps', () => {
   }
 })
 
-test('MEALS: the catalog carries the household recipes', () => {
+test('seed: every household recipe is marked verified', () => {
+  // These are the ones that have actually been cooked from these steps —
+  // anything imported later starts untried.
+  for (const meal of MEALS) assert.equal(meal.verified, true, meal.id)
+})
+
+test('seed: the catalog carries the household recipes', () => {
   const ids = MEALS.map((m) => m.id)
   assert.ok(ids.includes('meal-pad-thai'))
   assert.ok(ids.includes('meal-kevins-chicken-potatoes'))
@@ -35,19 +48,19 @@ test('MEALS: the catalog carries the household recipes', () => {
   assert.ok(ids.includes('meal-crockpot-mexican-chicken'))
 })
 
-test('MEALS: turkey sandwich condiments are pick-your-own options', () => {
+test('seed: turkey sandwich condiments are pick-your-own options', () => {
   const sandwich = MEALS.find((m) => m.id === 'meal-turkey-sandwich')
   assert.deepEqual(sandwich.options, ['Mayo', 'Chick-fil-A sauce', 'Cheese'])
 })
 
-test("MEALS: Kevin's chicken meal shops for the brand product", () => {
+test("seed: Kevin's chicken meal shops for the brand product", () => {
   const kevins = MEALS.find((m) => m.id === 'meal-kevins-chicken-potatoes')
   assert.ok(kevins.ingredients.includes("Kevin's chicken"))
   // Pantry assumptions stay off the list.
   assert.ok(!kevins.ingredients.some((i) => /water|salt/i.test(i)))
 })
 
-test('MEALS: pizza toppings are options, not fixed ingredients', () => {
+test('seed: pizza toppings are options, not fixed ingredients', () => {
   assert.deepEqual(pizza.options, ['Mozzarella cheese', 'Pepperoni', 'Sausage'])
   for (const topping of pizza.options) {
     assert.ok(!pizza.ingredients.includes(topping))

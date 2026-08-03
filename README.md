@@ -29,9 +29,27 @@ cp .env.example .env
 
 In Atlas: **Cluster → Connect → Drivers** to copy the `mongodb+srv://…` string, and
 replace `<username>:<password>` with a database user's credentials. The database name
-is fixed to `tommy-data` in code, so it doesn't need to be in the URI. The app creates
-two collections on first write: `todos` (one document per chore) and `meta` (the
+is fixed to `tommy-data` in code, so it doesn't need to be in the URI. The app uses
+three collections: `nalas-minions` (one document per chore), `nalas-menu` (one document
+per meal — ingredients, recipe steps, and whether it's verified), and `meta` (the
 daily-reset date). Without a `.env`, the app falls back to a local cache.
+
+Publish the household recipes into `nalas-menu` once:
+
+```bash
+npm run seed:meals
+```
+
+That upserts every meal in `scripts/meals-data.cjs` — edit a recipe there and re-run it.
+It never deletes, so recipes added from the app's **Add recipe** button (paste a link or
+the recipe text on `/menu`) survive a re-seed. Seeded recipes are marked `verified`;
+imported ones show as **Untried** until somebody cooks from the steps.
+
+`/menu` also reads the meal-planner project's `recipes` collection in the same database
+(read-only — this app never writes to it). Those dinners list after everything in
+`nalas-menu` and always show as **Untried**: they carry produce to shop for and links to
+the real recipe, but no steps of their own. The mapping lives in
+`server/recipe-library.cjs`.
 
 > MongoDB only runs in the Electron desktop app (it needs Node). The browser build
 > used on iPad/phone can't reach Mongo directly, so it persists to localStorage.

@@ -1,17 +1,20 @@
 // Routing tests for the /menu additions in src/App.jsx: the route switch
 // serves the menu page, and the new toolbar buttons on the chores and grocery
 // pages navigate to it (and back). Storage is mocked, so the pages render
-// their loaded-empty states without any API.
+// their loaded-empty states without any API — except the menu, which is served
+// one meal so the page has something to show.
 
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { render, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 
 import App from '../../src/App'
-import { loadTasks } from '../../src/storage'
+import { MEALS } from '../../scripts/meals-data.cjs'
+import { loadTasks, loadMeals } from '../../src/storage'
 
 vi.mock('../../src/storage', () => ({
   loadTasks: vi.fn(),
+  loadMeals: vi.fn(),
   addTask: vi.fn().mockResolvedValue(undefined),
   saveTasks: vi.fn().mockResolvedValue(undefined),
   getMeta: vi.fn().mockResolvedValue(null),
@@ -28,6 +31,7 @@ function renderAt(path) {
 beforeEach(() => {
   vi.clearAllMocks()
   loadTasks.mockResolvedValue([])
+  loadMeals.mockResolvedValue([MEALS.find((m) => m.id === 'meal-pad-thai')])
 })
 
 describe('route switch', () => {

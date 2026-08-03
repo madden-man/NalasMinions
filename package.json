@@ -8,6 +8,7 @@
   "scripts": {
     "dev": "vite",
     "server": "node server/index.cjs",
+    "seed:meals": "node scripts/seed-meals.cjs",
     "dev:web": "concurrently -k \"npm run server\" \"vite\"",
     "build": "vite build",
     "start": "node server/index.cjs",
