@@ -42,6 +42,24 @@ npm run seed:meals
 ```
 
 That upserts every meal in `scripts/meals-data.cjs` — edit a recipe there and re-run it.
+
+A meal can name a `store` — where its ingredients are bought — which shows as a chip on
+the card and in the recipe dialog, so a week can be planned around a single trip. There
+are exactly five legal values, listed in `server/stores.cjs`:
+
+> **Trader Joe's · King Soopers · Costco · Safeway · Whole Foods**
+
+`store` is optional, and the meals cooked from whatever's in the house leave it unset.
+`npm run seed:meals` refuses to publish a meal whose store isn't one of the five, so a
+typo can't reach the database.
+
+Library dishes get theirs from the planner's free-text `groceryStore` note, normalized:
+"King Soopers (seafood counter)" and "King Soopers + a Latin market for peppers" both
+become **King Soopers**. A note that names none of the five — "H Mart or an Asian
+market", "a Middle Eastern market" — sets no store at all rather than rounding to the
+nearest one, since sending somebody to Safeway for gochujang is worse than saying
+nothing.
+
 It never deletes, so recipes added from the app's **Add recipe** button (paste a link or
 the recipe text on `/menu`) survive a re-seed. Seeded recipes are marked `verified`;
 imported ones show as **Untried** until somebody cooks from the steps.

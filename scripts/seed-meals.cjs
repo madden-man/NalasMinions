@@ -14,10 +14,26 @@ require('dotenv').config({ path: path.join(__dirname, '..', '.env') })
 
 const mongo = require('../electron/mongo.cjs')
 const { MEALS } = require('./meals-data.cjs')
+const { STORES, isStore } = require('../server/stores.cjs')
+
+// A meal's `store` has to be one of the five the household shops at, or absent.
+// Caught here rather than in the app, because a typo'd store silently becomes a
+// chip nobody can shop from.
+function checkStores(meals) {
+  const bad = meals.filter((m) => m.store !== undefined && !isStore(m.store))
+  if (!bad.length) return true
+  console.error(`Unknown store on ${bad.length} meal(s) — must be one of: ${STORES.join(', ')}`)
+  for (const m of bad) console.error(`  ${m.id}: ${JSON.stringify(m.store)}`)
+  return false
+}
 
 async function main() {
   if (!mongo.isEnabled()) {
     console.error('MONGODB_URI is not set — see .env.example')
+    process.exitCode = 1
+    return
+  }
+  if (!checkStores(MEALS)) {
     process.exitCode = 1
     return
   }

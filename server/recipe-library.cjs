@@ -22,6 +22,7 @@
 // still the fallback for anything not pulled yet.
 
 const { overrideFor } = require('../scripts/recipe-links.cjs')
+const { normalizeStore } = require('./stores.cjs')
 
 const RECIPES = 'recipes'
 
@@ -64,6 +65,7 @@ function linksFor(doc, override) {
 function mealFromRecipe(doc, pulled) {
   const override = overrideFor(doc._id)
   const links = linksFor(doc, override)
+  const store = normalizeStore(doc.groceryStore)
   const produce = doc.produce || []
   const ingredients = pulled?.ingredients?.length ? pulled.ingredients : produce
 
@@ -75,6 +77,11 @@ function mealFromRecipe(doc, pulled) {
     // planner knows — the cuisine and how involved it is.
     description: doc.note || [doc.cuisine, doc.difficultyLabel].filter(Boolean).join(' — '),
     verified: false,
+    // The planner already notes where to shop for a dish, in prose. Where that
+    // note names one of the household's five stores it becomes the same `store`
+    // indicator the menu's own meals carry; where it names a specialty market
+    // instead, it sets nothing rather than guessing (see server/stores.cjs).
+    ...(store ? { store } : {}),
     ingredients,
     // Only set when the list came off the link and so needs the grocery-side
     // rewrite; a `produce` fallback is already written the way you'd shop.

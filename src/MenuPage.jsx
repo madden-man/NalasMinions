@@ -14,6 +14,7 @@ import CircleIcon from '@mui/icons-material/Circle'
 import VerifiedIcon from '@mui/icons-material/Verified'
 import HelpOutlineIcon from '@mui/icons-material/HelpOutline'
 import AddIcon from '@mui/icons-material/Add'
+import StorefrontIcon from '@mui/icons-material/Storefront'
 import { isElectron } from './platform'
 import {
   loadTasks,
@@ -115,6 +116,26 @@ function VerifiedBadge({ verified }) {
   )
 }
 
+// Where this meal's ingredients are bought, when it's really one shop at one
+// place — the Trader Joe's freezer run, the King Soopers pick-up, or whatever
+// the recipe library noted for a library dish. Meals cooked from what's already
+// in the house set no store, and show nothing.
+function StoreChip({ store, sx }) {
+  if (!store) return null
+  return (
+    <Tooltip title={`Shop for this at ${store}`}>
+      <Chip
+        size="small"
+        variant="outlined"
+        color="secondary"
+        icon={<StorefrontIcon />}
+        label={store}
+        sx={{ mt: 1, maxWidth: '100%', ...sx }}
+      />
+    </Tooltip>
+  )
+}
+
 // Where to read the actual recipe. Every meal has somewhere to point:
 //
 //   * a library dish carries its own labelled links (the replacement link
@@ -158,9 +179,10 @@ function RecipeDialog({ meal, onClose, onAdd, onPull, pulling }) {
       {meal && (
         <>
           <DialogTitle sx={{ fontWeight: 700 }}>
-            <Stack direction="row" alignItems="center" spacing={1}>
+            <Stack direction="row" alignItems="center" spacing={1} useFlexGap flexWrap="wrap">
               <span>{meal.name}</span>
               <VerifiedBadge verified={meal.verified} />
+              <StoreChip store={meal.store} sx={{ mt: 0 }} />
             </Stack>
           </DialogTitle>
           <DialogContent dividers>
@@ -566,6 +588,10 @@ export default function MenuPage({ navigate, openMealId = null }) {
                   <Typography variant="body2" color="text.secondary" sx={{ mt: 0.5 }}>
                     {meal.description}
                   </Typography>
+                  {/* Where the shop is, for the meals that are one trip to one
+                      place. Meals cooked from whatever's in the house set no
+                      store and show no chip. */}
+                  <StoreChip store={meal.store} />
                 </CardContent>
               </CardActionArea>
               {/* Optional extras (toppings): toggle a chip off to shop without

@@ -13,6 +13,15 @@
 // `verified` marks a recipe that's been cooked from these exact steps and is
 // known to work. A new meal starts unverified (the field can just be left off);
 // flip it to true once it's been made and the steps hold up.
+//
+// `store` names where the ingredients come from, for the meals that are really
+// one shop at one place — the Trader Joe's freezer run, the King Soopers pick-up.
+// It shows as a chip on the meal's card so a week can be planned around a single
+// trip, and it must be one of the five in server/stores.cjs: Trader Joe's, King
+// Soopers, Costco, Safeway, or Whole Foods. The seeder refuses anything else.
+//
+// Optional, and deliberately absent from the meals below that are cooked from
+// whatever is in the house: an unset store means "wherever you shop".
 
 const MEALS = [
   {
@@ -299,6 +308,137 @@ const MEALS = [
       'Spread cheese all over — it\'s the glue that holds the quesadilla together.',
       'Spread the veggies on top of the cheese, then close it with a second tortilla.',
       'Cook on the pan like a grilled cheese, low to medium heat, flipping once the bottom is golden — it won\'t take long.',
+    ],
+  },
+
+  // --- the easy ones ------------------------------------------------------
+  //
+  // Assembly rather than cooking: a freezer or deli item, a starch, and a
+  // vegetable, mostly unattended. Each is one trip to one store, which is what
+  // `store` is for.
+
+  {
+    id: 'meal-tj-orange-chicken',
+    name: "Trader Joe's Orange Chicken",
+    description: 'The frozen orange chicken crisped in the oven, with broccoli and jasmine rice.',
+    verified: true,
+    store: "Trader Joe's",
+    ingredients: [
+      'Trader Joe\'s Mandarin Orange Chicken (frozen)',
+      '1 bag frozen broccoli florets',
+      '2 packets frozen jasmine rice',
+    ],
+    steps: [
+      'Heat the oven or air fryer to 400°F.',
+      'Spread the frozen chicken out in a single layer and set the sauce packet aside — it goes on at the very end. Cook for 20 minutes, turning once, until the coating is genuinely crisp.',
+      'While it cooks, microwave the rice packets (about 3 minutes) and steam the broccoli in its bag.',
+      'Thaw the sauce packet under warm running water.',
+      'Tip the crisped chicken into a bowl, off the heat, and toss it with the sauce there — saucing it in the hot pan is what turns the coating soggy.',
+      'Serve over the rice with the broccoli alongside.',
+    ],
+  },
+  {
+    id: 'meal-tj-butter-chicken-dumplings',
+    name: 'Butter Chicken & Soup Dumplings',
+    description: "Trader Joe's butter chicken with basmati, with soup dumplings to start. Microwave only.",
+    verified: true,
+    store: "Trader Joe's",
+    ingredients: [
+      'Trader Joe\'s Butter Chicken with Basmati Rice (frozen)',
+      'Trader Joe\'s Chicken Soup Dumplings (frozen)',
+    ],
+    steps: [
+      'Slit the film on the butter chicken tray so it steams instead of bursting, then microwave it per the box — about 10 minutes.',
+      'Put the dumplings in their tray with a splash of water and microwave about 2 minutes, until they are plump and hot through.',
+      'Let the dumplings stand for a minute before eating. The soup inside is much hotter than the outside suggests.',
+      'Eat the dumplings while the butter chicken finishes, then serve the rice and sauce straight from the tray.',
+    ],
+  },
+  {
+    id: 'meal-sausage-potatoes-broccoli',
+    name: 'Smoked Apple Sausage with Mashed Potatoes & Broccoli',
+    description: 'Browned smoked apple sausage over microwave mashed potatoes, with steamed broccoli.',
+    verified: true,
+    store: 'King Soopers',
+    ingredients: [
+      'Smoked apple chicken sausage',
+      'Refrigerated mashed potatoes',
+      '1 bag frozen broccoli florets',
+    ],
+    steps: [
+      'Slice the sausage into coins on the diagonal. It is already fully cooked, so this is only about getting some colour on it.',
+      'Brown the coins in a dry pan over medium heat for 4–5 minutes, turning once, until the edges caramelize.',
+      'Microwave the mashed potatoes per the tub, stirring halfway through.',
+      'Steam the broccoli in its bag, about 4 minutes.',
+      'Plate the potatoes, pile the sausage on top, and put the broccoli alongside.',
+    ],
+  },
+  {
+    id: 'meal-alfredo-pasta-peas',
+    name: 'Alfredo Pasta with Peas',
+    description: 'Jarred alfredo, short pasta, and peas cooked in the same pot — chicken if you want it bigger.',
+    verified: true,
+    store: 'King Soopers',
+    ingredients: [
+      '1 lb short pasta (penne or shells)',
+      '1 jar alfredo sauce',
+      '1 bag frozen peas',
+    ],
+    // Turns it from a side into a dinner, but it works without.
+    options: [
+      'Rotisserie chicken',
+      'Parmesan',
+    ],
+    steps: [
+      'Boil the pasta in salted water per the box.',
+      'Tip the frozen peas straight into the pasta water for the last 3 minutes — same pot, nothing extra to wash.',
+      'Drain, but keep a mugful of the pasta water first.',
+      'Off the heat, return the pasta and peas to the pot, pour in the alfredo, and stir, loosening it with a splash of the reserved water until it coats the pasta instead of clumping.',
+      'Stir through pulled rotisserie chicken if you want it to be a full dinner, and finish with parmesan.',
+    ],
+  },
+  {
+    id: 'meal-rotisserie-chicken-sandwich',
+    name: 'Rotisserie Chicken Sandwich',
+    description: 'A rotisserie chicken pulled into sandwiches. No cooking at all.',
+    verified: true,
+    store: 'King Soopers',
+    ingredients: [
+      'Rotisserie chicken',
+      'Sandwich rolls or sliced bread',
+      'Mayo',
+    ],
+    options: [
+      'Sliced cheese',
+      'Lettuce',
+      'Pickles',
+      'Chick-fil-A sauce',
+    ],
+    steps: [
+      'Pull the meat off the chicken while it is still warm — it comes away far more easily than it does cold.',
+      'Toast the rolls if you like.',
+      'Spread mayo (or Chick-fil-A sauce) on both cut sides.',
+      'Pile the chicken on, add cheese, lettuce, and pickles to taste, and close it up.',
+    ],
+  },
+  {
+    id: 'meal-tomato-soup-grilled-cheese',
+    name: 'Tomato Soup & Grilled Cheese',
+    description: 'Tinned tomato soup and a pan-grilled cheese sandwich to dip in it.',
+    verified: true,
+    store: 'King Soopers',
+    ingredients: [
+      'Tomato soup',
+      'Sliced bread',
+      'Sliced cheddar or American cheese',
+      'Butter',
+    ],
+    steps: [
+      'Pour the soup into a pot over medium-low heat and let it warm through while you make the sandwiches, stirring now and then.',
+      'Butter one side of each slice of bread — the buttered faces are the ones that touch the pan.',
+      'Build the sandwiches with the cheese in the middle and the buttered sides facing out.',
+      'Grill in a pan over medium-low for 3–4 minutes a side, pressing down lightly, until deep golden. Keep the heat low: it is what lets the middle melt before the outside burns.',
+      'Cut on the diagonal and serve with the soup to dip into.',
     ],
   },
 ]

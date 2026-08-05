@@ -15,7 +15,9 @@ import { createRequire } from 'node:module'
 import { createGroceryTask, addOneOff, toggleOneOff } from '../src/grocery.js'
 import { addMealToGrocery, shoppingList } from '../src/menu.js'
 
-const { MEALS } = createRequire(import.meta.url)('../scripts/meals-data.cjs')
+const require_ = createRequire(import.meta.url)
+const { MEALS } = require_('../scripts/meals-data.cjs')
+const { STORES, isStore } = require_('../server/stores.cjs')
 
 const NOW = new Date('2026-07-15T12:00:00')
 const padThai = MEALS.find((m) => m.id === 'meal-pad-thai')
@@ -177,4 +179,70 @@ test('addMealToGrocery: kept options still ride along with a pulled list', () =>
   const withSides = { ...linked, options: ['Miso Soup'] }
   const t = addMealToGrocery(createGroceryTask(), withSides, NOW)
   assert.deepEqual(t.oneOffs.map((i) => i.text).sort(), ['2 bell peppers', 'Miso Soup'])
+})
+
+// --- the store indicator --------------------------------------------------
+//
+// `store` names where a meal's ingredients are bought, for the ones that are a
+// single trip to a single place. It's optional: the meals cooked from whatever
+// is in the house leave it unset.
+
+test('seed: every store set is one of the five the household shops at', () => {
+  for (const meal of MEALS) {
+    if (meal.store === undefined) continue
+    assert.ok(isStore(meal.store), `${meal.id}: ${JSON.stringify(meal.store)} is not one of ${STORES.join(', ')}`)
+  }
+})
+
+test('seed: the easy meals each name the store they are shopped at', () => {
+  const easy = [
+    'meal-tj-orange-chicken',
+    'meal-tj-butter-chicken-dumplings',
+    'meal-sausage-potatoes-broccoli',
+    'meal-alfredo-pasta-peas',
+    'meal-rotisserie-chicken-sandwich',
+    'meal-tomato-soup-grilled-cheese',
+  ]
+  for (const id of easy) {
+    const meal = MEALS.find((m) => m.id === id)
+    assert.ok(meal, `missing ${id}`)
+    assert.ok(isStore(meal.store), `${id}: ${meal.store}`)
+  }
+})
+
+test("seed: the Trader Joe's meals are the frozen-aisle ones", () => {
+  const tj = MEALS.filter((m) => m.store === "Trader Joe's").map((m) => m.id)
+  assert.deepEqual(tj.sort(), ['meal-tj-butter-chicken-dumplings', 'meal-tj-orange-chicken'])
+})
+
+test('seed: the original household meals set no store', () => {
+  // They are cooked from what's in the house, not from one shop.
+  for (const id of ['meal-pad-thai', 'meal-flatbread-pizza', 'meal-banana-bread']) {
+    assert.equal(MEALS.find((m) => m.id === id).store, undefined, id)
+  }
+})
+
+test('seed: the easy meals still carry real ingredients and steps', () => {
+  const easy = MEALS.filter((m) => m.store)
+  assert.equal(easy.length, 6)
+  for (const meal of easy) {
+    assert.ok(meal.ingredients.length >= 2, meal.id)
+    assert.ok(meal.steps.length >= 4, meal.id)
+    // These go on the grocery list as-is, so no pulled-list rewrite applies.
+    assert.equal(meal.shopping, undefined, meal.id)
+  }
+})
+
+test('addMealToGrocery: an easy meal shops for exactly its ingredients', () => {
+  const soup = MEALS.find((m) => m.id === 'meal-tomato-soup-grilled-cheese')
+  const t = addMealToGrocery(createGroceryTask(), soup, NOW)
+  assert.deepEqual(t.oneOffs.map((i) => i.text).sort(), [...soup.ingredients].sort())
+})
+
+test('addMealToGrocery: the alfredo chicken is optional, not assumed', () => {
+  const pasta = MEALS.find((m) => m.id === 'meal-alfredo-pasta-peas')
+  assert.ok(pasta.options.includes('Rotisserie chicken'))
+  // Deselect everything optional and the base meal still stands on its own.
+  const t = addMealToGrocery(createGroceryTask(), pasta, NOW, [])
+  assert.deepEqual(t.oneOffs.map((i) => i.text).sort(), [...pasta.ingredients].sort())
 })

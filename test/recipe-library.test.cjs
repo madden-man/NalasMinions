@@ -155,6 +155,20 @@ test('an empty pull is treated as no pull rather than as an empty dish', () => {
   assert.deepEqual(meal.ingredients, ['Cabbage', 'Daikon', 'Carrots', 'Citrus'])
 })
 
+test('a planner note naming one of the five becomes the store indicator', () => {
+  const meal = mealFromRecipe({ ...FEATURED, groceryStore: 'King Soopers (seafood counter)' })
+  assert.equal(meal.store, 'King Soopers')
+})
+
+test('a planner note naming a specialty market sets no store', () => {
+  // The fixture's own note is "H Mart or an Asian market" — none of the five,
+  // so the card shows no chip rather than pointing at the wrong shop.
+  assert.equal(FEATURED.groceryStore, 'H Mart or an Asian market')
+  assert.equal(mealFromRecipe(FEATURED).store, undefined)
+  // And a dish with no note at all sets none either.
+  assert.equal(mealFromRecipe({ _id: 'x', dish: 'Beans on Toast' }).store, undefined)
+})
+
 // --- replacement links ----------------------------------------------------
 
 test('an override leads the link list, and the dish keeps its other links', () => {

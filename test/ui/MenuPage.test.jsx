@@ -550,3 +550,43 @@ describe('ingredients read off the link', () => {
     )
   })
 })
+
+describe('the store indicator', () => {
+  const tjOrangeChicken = MEALS.find((m) => m.id === 'meal-tj-orange-chicken')
+
+  it("chips the store on the meals that are one shop at one place", async () => {
+    await renderPage()
+    const card = screen.getByText(tjOrangeChicken.name).closest('.MuiCard-root')
+    expect(within(card).getByText("Trader Joe's")).toBeInTheDocument()
+  })
+
+  it('shows no chip for a meal cooked from what is in the house', async () => {
+    await renderPage()
+    const card = screen.getByText(padThai.name).closest('.MuiCard-root')
+    expect(padThai.store).toBeUndefined()
+    expect(within(card).queryByText(/Trader Joe's|King Soopers/)).not.toBeInTheDocument()
+  })
+
+  it('repeats the store in the recipe dialog, where the shop gets planned', async () => {
+    await renderPage()
+    await userEvent.click(
+      screen.getByRole('button', { name: `${tjOrangeChicken.name} recipe` }),
+    )
+    expect(within(screen.getByRole('dialog')).getByText("Trader Joe's")).toBeInTheDocument()
+  })
+
+  it('chips a library dish whose shopping note resolved to one of the five', async () => {
+    const libraryDish = { ...katsu, store: 'King Soopers' }
+    await renderPage({ meals: [libraryDish] })
+    const card = screen.getByText(libraryDish.name).closest('.MuiCard-root')
+    expect(within(card).getByText('King Soopers')).toBeInTheDocument()
+  })
+
+  it('shows nothing for a library dish that needs a specialty market', async () => {
+    // normalizeStore leaves those unset rather than naming the wrong shop.
+    await renderPage({ meals: [{ ...katsu, store: undefined }] })
+    const card = screen.getByText(katsu.name).closest('.MuiCard-root')
+    expect(within(card).queryByText(/Trader Joe's|King Soopers|Costco|Safeway|Whole Foods/))
+      .not.toBeInTheDocument()
+  })
+})
