@@ -80,6 +80,25 @@ export async function addMeal(input) {
   return meal
 }
 
+// Save an edit to one recipe — name, description, store, ingredients, optional
+// extras, steps. The edit is kept separately from the meal and laid over it on
+// load, so this works the same for a household meal and for a dish out of the
+// read-only recipe library. Returns the meal as the menu will now show it.
+export async function saveMeal(id, fields) {
+  const { meal } = await api(`/meals/${encodeURIComponent(id)}`, {
+    method: 'PUT',
+    body: JSON.stringify(fields),
+  })
+  return meal
+}
+
+// Throw away every edit on a recipe, putting it back to what it was published
+// with. Returns the meal as published.
+export async function resetMeal(id) {
+  const { meal } = await api(`/meals/${encodeURIComponent(id)}`, { method: 'DELETE' })
+  return meal
+}
+
 // Read a recipe link's ingredients now and cache them, for a library dish that
 // is still shopping from its short `produce` note. Normally the backfill script
 // (npm run pull:ingredients) has already done this; this is the retry for a

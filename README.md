@@ -51,7 +51,8 @@ are exactly five legal values, listed in `server/stores.cjs`:
 
 `store` is optional, and the meals cooked from whatever's in the house leave it unset.
 `npm run seed:meals` refuses to publish a meal whose store isn't one of the five, so a
-typo can't reach the database.
+typo can't reach the database. A chip row at the top of `/menu` filters by store — only
+the stores something actually comes from are offered, each with a count.
 
 Library dishes get theirs from the planner's free-text `groceryStore` note, normalized:
 "King Soopers (seafood counter)" and "King Soopers + a Latin market for peppers" both
@@ -68,6 +69,21 @@ imported ones show as **Untried** until somebody cooks from the steps.
 (read-only — this app never writes to it). Those dinners list after everything in
 `nalas-menu` and always show as **Untried**: they link to the real recipe but carry no
 steps of their own. The mapping lives in `server/recipe-library.cjs`.
+
+### Editing a recipe
+Every meal on `/menu` has an **Edit** action — name, description, store, ingredients,
+optional extras, and instructions, with the lists edited one item per line.
+
+Edits are never written back to where the meal came from. The library dinners live in a
+collection this app only reads, and the household meals get republished by
+`npm run seed:meals`, so an edit stored in place would either be illegal or overwritten.
+Instead each edit is kept on its own in `tommy-data.nalas-menu-edits`, keyed by meal id,
+and laid over the meal when the menu loads (`server/meal-edits.cjs`). That makes
+**Reset** a real undo — it deletes the edit, and what was published is still underneath.
+
+One rule beyond a plain merge: a hand-typed ingredient list replaces the grocery rewrite
+as well as the displayed one. The rewrite only exists to tidy lines scraped off a recipe
+site; a list somebody typed is already phrased the way they'd shop.
 
 ### Every recipe has a link, and shops from it
 A library dinner used to shop from `produce` — three or four items, and empty for most

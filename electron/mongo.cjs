@@ -19,6 +19,7 @@ const {
   mealFromRecipe,
   recipeUrlsFor,
 } = require('../server/recipe-library.cjs')
+const { pickEdits, applyMealEdit } = require('../server/meal-edits.cjs')
 
 const DB_NAME = 'tommy-data'
 const TASKS = 'nalas-minions'
@@ -27,6 +28,10 @@ const META = 'meta'
 // Ingredients read off recipe links, cached by URL. This app's own collection —
 // the library it reads them for (RECIPES) stays untouched.
 const INGREDIENTS = 'nalas-menu-ingredients'
+// Edits typed into the app, keyed by meal id and laid over the meal on load.
+// Separate from the meals themselves so the read-only library stays read-only
+// and re-seeding can't overwrite them (see server/meal-edits.cjs).
+const EDITS = 'nalas-menu-edits'
 
 let clientPromise // cached connection, created on first use
 
@@ -118,7 +123,7 @@ async function saveTasks(tasks) {
 // never the storage fields.
 async function loadMeals() {
   const db = await getDb()
-  const [ours, library, pulls] = await Promise.all([
+  const [ours, library, pulls, edits] = await Promise.all([
     db.collection(MEALS).find({}).sort({ order: 1 }).toArray(),
     // The library belongs to another project. If it's missing or unreadable,
     // the household menu still loads — it just shows without the extras.
@@ -141,22 +146,59 @@ async function loadMeals() {
         console.warn('[mongo] ingredient cache unavailable:', err.message)
         return []
       }),
+    // Edits typed into the app. Missing collection just means nothing has been
+    // edited yet, so every meal reads exactly as it was published.
+    db
+      .collection(EDITS)
+      .find({})
+      .toArray()
+      .catch((err) => {
+        console.warn('[mongo] meal edits unavailable:', err.message)
+        return []
+      }),
   ])
 
   // Keyed by URL, not by dish: two dishes that link the same recipe share one
   // fetch, and a re-pointed link misses the cache instead of reading a stale
   // list for the page it no longer points at.
   const byUrl = new Map(pulls.map((p) => [p._id, p]))
+  const editsById = new Map(edits.map(({ _id, updatedAt, ...fields }) => [_id, fields]))
+  // Whatever was typed in the app wins over what the meal was published with.
+  const withEdits = (meal) => applyMealEdit(meal, editsById.get(meal.id))
 
   return [
-    ...ours.map(({ _id, order, updatedAt, ...rest }) => ({
-      id: _id,
-      ...rest,
-      verified: !!rest.verified,
-    })),
+    ...ours.map(({ _id, order, updatedAt, ...rest }) =>
+      withEdits({ id: _id, ...rest, verified: !!rest.verified }),
+    ),
     // Whichever of the dish's links was the one that answered.
-    ...library.map((doc) => mealFromRecipe(doc, recipeUrlsFor(doc).map((u) => byUrl.get(u)).find(Boolean))),
+    ...library.map((doc) =>
+      withEdits(mealFromRecipe(doc, recipeUrlsFor(doc).map((u) => byUrl.get(u)).find(Boolean))),
+    ),
   ]
+}
+
+// Store an edit for one meal, merged over anything already edited on it, and
+// return the meal as the menu will now show it. Never touches the collection the
+// meal came from — see server/meal-edits.cjs for why.
+async function saveMealEdit(id, fields) {
+  const db = await getDb()
+  const patch = pickEdits(fields)
+  if (Object.keys(patch).length) {
+    await db
+      .collection(EDITS)
+      .updateOne({ _id: id }, { $set: { ...patch, updatedAt: new Date() } }, { upsert: true })
+  }
+  const meals = await loadMeals()
+  return meals.find((m) => m.id === id) ?? null
+}
+
+// Throw away every edit on a meal, putting it back to what it was published
+// with. A delete rather than a restore, because the original was never altered.
+async function resetMealEdit(id) {
+  const db = await getDb()
+  await db.collection(EDITS).deleteOne({ _id: id })
+  const meals = await loadMeals()
+  return meals.find((m) => m.id === id) ?? null
 }
 
 // Remember the ingredients read off a recipe link, so the menu doesn't refetch
@@ -278,6 +320,8 @@ module.exports = {
   loadMeals,
   addMeal,
   saveMeals,
+  saveMealEdit,
+  resetMealEdit,
   saveIngredients,
   loadIngredients,
   loadRecipeDocs,

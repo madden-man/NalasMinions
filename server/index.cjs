@@ -57,7 +57,7 @@ function sendJson(res, status, body) {
     // Permissive CORS so the app works even if it's hosted on a different
     // origin than this API (same-origin needs no headers, so this is just slack).
     'Access-Control-Allow-Origin': '*',
-    'Access-Control-Allow-Methods': 'GET,POST,PUT,OPTIONS',
+    'Access-Control-Allow-Methods': 'GET,POST,PUT,DELETE,OPTIONS',
     'Access-Control-Allow-Headers': 'Content-Type',
   })
   res.end(JSON.stringify(body))
@@ -169,6 +169,20 @@ async function handler(req, res) {
           return sendJson(res, 400, { error: err.message })
         }
         return sendJson(res, 201, { meal: await mongo.addMeal(meal) })
+      }
+      // Edit a recipe, or put it back the way it was published. The edit is
+      // stored on its own and laid over the meal on load, so this works the
+      // same for a household meal and for a read-only library dish.
+      if (p.startsWith('/api/meals/') && (method === 'PUT' || method === 'DELETE')) {
+        const id = decodeURIComponent(p.slice('/api/meals/'.length))
+        if (!id) return sendJson(res, 400, { error: 'Which meal?' })
+        if (method === 'DELETE') {
+          return sendJson(res, 200, { meal: await mongo.resetMealEdit(id) })
+        }
+        const body = await readBody(req).catch(() => null)
+        const meal = await mongo.saveMealEdit(id, body || {})
+        if (!meal) return sendJson(res, 404, { error: `No meal called ${id}.` })
+        return sendJson(res, 200, { meal })
       }
       // Read a recipe link's ingredients now, and cache them. The backfill
       // script (npm run pull:ingredients) fills this in bulk; this is the

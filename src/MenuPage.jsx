@@ -3,7 +3,7 @@ import {
   AppBar, Toolbar, Typography, Container, Box, Card, CardActionArea, CardContent,
   CardActions, IconButton, Button, Chip, Stack, Tooltip, Snackbar, Alert,
   Dialog, DialogTitle, DialogContent, DialogActions, List, ListItem, ListItemIcon,
-  ListItemText, Divider, CircularProgress, TextField, Link,
+  ListItemText, Divider, CircularProgress, TextField, Link, MenuItem,
 } from '@mui/material'
 import ArrowBackIcon from '@mui/icons-material/ArrowBack'
 import RestaurantMenuIcon from '@mui/icons-material/RestaurantMenu'
@@ -15,11 +15,16 @@ import VerifiedIcon from '@mui/icons-material/Verified'
 import HelpOutlineIcon from '@mui/icons-material/HelpOutline'
 import AddIcon from '@mui/icons-material/Add'
 import StorefrontIcon from '@mui/icons-material/Storefront'
+import EditIcon from '@mui/icons-material/Edit'
+import RestartAltIcon from '@mui/icons-material/RestartAlt'
 import { isElectron } from './platform'
+import { STORES, ALL_STORES, NO_STORE, filterByStore, storeCounts } from './stores'
 import {
   loadTasks,
   loadMeals,
   addMeal,
+  saveMeal,
+  resetMeal,
   pullIngredients,
   addTask as upsertTask,
 } from './storage'
@@ -96,6 +101,188 @@ function AddRecipeDialog({ open, onClose, onSave }) {
   )
 }
 
+// A list field edits as text: one item per line, which is how people already
+// think about an ingredient list, and it beats a row of inputs with add/remove
+// buttons for something this small.
+const linesToList = (text) =>
+  String(text || '')
+    .split(/\r?\n/)
+    .map((line) => line.trim())
+    .filter(Boolean)
+
+const listToLines = (list) => (list || []).join('\n')
+
+// "Edit recipe": the whole meal in one form — what it's called, where its
+// ingredients are bought, what they are, and how to cook it.
+//
+// Edits are stored apart from the meal and laid over it (server/meal-edits.cjs),
+// so this works the same on a household meal and on a dish out of the read-only
+// recipe library, and "reset" is a real undo back to what was published.
+function EditRecipeDialog({ meal, open, onClose, onSave, onReset }) {
+  const [form, setForm] = useState(null)
+  const [busy, setBusy] = useState(null)
+  const [error, setError] = useState(null)
+
+  // Refill the form whenever a different recipe is opened for editing.
+  useEffect(() => {
+    if (!open || !meal) return
+    setForm({
+      name: meal.name ?? '',
+      description: meal.description ?? '',
+      store: meal.store ?? '',
+      ingredients: listToLines(meal.ingredients),
+      options: listToLines(meal.options),
+      steps: listToLines(meal.steps),
+    })
+    setError(null)
+  }, [open, meal])
+
+  const set = (key) => (e) => setForm((f) => ({ ...f, [key]: e.target.value }))
+
+  const close = () => {
+    if (busy) return
+    onClose()
+  }
+
+  const submit = async () => {
+    setBusy('save')
+    setError(null)
+    try {
+      await onSave(meal, {
+        name: form.name,
+        description: form.description,
+        store: form.store,
+        ingredients: linesToList(form.ingredients),
+        options: linesToList(form.options),
+        steps: linesToList(form.steps),
+      })
+      onClose()
+    } catch (err) {
+      setError(err.message)
+    } finally {
+      setBusy(null)
+    }
+  }
+
+  const reset = async () => {
+    setBusy('reset')
+    setError(null)
+    try {
+      await onReset(meal)
+      onClose()
+    } catch (err) {
+      setError(err.message)
+    } finally {
+      setBusy(null)
+    }
+  }
+
+  return (
+    <Dialog open={open && Boolean(meal)} onClose={close} fullWidth maxWidth="sm">
+      {meal && form && (
+        <>
+          <DialogTitle sx={{ fontWeight: 700 }}>Edit {meal.name}</DialogTitle>
+          <DialogContent dividers>
+            <Stack spacing={2} sx={{ mt: 1 }}>
+              <TextField
+                label="Name"
+                value={form.name}
+                onChange={set('name')}
+                disabled={Boolean(busy)}
+                fullWidth
+              />
+              <TextField
+                label="Description"
+                value={form.description}
+                onChange={set('description')}
+                disabled={Boolean(busy)}
+                fullWidth
+              />
+              <TextField
+                select
+                label="Buy the ingredients at"
+                value={form.store}
+                onChange={set('store')}
+                disabled={Boolean(busy)}
+                fullWidth
+                helperText="Shows as a chip on the card, and drives the filter at the top of the menu."
+              >
+                {/* Empty is a real answer: a meal cooked from what's in the
+                    house belongs to no particular shop. */}
+                <MenuItem value="">
+                  <em>No particular store</em>
+                </MenuItem>
+                {STORES.map((store) => (
+                  <MenuItem key={store} value={store}>
+                    {store}
+                  </MenuItem>
+                ))}
+              </TextField>
+              <TextField
+                label="Ingredients"
+                value={form.ingredients}
+                onChange={set('ingredients')}
+                disabled={Boolean(busy)}
+                fullWidth
+                multiline
+                minRows={4}
+                helperText="One per line, written the way you'd shop for it. These go on the grocery list as typed."
+              />
+              <TextField
+                label="Optional extras"
+                value={form.options}
+                onChange={set('options')}
+                disabled={Boolean(busy)}
+                fullWidth
+                multiline
+                minRows={2}
+                helperText="One per line. Toggled off on the card to shop without them."
+              />
+              <TextField
+                label="Instructions"
+                value={form.steps}
+                onChange={set('steps')}
+                disabled={Boolean(busy)}
+                fullWidth
+                multiline
+                minRows={5}
+                helperText="One step per line."
+              />
+              {error && <Alert severity="error">{error}</Alert>}
+            </Stack>
+          </DialogContent>
+          <DialogActions sx={{ justifyContent: 'space-between' }}>
+            {/* Only offered once there's something to undo. */}
+            <Button
+              color="inherit"
+              startIcon={<RestartAltIcon />}
+              onClick={reset}
+              disabled={Boolean(busy) || !meal.edited}
+            >
+              {busy === 'reset' ? 'Resetting…' : 'Reset'}
+            </Button>
+            <Stack direction="row" spacing={1}>
+              <Button onClick={close} color="inherit" disabled={Boolean(busy)}>
+                Cancel
+              </Button>
+              <Button
+                variant="contained"
+                onClick={submit}
+                disabled={Boolean(busy) || !form.name.trim()}
+                startIcon={
+                  busy === 'save' ? <CircularProgress size={16} color="inherit" /> : <EditIcon />
+                }
+              >
+                {busy === 'save' ? 'Saving…' : 'Save'}
+              </Button>
+            </Stack>
+          </DialogActions>
+        </>
+      )}
+    </Dialog>
+  )
+}
+
 // Whether a recipe has actually been cooked from these steps. Verified meals
 // get a quiet check; everything else (a freshly added recipe, say) is called
 // out as untried so nobody follows steps that haven't been through the kitchen.
@@ -113,6 +300,54 @@ function VerifiedBadge({ verified }) {
       label="Untried"
       aria-label="unverified recipe"
     />
+  )
+}
+
+// The store filter: pick a shop and the menu shows only what you can buy there,
+// so a week's cooking can be planned one trip at a time.
+//
+// Options that would show nothing are left out rather than offered and then
+// disappointing — with 150-odd meals the row is long enough already. Counts ride
+// on the chips so it's clear what a filter is worth before tapping it.
+function StoreFilter({ meals, value, onChange }) {
+  const counts = storeCounts(meals)
+  const options = [
+    { key: ALL_STORES, label: 'All' },
+    ...STORES.map((store) => ({ key: store, label: store })),
+    { key: NO_STORE, label: 'No store' },
+  ].filter((o) => o.key === ALL_STORES || counts[o.key] > 0)
+
+  // Nothing to choose between when every meal falls in the same bucket — "All"
+  // and the one store it all comes from say the same thing twice.
+  if (options.filter((o) => o.key !== ALL_STORES).length < 2) return null
+
+  return (
+    <Stack
+      direction="row"
+      spacing={0.75}
+      useFlexGap
+      flexWrap="wrap"
+      sx={{ mb: 2 }}
+      role="group"
+      aria-label="filter meals by store"
+    >
+      {options.map(({ key, label }) => {
+        const selected = value === key
+        return (
+          <Chip
+            key={key}
+            size="small"
+            clickable
+            label={`${label} (${counts[key]})`}
+            color={selected ? 'primary' : 'default'}
+            variant={selected ? 'filled' : 'outlined'}
+            icon={key === ALL_STORES || key === NO_STORE ? undefined : <StorefrontIcon />}
+            onClick={() => onChange(key)}
+            aria-pressed={selected}
+          />
+        )
+      })}
+    </Stack>
   )
 }
 
@@ -168,7 +403,7 @@ function recipeLinks(meal) {
 // The ingredients listed here are the recipe's own, exactly as published — the
 // grocery list gets the tidied version instead (shoppingList), so what's on the
 // counter matches the page and what's in the cart reads like a shopping list.
-function RecipeDialog({ meal, onClose, onAdd, onPull, pulling }) {
+function RecipeDialog({ meal, onClose, onAdd, onEdit, onPull, pulling }) {
   const links = meal ? recipeLinks(meal) : []
   // A library dish still shopping from `produce`: its link hasn't been read yet
   // (or the site was down when the backfill ran), so offer the retry. Keyed on
@@ -292,6 +527,9 @@ function RecipeDialog({ meal, onClose, onAdd, onPull, pulling }) {
             <Button onClick={onClose} color="inherit">
               Close
             </Button>
+            <Button startIcon={<EditIcon />} onClick={() => onEdit(meal)}>
+              Edit
+            </Button>
             <Button
               variant="contained"
               startIcon={<AddShoppingCartIcon />}
@@ -320,6 +558,11 @@ export default function MenuPage({ navigate, openMealId = null }) {
   const [openMeal, setOpenMeal] = useState(null)
   // Whether the "add a recipe" box is open.
   const [adding, setAdding] = useState(false)
+  // The meal being edited, or null. Kept apart from openMeal so saving can put
+  // the fresh copy back into the recipe dialog underneath.
+  const [editing, setEditing] = useState(null)
+  // Which store's meals are shown. Starts on everything.
+  const [storeFilter, setStoreFilter] = useState(ALL_STORES)
   // Which optional extras (toppings) are kept, per meal id. A meal with no
   // entry keeps all of its options — deselecting is the exception.
   const [toppings, setToppings] = useState({})
@@ -411,6 +654,26 @@ export default function MenuPage({ navigate, openMealId = null }) {
     if (openMealId) navigate('/menu')
   }
 
+  // Put an edited (or reset) meal back into the catalog, and into the recipe
+  // dialog if that's the one being looked at, so the change shows without a
+  // reload. The server returns the meal exactly as the menu should now show it.
+  const replaceMeal = (updated) => {
+    if (!updated) return
+    setMeals((prev) => (prev ?? []).map((m) => (m.id === updated.id ? updated : m)))
+    setOpenMeal((current) => (current?.id === updated.id ? updated : current))
+  }
+
+  const editRecipe = async (meal, fields) => {
+    replaceMeal(await saveMeal(meal.id, fields))
+    setToast({ severity: 'success', text: `${fields.name || meal.name} updated` })
+  }
+
+  const resetRecipe = async (meal) => {
+    const restored = await resetMeal(meal.id)
+    replaceMeal(restored)
+    setToast({ severity: 'info', text: `${restored?.name ?? meal.name} put back as published` })
+  }
+
   // Read a library dish's ingredients off its recipe link, then swap the richer
   // meal into the catalog (and into the open dialog) so the grocery add that
   // follows shops from the real list rather than the produce note.
@@ -468,6 +731,8 @@ export default function MenuPage({ navigate, openMealId = null }) {
     if (next !== grocery) setGrocery(next)
     closeRecipe()
   }
+
+  const shownMeals = filterByStore(meals ?? [], storeFilter)
 
   return (
     <Box sx={{ minHeight: '100vh', pb: 6 }}>
@@ -567,8 +832,19 @@ export default function MenuPage({ navigate, openMealId = null }) {
           </Alert>
         )}
 
+        {/* Only worth showing once there are meals to narrow down. */}
+        {meals?.length > 0 && (
+          <StoreFilter meals={meals} value={storeFilter} onChange={setStoreFilter} />
+        )}
+
+        {shownMeals.length === 0 && meals?.length > 0 && (
+          <Alert severity="info" sx={{ mb: 2 }}>
+            Nothing on the menu comes from there yet.
+          </Alert>
+        )}
+
         <Stack spacing={2}>
-          {(meals ?? []).map((meal) => (
+          {shownMeals.map((meal) => (
             <Card key={meal.id} elevation={1}>
               <CardActionArea onClick={() => pickMeal(meal)} disabled={!grocery}>
                 <CardContent sx={{ pb: 1 }}>
@@ -637,6 +913,16 @@ export default function MenuPage({ navigate, openMealId = null }) {
                 >
                   Add to this week
                 </Button>
+                <Tooltip title="Edit this recipe">
+                  <IconButton
+                    size="small"
+                    aria-label={`edit ${meal.name}`}
+                    onClick={() => setEditing(meal)}
+                    sx={{ ml: 'auto' }}
+                  >
+                    <EditIcon fontSize="small" />
+                  </IconButton>
+                </Tooltip>
               </CardActions>
             </Card>
           ))}
@@ -647,11 +933,20 @@ export default function MenuPage({ navigate, openMealId = null }) {
         meal={openMeal}
         onClose={closeRecipe}
         onAdd={pickMeal}
+        onEdit={setEditing}
         onPull={pullFor}
         pulling={Boolean(pulling)}
       />
 
       <AddRecipeDialog open={adding} onClose={() => setAdding(false)} onSave={saveRecipe} />
+
+      <EditRecipeDialog
+        meal={editing}
+        open={Boolean(editing)}
+        onClose={() => setEditing(null)}
+        onSave={editRecipe}
+        onReset={resetRecipe}
+      />
 
       {/* Confirmation that the ingredients landed (or were already listed), or
           that a pasted recipe joined the menu. */}

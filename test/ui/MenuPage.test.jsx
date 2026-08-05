@@ -13,7 +13,7 @@ import userEvent from '@testing-library/user-event'
 import MenuPage from '../../src/MenuPage'
 import { MEALS } from '../../scripts/meals-data.cjs'
 import { createGroceryTask, addOneOff, GROCERY_TASK_ID } from '../../src/grocery.js'
-import { loadTasks, loadMeals, addMeal, addTask, pullIngredients } from '../../src/storage'
+import { loadTasks, loadMeals, addMeal, addTask, pullIngredients, saveMeal, resetMeal } from '../../src/storage'
 
 vi.mock('../../src/storage', () => ({
   loadTasks: vi.fn(),
@@ -21,6 +21,8 @@ vi.mock('../../src/storage', () => ({
   addMeal: vi.fn(),
   addTask: vi.fn(),
   pullIngredients: vi.fn(),
+  saveMeal: vi.fn(),
+  resetMeal: vi.fn(),
 }))
 
 const padThai = MEALS.find((m) => m.id === 'meal-pad-thai')
@@ -588,5 +590,159 @@ describe('the store indicator', () => {
     const card = screen.getByText(katsu.name).closest('.MuiCard-root')
     expect(within(card).queryByText(/Trader Joe's|King Soopers|Costco|Safeway|Whole Foods/))
       .not.toBeInTheDocument()
+  })
+})
+
+describe('editing a recipe', () => {
+  const tjOrangeChicken = MEALS.find((m) => m.id === 'meal-tj-orange-chicken')
+
+  const openEditor = async (meal) => {
+    await userEvent.click(screen.getByRole('button', { name: `edit ${meal.name}` }))
+    return screen.getByRole('dialog')
+  }
+
+  it('opens prefilled with what the recipe currently says', async () => {
+    await renderPage({ meals: [tjOrangeChicken] })
+    const dialog = await openEditor(tjOrangeChicken)
+    expect(within(dialog).getByLabelText('Name')).toHaveValue(tjOrangeChicken.name)
+    // Lists edit as one-per-line text.
+    expect(within(dialog).getByLabelText('Ingredients')).toHaveValue(
+      tjOrangeChicken.ingredients.join('\n'),
+    )
+    expect(within(dialog).getByLabelText('Instructions')).toHaveValue(
+      tjOrangeChicken.steps.join('\n'),
+    )
+  })
+
+  it('saves the edited fields and shows the result without a reload', async () => {
+    const updated = { ...tjOrangeChicken, name: 'Orange Chicken, our way', edited: true }
+    saveMeal.mockResolvedValue(updated)
+    await renderPage({ meals: [tjOrangeChicken] })
+    const dialog = await openEditor(tjOrangeChicken)
+
+    const name = within(dialog).getByLabelText('Name')
+    await userEvent.clear(name)
+    await userEvent.type(name, 'Orange Chicken, our way')
+    await userEvent.click(within(dialog).getByRole('button', { name: 'Save' }))
+
+    await waitFor(() => expect(saveMeal).toHaveBeenCalledTimes(1))
+    const [id, fields] = saveMeal.mock.calls[0]
+    expect(id).toBe(tjOrangeChicken.id)
+    expect(fields.name).toBe('Orange Chicken, our way')
+    // The card picks up the new name straight away.
+    expect(await screen.findByText('Orange Chicken, our way')).toBeInTheDocument()
+  })
+
+  it('turns the ingredient textarea back into a list, dropping blank lines', async () => {
+    saveMeal.mockResolvedValue({ ...tjOrangeChicken, edited: true })
+    await renderPage({ meals: [tjOrangeChicken] })
+    const dialog = await openEditor(tjOrangeChicken)
+
+    const box = within(dialog).getByLabelText('Ingredients')
+    await userEvent.clear(box)
+    await userEvent.type(box, 'Orange chicken\n\n  Broccoli  \n')
+    await userEvent.click(within(dialog).getByRole('button', { name: 'Save' }))
+
+    await waitFor(() => expect(saveMeal).toHaveBeenCalled())
+    expect(saveMeal.mock.calls[0][1].ingredients).toEqual(['Orange chicken', 'Broccoli'])
+  })
+
+  it('lets the store be set, and cleared back to no particular shop', async () => {
+    saveMeal.mockResolvedValue({ ...tjOrangeChicken, store: 'Costco', edited: true })
+    await renderPage({ meals: [tjOrangeChicken] })
+    const dialog = await openEditor(tjOrangeChicken)
+
+    await userEvent.click(within(dialog).getByLabelText('Buy the ingredients at'))
+    await userEvent.click(await screen.findByRole('option', { name: 'Costco' }))
+    await userEvent.click(within(dialog).getByRole('button', { name: 'Save' }))
+
+    await waitFor(() => expect(saveMeal).toHaveBeenCalled())
+    expect(saveMeal.mock.calls[0][1].store).toBe('Costco')
+  })
+
+  it('offers reset only once there is an edit to undo', async () => {
+    await renderPage({ meals: [tjOrangeChicken] })
+    let dialog = await openEditor(tjOrangeChicken)
+    expect(within(dialog).getByRole('button', { name: 'Reset' })).toBeDisabled()
+
+    await userEvent.click(within(dialog).getByRole('button', { name: 'Cancel' }))
+    await renderPage({ meals: [{ ...tjOrangeChicken, edited: true }] })
+    dialog = await openEditor(tjOrangeChicken)
+    expect(within(dialog).getByRole('button', { name: 'Reset' })).toBeEnabled()
+  })
+
+  it('resets a recipe back to what it was published with', async () => {
+    resetMeal.mockResolvedValue(tjOrangeChicken)
+    await renderPage({ meals: [{ ...tjOrangeChicken, name: 'Renamed', edited: true }] })
+    const dialog = await openEditor({ ...tjOrangeChicken, name: 'Renamed' })
+    await userEvent.click(within(dialog).getByRole('button', { name: 'Reset' }))
+
+    await waitFor(() => expect(resetMeal).toHaveBeenCalledWith(tjOrangeChicken.id))
+    expect(await screen.findByText(tjOrangeChicken.name)).toBeInTheDocument()
+  })
+
+  it('keeps what was typed when the save fails', async () => {
+    saveMeal.mockRejectedValue(new Error('mongo down'))
+    await renderPage({ meals: [tjOrangeChicken] })
+    const dialog = await openEditor(tjOrangeChicken)
+
+    const name = within(dialog).getByLabelText('Name')
+    await userEvent.clear(name)
+    await userEvent.type(name, 'Half-typed')
+    await userEvent.click(within(dialog).getByRole('button', { name: 'Save' }))
+
+    expect(await within(dialog).findByText(/mongo down/)).toBeInTheDocument()
+    // Still open, still holding the edit.
+    expect(within(dialog).getByLabelText('Name')).toHaveValue('Half-typed')
+  })
+})
+
+describe('filtering by store', () => {
+  const menu = [
+    { ...katsu, id: 'r1', name: 'TJ One', store: "Trader Joe's" },
+    { ...katsu, id: 'r2', name: 'TJ Two', store: "Trader Joe's" },
+    { ...katsu, id: 'r3', name: 'KS One', store: 'King Soopers' },
+    { ...katsu, id: 'r4', name: 'Storeless', store: undefined },
+  ]
+
+  it('offers only the stores something actually comes from, with counts', async () => {
+    await renderPage({ meals: menu })
+    const group = screen.getByRole('group', { name: /filter meals by store/i })
+    expect(within(group).getByText('All (4)')).toBeInTheDocument()
+    expect(within(group).getByText("Trader Joe's (2)")).toBeInTheDocument()
+    expect(within(group).getByText('King Soopers (1)')).toBeInTheDocument()
+    expect(within(group).getByText('No store (1)')).toBeInTheDocument()
+    // Nothing comes from these, so they aren't offered.
+    expect(within(group).queryByText(/Costco/)).not.toBeInTheDocument()
+    expect(within(group).queryByText(/Safeway/)).not.toBeInTheDocument()
+  })
+
+  it('narrows the menu to one store', async () => {
+    await renderPage({ meals: menu })
+    await userEvent.click(screen.getByText("Trader Joe's (2)"))
+    expect(screen.getByText('TJ One')).toBeInTheDocument()
+    expect(screen.getByText('TJ Two')).toBeInTheDocument()
+    expect(screen.queryByText('KS One')).not.toBeInTheDocument()
+    expect(screen.queryByText('Storeless')).not.toBeInTheDocument()
+  })
+
+  it('collects the meals belonging to no particular shop', async () => {
+    await renderPage({ meals: menu })
+    await userEvent.click(screen.getByText('No store (1)'))
+    expect(screen.getByText('Storeless')).toBeInTheDocument()
+    expect(screen.queryByText('TJ One')).not.toBeInTheDocument()
+  })
+
+  it('goes back to the whole menu', async () => {
+    await renderPage({ meals: menu })
+    await userEvent.click(screen.getByText('King Soopers (1)'))
+    expect(screen.queryByText('TJ One')).not.toBeInTheDocument()
+    await userEvent.click(screen.getByText('All (4)'))
+    for (const meal of menu) expect(screen.getByText(meal.name)).toBeInTheDocument()
+  })
+
+  it('shows no filter at all when there is nothing to narrow down', async () => {
+    await renderPage({ meals: [{ ...katsu, store: undefined }] })
+    expect(screen.queryByRole('group', { name: /filter meals by store/i })).not.toBeInTheDocument()
   })
 })
