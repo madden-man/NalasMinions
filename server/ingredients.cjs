@@ -134,8 +134,10 @@ async function pullIngredients(url, fetchImpl = fetch) {
   }
   if (!res.ok) throw new Error(`Couldn't read ${url} — the site returned ${res.status}.`)
 
-  const { name, ingredients } = parseIngredientsHtml(await res.text(), url)
-  return { url, name, ingredients, shopping: toShoppingList(ingredients) }
+  const { name, ingredients, steps } = parseIngredientsHtml(await res.text(), url)
+  // Steps ride along when the page publishes them, so a library dish that had
+  // nothing but a name and a link becomes a recipe you can actually cook from.
+  return { url, name, ingredients, steps, shopping: toShoppingList(ingredients) }
 }
 
 module.exports = {

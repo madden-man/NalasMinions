@@ -14,6 +14,7 @@ const {
   toShoppingList,
   pullIngredients,
 } = require('../server/ingredients.cjs')
+const { parseIngredientsHtml } = require('../server/recipe.cjs')
 
 test('drops the parenthetical asides recipes hang off an ingredient', () => {
   assert.equal(shoppingLine('3 tablespoons olive oil, (divided)'), '3 tablespoons olive oil')
@@ -177,4 +178,44 @@ test('says why a page could not be read, rather than throwing something opaque',
     () => pullIngredients('https://example.com/plain', okFetch('<html>no metadata</html>')),
     /doesn't publish a readable recipe/,
   )
+})
+
+test('decodes the numeric HTML entities recipe sites really publish', () => {
+  const body = `<html><script type="application/ld+json">${JSON.stringify({
+    '@type': 'Recipe',
+    name: 'Entity Test',
+    recipeIngredient: ['4 inches&#32;daikon radish', 'Chef&#8217;s salt &amp; pepper blend'],
+    recipeInstructions: ['Don&#8217;t overcook the &lt;b&gt;beef&lt;/b&gt;.'],
+  })}</script></html>`
+  const pulled = parseIngredientsHtml(body, 'https://example.com/x')
+  assert.deepEqual(pulled.ingredients, [
+    '4 inches daikon radish',
+    'Chef’s salt & pepper blend',
+  ])
+  assert.deepEqual(pulled.steps, ['Don’t overcook the <b>beef</b>.'])
+})
+
+test('reads the steps a page publishes, so a link-only dish becomes cookable', () => {
+  const body = `<html><script type="application/ld+json">${JSON.stringify({
+    '@type': 'Recipe',
+    name: 'Stew',
+    recipeIngredient: ['1 onion'],
+    recipeInstructions: [
+      { '@type': 'HowToStep', text: 'Chop the onion.' },
+      { '@type': 'HowToStep', text: 'Simmer for an hour.' },
+    ],
+  })}</script></html>`
+  const pulled = parseIngredientsHtml(body, 'https://example.com/stew')
+  assert.deepEqual(pulled.steps, ['Chop the onion.', 'Simmer for an hour.'])
+})
+
+test('a page with no instructions still yields its ingredients, with no steps', () => {
+  const body = `<html><script type="application/ld+json">${JSON.stringify({
+    '@type': 'Recipe',
+    name: 'Listless',
+    recipeIngredient: ['1 onion'],
+  })}</script></html>`
+  const pulled = parseIngredientsHtml(body, 'https://example.com/x')
+  assert.deepEqual(pulled.steps, [])
+  assert.deepEqual(pulled.ingredients, ['1 onion'])
 })

@@ -170,9 +170,11 @@ function recipeLinks(meal) {
 // counter matches the page and what's in the cart reads like a shopping list.
 function RecipeDialog({ meal, onClose, onAdd, onPull, pulling }) {
   const links = meal ? recipeLinks(meal) : []
-  // A library dish still shopping from `produce`: its link hasn't been read
-  // yet (or the site was down when the backfill ran), so offer the retry.
-  const canPull = Boolean(meal && !meal.shopping && !meal.steps?.length && meal.sourceUrl)
+  // A library dish still shopping from `produce`: its link hasn't been read yet
+  // (or the site was down when the backfill ran), so offer the retry. Keyed on
+  // the missing shopping list rather than on missing steps — a pulled dish now
+  // usually has steps, and a household meal has them without ever being pulled.
+  const canPull = Boolean(meal && !meal.shopping && meal.sourceUrl)
 
   return (
     <Dialog open={Boolean(meal)} onClose={onClose} fullWidth maxWidth="sm">
@@ -415,8 +417,9 @@ export default function MenuPage({ navigate, openMealId = null }) {
   const pullFor = async (meal) => {
     setPulling(meal.id)
     try {
-      const { ingredients, shopping } = await pullIngredients(meal.sourceUrl)
-      const next = { ...meal, ingredients, shopping }
+      const { ingredients, steps, shopping } = await pullIngredients(meal.sourceUrl)
+      // Keep whatever steps the meal already had if the page published none.
+      const next = { ...meal, ingredients, shopping, steps: steps?.length ? steps : meal.steps }
       setMeals((prev) => (prev ?? []).map((m) => (m.id === meal.id ? next : m)))
       setOpenMeal((current) => (current?.id === meal.id ? next : current))
       setToast({

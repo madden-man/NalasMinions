@@ -36,13 +36,23 @@ function slugify(name) {
   return `meal-${slug || 'recipe'}`
 }
 
-const clean = (s) =>
-  String(s || '')
-    .replace(/<[^>]*>/g, ' ') // instructions sometimes carry markup
+// Recipe sites encode more than the handful of entities you'd expect —
+// "4 inches&#32;daikon" and "don&#8217;t" both turn up in real instructions — so
+// decode numerically rather than listing them. Done before the named ones so an
+// escaped "&amp;#39;" survives as text instead of becoming an apostrophe.
+const decodeEntities = (s) =>
+  s
+    .replace(/&#(\d+);/g, (_, code) => String.fromCodePoint(Number(code)))
+    .replace(/&#x([0-9a-f]+);/gi, (_, hex) => String.fromCodePoint(parseInt(hex, 16)))
     .replace(/&nbsp;/gi, ' ')
-    .replace(/&amp;/gi, '&')
-    .replace(/&#39;|&apos;/gi, "'")
+    .replace(/&apos;/gi, "'")
     .replace(/&quot;/gi, '"')
+    .replace(/&lt;/gi, '<')
+    .replace(/&gt;/gi, '>')
+    .replace(/&amp;/gi, '&')
+
+const clean = (s) =>
+  decodeEntities(String(s || '').replace(/<[^>]*>/g, ' ')) // instructions sometimes carry markup
     .replace(/\s+/g, ' ')
     // Stripping inline markup ("the <b>beef</b>.") leaves a space before the
     // punctuation; close it back up.
@@ -172,15 +182,24 @@ function parseRecipeHtml(html, sourceUrl) {
   throw new Error(NO_RECIPE)
 }
 
-// The same metadata read for its ingredients alone. Deliberately laxer than
-// parseRecipeHtml: this backs a dish that only links out (server/ingredients.cjs),
-// where the steps are read at the link and a page listing ingredients without
-// machine-readable instructions is still perfectly worth shopping from.
+// The same metadata read for a dish that only links out (server/ingredients.cjs).
+//
+// Deliberately laxer than parseRecipeHtml: ingredients are what this is for, and
+// a page that lists them without machine-readable instructions is still well
+// worth shopping from. Steps come along when the page publishes them — that's
+// what fills in a library dish that would otherwise be a name and a link — but
+// their absence is not a reason to reject the page.
 function parseIngredientsHtml(html, sourceUrl) {
   for (const recipe of recipeNodes(html)) {
     const ingredients = nodeIngredients(recipe).map(clean).filter(Boolean)
     if (!ingredients.length) continue
-    return { url: sourceUrl, name: clean(recipe.name) || 'Imported recipe', ingredients }
+    return {
+      url: sourceUrl,
+      name: clean(recipe.name) || 'Imported recipe',
+      description: clean(recipe.description),
+      ingredients,
+      steps: instructionsToSteps(recipe.recipeInstructions).map(clean).filter(Boolean),
+    }
   }
   throw new Error(NO_RECIPE)
 }

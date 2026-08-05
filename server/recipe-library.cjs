@@ -87,7 +87,11 @@ function mealFromRecipe(doc, pulled) {
     // rewrite; a `produce` fallback is already written the way you'd shop.
     ...(pulled?.shopping ? { shopping: pulled.shopping } : {}),
     options: [...(doc.sides || []), ...(doc.dessert ? [doc.dessert] : [])],
-    steps: [],
+    // The library holds no method of its own, but the linked recipe usually
+    // publishes one, and a dish reads far better as steps you can follow than
+    // as a name and a link. They stay unverified either way: these came off a
+    // site, and nobody here has cooked from them.
+    steps: pulled?.steps || [],
     ...(links.length ? { links, sourceUrl: links[0].url } : {}),
   }
 }

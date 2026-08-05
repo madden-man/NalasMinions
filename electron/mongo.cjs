@@ -161,14 +161,14 @@ async function loadMeals() {
 
 // Remember the ingredients read off a recipe link, so the menu doesn't refetch
 // the page on every load. Keyed by the URL they came from.
-async function saveIngredients({ url, name, ingredients, shopping }) {
+async function saveIngredients({ url, name, ingredients, steps = [], shopping }) {
   const db = await getDb()
   await db.collection(INGREDIENTS).replaceOne(
     { _id: url },
-    { _id: url, name, ingredients, shopping, fetchedAt: new Date() },
+    { _id: url, name, ingredients, steps, shopping, fetchedAt: new Date() },
     { upsert: true },
   )
-  return { url, name, ingredients, shopping }
+  return { url, name, ingredients, steps, shopping }
 }
 
 // Every cached pull, for the backfill script's "what's still missing" pass.
