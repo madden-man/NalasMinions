@@ -14,6 +14,7 @@ const mongo = require('../../electron/mongo.cjs')
 const { notify, cancelScheduled } = require('../../server/notify.cjs')
 const { ensureReminderScheduled } = require('../../server/schedule.cjs')
 const { mealFromInput } = require('../../server/recipe.cjs')
+const { pullIngredients } = require('../../server/ingredients.cjs')
 
 const json = (statusCode, body) => ({
   statusCode,
@@ -97,6 +98,23 @@ exports.handler = async (event) => {
         return json(400, { error: err.message })
       }
       return json(201, { meal: await mongo.addMeal(meal) })
+    }
+
+    // Read a recipe link's ingredients now, and cache them. The backfill
+    // script (npm run pull:ingredients) fills this in bulk; this is the retry
+    // for a dish whose page was down when it ran.
+    if (sub === '/ingredients' && method === 'POST') {
+      const body = parseBody()
+      const url = body && body.url
+      if (!url) return json(400, { error: 'Give a recipe url to read.' })
+      let pulled
+      try {
+        pulled = await pullIngredients(url)
+      } catch (err) {
+        // The site being unreadable is the caller's answer, not a crash.
+        return json(400, { error: err.message })
+      }
+      return json(200, { ingredients: await mongo.saveIngredients(pulled) })
     }
 
     if (sub.startsWith('/meta/')) {

@@ -9,6 +9,8 @@
     "dev": "vite",
     "server": "node server/index.cjs",
     "seed:meals": "node scripts/seed-meals.cjs",
+    "pull:ingredients": "node scripts/pull-ingredients.cjs",
+    "check:links": "node scripts/check-links.cjs",
     "dev:web": "concurrently -k \"npm run server\" \"vite\"",
     "build": "vite build",
     "start": "node server/index.cjs",

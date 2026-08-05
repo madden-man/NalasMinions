@@ -13,12 +13,20 @@
 // project's dinner library, mapped in server/recipe-library.cjs.
 
 const { MongoClient } = require('mongodb')
-const { RECIPES, LIBRARY_SORT, mealFromRecipe } = require('../server/recipe-library.cjs')
+const {
+  RECIPES,
+  LIBRARY_SORT,
+  mealFromRecipe,
+  recipeUrlsFor,
+} = require('../server/recipe-library.cjs')
 
 const DB_NAME = 'tommy-data'
 const TASKS = 'nalas-minions'
 const MEALS = 'nalas-menu'
 const META = 'meta'
+// Ingredients read off recipe links, cached by URL. This app's own collection —
+// the library it reads them for (RECIPES) stays untouched.
+const INGREDIENTS = 'nalas-menu-ingredients'
 
 let clientPromise // cached connection, created on first use
 
@@ -110,7 +118,7 @@ async function saveTasks(tasks) {
 // never the storage fields.
 async function loadMeals() {
   const db = await getDb()
-  const [ours, library] = await Promise.all([
+  const [ours, library, pulls] = await Promise.all([
     db.collection(MEALS).find({}).sort({ order: 1 }).toArray(),
     // The library belongs to another project. If it's missing or unreadable,
     // the household menu still loads — it just shows without the extras.
@@ -123,7 +131,22 @@ async function loadMeals() {
         console.warn('[mongo] recipe library unavailable:', err.message)
         return []
       }),
+    // Ingredients previously read off the recipe links. A cold cache is not an
+    // error — every dish just falls back to its `produce`.
+    db
+      .collection(INGREDIENTS)
+      .find({})
+      .toArray()
+      .catch((err) => {
+        console.warn('[mongo] ingredient cache unavailable:', err.message)
+        return []
+      }),
   ])
+
+  // Keyed by URL, not by dish: two dishes that link the same recipe share one
+  // fetch, and a re-pointed link misses the cache instead of reading a stale
+  // list for the page it no longer points at.
+  const byUrl = new Map(pulls.map((p) => [p._id, p]))
 
   return [
     ...ours.map(({ _id, order, updatedAt, ...rest }) => ({
@@ -131,8 +154,34 @@ async function loadMeals() {
       ...rest,
       verified: !!rest.verified,
     })),
-    ...library.map(mealFromRecipe),
+    // Whichever of the dish's links was the one that answered.
+    ...library.map((doc) => mealFromRecipe(doc, recipeUrlsFor(doc).map((u) => byUrl.get(u)).find(Boolean))),
   ]
+}
+
+// Remember the ingredients read off a recipe link, so the menu doesn't refetch
+// the page on every load. Keyed by the URL they came from.
+async function saveIngredients({ url, name, ingredients, shopping }) {
+  const db = await getDb()
+  await db.collection(INGREDIENTS).replaceOne(
+    { _id: url },
+    { _id: url, name, ingredients, shopping, fetchedAt: new Date() },
+    { upsert: true },
+  )
+  return { url, name, ingredients, shopping }
+}
+
+// Every cached pull, for the backfill script's "what's still missing" pass.
+async function loadIngredients() {
+  const db = await getDb()
+  return db.collection(INGREDIENTS).find({}).toArray()
+}
+
+// The raw library documents, so the backfill script can work out each dish's
+// recipe URL without going through the meal mapping.
+async function loadRecipeDocs() {
+  const db = await getDb()
+  return db.collection(RECIPES).find({}).sort(LIBRARY_SORT).toArray()
 }
 
 // Add one meal to the end of the menu (the "Add recipe" box on /menu). The id
@@ -229,6 +278,9 @@ module.exports = {
   loadMeals,
   addMeal,
   saveMeals,
+  saveIngredients,
+  loadIngredients,
+  loadRecipeDocs,
   getMeta,
   setMeta,
   close,

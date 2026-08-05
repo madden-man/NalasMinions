@@ -13,13 +13,14 @@ import userEvent from '@testing-library/user-event'
 import MenuPage from '../../src/MenuPage'
 import { MEALS } from '../../scripts/meals-data.cjs'
 import { createGroceryTask, addOneOff, GROCERY_TASK_ID } from '../../src/grocery.js'
-import { loadTasks, loadMeals, addMeal, addTask } from '../../src/storage'
+import { loadTasks, loadMeals, addMeal, addTask, pullIngredients } from '../../src/storage'
 
 vi.mock('../../src/storage', () => ({
   loadTasks: vi.fn(),
   loadMeals: vi.fn(),
   addMeal: vi.fn(),
   addTask: vi.fn(),
+  pullIngredients: vi.fn(),
 }))
 
 const padThai = MEALS.find((m) => m.id === 'meal-pad-thai')
@@ -29,11 +30,16 @@ const pizza = MEALS.find((m) => m.id === 'meal-flatbread-pizza')
 // grocery task (or none), then wait for both load effects to settle — the meal
 // cards only exist once the menu has arrived, and they stay disabled until the
 // grocery task has.
-async function renderPage({ stored = createGroceryTask(), meals = MEALS, navigate = vi.fn() } = {}) {
+async function renderPage({
+  stored = createGroceryTask(),
+  meals = MEALS,
+  navigate = vi.fn(),
+  openMealId = null,
+} = {}) {
   loadTasks.mockResolvedValue(stored ? [stored] : [])
   loadMeals.mockResolvedValue(meals)
   addTask.mockResolvedValue(undefined)
-  render(<MenuPage navigate={navigate} />)
+  render(<MenuPage navigate={navigate} openMealId={openMealId} />)
   // The first meal's add button is the signal that both loads have settled —
   // taken from whatever menu this render was given, not a fixed dish.
   await waitFor(() =>
@@ -434,5 +440,113 @@ describe('dishes from the shared recipe library', () => {
 
     expect(await screen.findByText(/no ingredients saved for this one/i)).toBeInTheDocument()
     expect(addTask).not.toHaveBeenCalled()
+  })
+})
+
+// A library dish as the menu now serves it: ingredients read off its recipe
+// link, so it carries the recipe's own wording plus the grocery rewrite.
+const katsu = {
+  id: 'recipe-abc123',
+  name: 'Chicken Katsu',
+  description: 'Japanese — some technique',
+  verified: false,
+  ingredients: ['2 bell peppers (orange + red)', '½ tsp Diamond Crystal kosher salt'],
+  shopping: ['2 bell peppers'],
+  options: [],
+  steps: [],
+  links: [{ label: 'Chicken Katsu (Just One Cookbook)', url: 'https://example.com/katsu' }],
+  sourceUrl: 'https://example.com/katsu',
+}
+
+// The same dish before anyone read its link: only the planner's produce note.
+const unpulled = {
+  ...katsu,
+  id: 'recipe-def456',
+  name: 'Oyakodon',
+  ingredients: ['Onion', 'Mitsuba'],
+  shopping: undefined,
+  links: [{ label: 'Oyakodon', url: 'https://example.com/oyakodon' }],
+  sourceUrl: 'https://example.com/oyakodon',
+}
+
+describe('every recipe has a link', () => {
+  it("links a household meal to its own permalink, since nobody else publishes it", async () => {
+    await renderPage()
+    await userEvent.click(screen.getByRole('button', { name: `${padThai.name} recipe` }))
+    const dialog = screen.getByRole('dialog')
+    expect(within(dialog).getByText('Recipe')).toBeInTheDocument()
+    const link = within(dialog).getByRole('link', { name: 'Link to this recipe' })
+    expect(link).toHaveAttribute('href', expect.stringContaining('/menu/meal-pad-thai'))
+    expect(within(dialog).getByText('This recipe lives here')).toBeInTheDocument()
+  })
+
+  it('links a library dish to the recipe it was read from', async () => {
+    await renderPage({ meals: [katsu] })
+    await userEvent.click(screen.getByRole('button', { name: `${katsu.name} recipe` }))
+    const dialog = screen.getByRole('dialog')
+    expect(
+      within(dialog).getByRole('link', { name: 'Chicken Katsu (Just One Cookbook)' }),
+    ).toHaveAttribute('href', 'https://example.com/katsu')
+  })
+
+  it('opens the recipe named by a permalink', async () => {
+    await renderPage({ openMealId: 'meal-pad-thai' })
+    await waitFor(() => expect(screen.getByRole('dialog')).toBeInTheDocument())
+    expect(within(screen.getByRole('dialog')).getByText(padThai.name)).toBeInTheDocument()
+  })
+})
+
+describe('ingredients read off the link', () => {
+  it('shows the recipe wording but shops from the grocery rewrite', async () => {
+    await renderPage({ meals: [katsu] })
+    await userEvent.click(screen.getByRole('button', { name: `${katsu.name} recipe` }))
+    const dialog = screen.getByRole('dialog')
+    // The dialog matches the page the recipe came from…
+    expect(within(dialog).getByText('½ tsp Diamond Crystal kosher salt')).toBeInTheDocument()
+    expect(within(dialog).getByText('from the recipe')).toBeInTheDocument()
+
+    await userEvent.click(
+      within(dialog).getByRole('button', { name: /add ingredients to grocery list/i }),
+    )
+    // …but the salt it assumes you have never reaches the cart.
+    await waitFor(() => expect(addTask).toHaveBeenCalled())
+    const saved = addTask.mock.calls.at(-1)[0]
+    expect(saved.oneOffs.map((i) => i.text)).toEqual(['2 bell peppers'])
+  })
+
+  it('counts what a pick would actually buy, not the full recipe', async () => {
+    await renderPage({ meals: [katsu] })
+    const card = screen.getByText(katsu.name).closest('.MuiCard-root')
+    expect(within(card).getByText('1 ingredients')).toBeInTheDocument()
+  })
+
+  it('offers to read the link for a dish still shopping from produce', async () => {
+    pullIngredients.mockResolvedValue({
+      url: unpulled.sourceUrl,
+      name: 'Oyakodon',
+      ingredients: ['1 onion, thinly sliced', '1 tsp salt'],
+      shopping: ['1 onion'],
+    })
+    await renderPage({ meals: [unpulled] })
+    await userEvent.click(screen.getByRole('button', { name: `${unpulled.name} recipe` }))
+    const dialog = screen.getByRole('dialog')
+    expect(within(dialog).getByText(/only the produce to shop for is saved/i)).toBeInTheDocument()
+
+    await userEvent.click(within(dialog).getByRole('button', { name: 'Read it' }))
+    await waitFor(() => expect(pullIngredients).toHaveBeenCalledWith(unpulled.sourceUrl))
+    // The dialog swaps over to the real list, ready to shop from.
+    await waitFor(() =>
+      expect(within(screen.getByRole('dialog')).getByText('1 onion, thinly sliced')).toBeInTheDocument(),
+    )
+  })
+
+  it('says why a link could not be read instead of failing silently', async () => {
+    pullIngredients.mockRejectedValue(new Error('the site returned 403'))
+    await renderPage({ meals: [unpulled] })
+    await userEvent.click(screen.getByRole('button', { name: `${unpulled.name} recipe` }))
+    await userEvent.click(screen.getByRole('button', { name: 'Read it' }))
+    await waitFor(() =>
+      expect(screen.getByText(/Oyakodon: the site returned 403/)).toBeInTheDocument(),
+    )
   })
 })

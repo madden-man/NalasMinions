@@ -174,10 +174,17 @@ function TaskRow({ task, onToggle, onRemove, onEdit }) {
 // Tiny route switch: '/' is the chores list, '/grocery' the grocery list,
 // '/menu' the weekly meal menu. The path comes from useRoute (the URL path in
 // the browser, the hash in Electron).
+//
+// '/menu/<meal id>' is the menu with that recipe open — the permalink a
+// household meal uses as its link, since the recipe it points at is this page
+// rather than somebody's site.
 export default function App() {
   const [path, navigate] = useRoute()
   if (path === '/grocery') return <GroceryPage navigate={navigate} />
-  if (path === '/menu') return <MenuPage navigate={navigate} />
+  if (path.startsWith('/menu')) {
+    const mealId = path.slice('/menu/'.length)
+    return <MenuPage navigate={navigate} openMealId={path === '/menu' ? null : mealId} />
+  }
   return <ChoresPage navigate={navigate} />
 }
 

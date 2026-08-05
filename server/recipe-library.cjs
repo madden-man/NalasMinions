@@ -13,6 +13,15 @@
 //     this app holds — it doesn't hold any; the method lives at the link.
 //   * They sort after everything in nalas-menu, so the meals added here stay at
 //     the top of the page.
+//
+// Because the method lives at the link, so does the shopping list. `produce` is
+// only what the planner thought to note — three or four items, and nothing at
+// all for most dishes — so the menu reads the real ingredients off the linked
+// page instead (server/ingredients.cjs) and caches them. Dishes whose own links
+// can't be read get a replacement from scripts/recipe-links.cjs. `produce` is
+// still the fallback for anything not pulled yet.
+
+const { overrideFor } = require('../scripts/recipe-links.cjs')
 
 const RECIPES = 'recipes'
 
@@ -20,17 +29,43 @@ const RECIPES = 'recipes'
 // alphabetical order on `role`, so the database can do the sorting.
 const LIBRARY_SORT = { week: 1, role: 1, dish: 1 }
 
+// Every link to show for a dish, best first.
+//
+// When the dish has an override, that link leads: it's the one the ingredients
+// were pulled from, so it's the one that matches what the recipe dialog lists.
+// The library's own links follow, minus any the override recorded as dead — a
+// 404 helps nobody, while a link that merely refuses this app still opens fine
+// in a browser and stays.
+function linksFor(doc, override) {
+  const dead = new Set(override?.dead || [])
+  const own = (doc.links || [])
+    .filter((l) => l && l.url && !dead.has(l.url))
+    .map(({ label, url }) => ({ label: label || url, url }))
+
+  if (!override) return own
+  return [
+    { label: override.label || override.url, url: override.url },
+    ...own.filter((l) => l.url !== override.url),
+  ]
+}
+
 // One library document -> a menu meal.
 //
-// The mapping is lossy by nature: `produce` is the closest thing to an
-// ingredient list (it's what you shop for), sides and dessert become the
-// optional extras the picker can toggle off, and there are no steps at all —
-// `links` carries the recipe instead, which the recipe dialog shows in their
-// place.
-function mealFromRecipe(doc) {
-  const links = (doc.links || [])
-    .filter((l) => l && l.url)
-    .map(({ label, url }) => ({ label: label || url, url }))
+// `pulled` is the cached ingredient read for this dish's recipe link (see
+// electron/mongo.cjs), when there is one: { ingredients, shopping }. It decides
+// what the dish shops for —
+//
+//   * `ingredients` is what the recipe actually publishes, shown in the dialog.
+//   * `shopping` is that list rewritten for the grocery list — cooking notes
+//     dropped, pantry staples skipped — and is what a pick adds.
+//
+// Without a pull, both fall back to `produce`: the old behaviour, and still the
+// honest answer when a site is down.
+function mealFromRecipe(doc, pulled) {
+  const override = overrideFor(doc._id)
+  const links = linksFor(doc, override)
+  const produce = doc.produce || []
+  const ingredients = pulled?.ingredients?.length ? pulled.ingredients : produce
 
   return {
     // Prefixed so a library dish can never collide with a meal in nalas-menu.
@@ -40,11 +75,27 @@ function mealFromRecipe(doc) {
     // planner knows — the cuisine and how involved it is.
     description: doc.note || [doc.cuisine, doc.difficultyLabel].filter(Boolean).join(' — '),
     verified: false,
-    ingredients: doc.produce || [],
+    ingredients,
+    // Only set when the list came off the link and so needs the grocery-side
+    // rewrite; a `produce` fallback is already written the way you'd shop.
+    ...(pulled?.shopping ? { shopping: pulled.shopping } : {}),
     options: [...(doc.sides || []), ...(doc.dessert ? [doc.dessert] : [])],
     steps: [],
     ...(links.length ? { links, sourceUrl: links[0].url } : {}),
   }
 }
 
-module.exports = { RECIPES, LIBRARY_SORT, mealFromRecipe }
+// Where a dish's ingredients could be read from, best first — the same order
+// the links are shown in.
+//
+// A list rather than a single URL because a dish often carries several links
+// (the main course, then a side or a dessert) and the first one is not always
+// the readable one: a dish keeps its own links whenever *any* of them parses,
+// so the leader can still be a dead page. Callers walk the list until one
+// works, which is also why the cache is keyed by URL — whichever link answered
+// is the one remembered.
+function recipeUrlsFor(doc) {
+  return linksFor(doc, overrideFor(doc._id)).map((l) => l.url)
+}
+
+module.exports = { RECIPES, LIBRARY_SORT, mealFromRecipe, linksFor, recipeUrlsFor }

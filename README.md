@@ -30,9 +30,10 @@ cp .env.example .env
 In Atlas: **Cluster → Connect → Drivers** to copy the `mongodb+srv://…` string, and
 replace `<username>:<password>` with a database user's credentials. The database name
 is fixed to `tommy-data` in code, so it doesn't need to be in the URI. The app uses
-three collections: `nalas-minions` (one document per chore), `nalas-menu` (one document
-per meal — ingredients, recipe steps, and whether it's verified), and `meta` (the
-daily-reset date). Without a `.env`, the app falls back to a local cache.
+four collections: `nalas-minions` (one document per chore), `nalas-menu` (one document
+per meal — ingredients, recipe steps, and whether it's verified), `nalas-menu-ingredients`
+(ingredients read off recipe links, cached by URL), and `meta` (the daily-reset date).
+Without a `.env`, the app falls back to a local cache.
 
 Publish the household recipes into `nalas-menu` once:
 
@@ -47,9 +48,46 @@ imported ones show as **Untried** until somebody cooks from the steps.
 
 `/menu` also reads the meal-planner project's `recipes` collection in the same database
 (read-only — this app never writes to it). Those dinners list after everything in
-`nalas-menu` and always show as **Untried**: they carry produce to shop for and links to
-the real recipe, but no steps of their own. The mapping lives in
-`server/recipe-library.cjs`.
+`nalas-menu` and always show as **Untried**: they link to the real recipe but carry no
+steps of their own. The mapping lives in `server/recipe-library.cjs`.
+
+### Every recipe has a link, and shops from it
+A library dinner used to shop from `produce` — three or four items, and empty for most
+dishes — so picking one often added nothing. Instead the menu reads the ingredients off
+the dish's own recipe link, through the same schema.org metadata the importer uses, and
+keeps two lists: `ingredients` exactly as the recipe publishes them (what the recipe
+dialog shows) and `shopping`, the same lines rewritten for a grocery run with cooking
+notes dropped and pantry staples skipped (`server/ingredients.cjs`).
+
+Fetching 100+ pages per render would be absurd, so pulls are cached by URL in
+`tommy-data.nalas-menu-ingredients` — this app's own collection. Fill it with:
+
+```bash
+npm run pull:ingredients            # read whatever isn't cached yet
+npm run pull:ingredients -- --force # re-read everything
+```
+
+Dishes not yet pulled fall back to `produce`, and the recipe dialog offers a **Read it**
+button to pull one on demand.
+
+Some dishes couldn't be read at all: the library had no link, or linked somewhere this
+app can't reach — Serious Eats, Simply Recipes, The Spruce Eats and Maangchi all answer
+403 to a server-side request, some pages publish no recipe metadata, and some URLs have
+gone dead. Those get a curated replacement in `scripts/recipe-links.cjs`, each one
+checked to parse into a real ingredient list. Re-check them any time with:
+
+```bash
+npm run check:links
+```
+
+It exits non-zero when a link stops parsing, which is the cue to pick another. A link
+that merely refuses this app (403) still opens fine in a browser, so it stays listed
+under the replacement; only genuinely dead ones are dropped.
+
+The household's own meals in `nalas-menu` keep their hand-written ingredient lists —
+already phrased the way you'd shop, with salt and water deliberately left off — and link
+to their permalink on `/menu` (`/menu/meal-pad-thai`), since nobody else publishes
+Kevin's chicken.
 
 > MongoDB only runs in the Electron desktop app (it needs Node). The browser build
 > used on iPad/phone can't reach Mongo directly, so it persists to localStorage.

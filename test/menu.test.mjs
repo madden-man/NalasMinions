@@ -13,7 +13,7 @@ import assert from 'node:assert/strict'
 import { createRequire } from 'node:module'
 
 import { createGroceryTask, addOneOff, toggleOneOff } from '../src/grocery.js'
-import { addMealToGrocery } from '../src/menu.js'
+import { addMealToGrocery, shoppingList } from '../src/menu.js'
 
 const { MEALS } = createRequire(import.meta.url)('../scripts/meals-data.cjs')
 
@@ -132,4 +132,49 @@ test('addMealToGrocery: leaves staples and other one-offs untouched', () => {
   const t = addMealToGrocery(before, padThai, new Date(NOW.getTime() + 1000))
   assert.deepEqual(t.items, before.items)
   assert.ok(t.oneOffs.some((i) => i.text === 'Birthday candles'))
+})
+
+// --- meals whose ingredients were read off a link -------------------------
+//
+// A library dish carries the recipe's own wording in `ingredients` and the
+// grocery-ready rewrite in `shopping` (server/ingredients.cjs). The menu shops
+// from the second and shows the first.
+
+const linked = {
+  id: 'recipe-abc',
+  name: 'Chicken Katsu',
+  ingredients: ['2 bell peppers (orange + red)', '½ tsp Diamond Crystal kosher salt'],
+  shopping: ['2 bell peppers'],
+  options: [],
+}
+
+test('shoppingList: prefers the grocery rewrite when the meal has one', () => {
+  assert.deepEqual(shoppingList(linked), ['2 bell peppers'])
+})
+
+test('shoppingList: a hand-written meal shops from its own ingredients', () => {
+  // Nothing in nalas-menu has `shopping` — those lists are already shop-ready.
+  assert.equal(padThai.shopping, undefined)
+  assert.deepEqual(shoppingList(padThai), padThai.ingredients)
+})
+
+test('shoppingList: an empty rewrite falls back rather than shopping for nothing', () => {
+  assert.deepEqual(shoppingList({ ...linked, shopping: [] }), linked.ingredients)
+})
+
+test('shoppingList: tolerates a meal with no ingredients at all', () => {
+  assert.deepEqual(shoppingList({ id: 'x', name: 'Nothing' }), [])
+})
+
+test('addMealToGrocery: puts the rewrite on the list, not the recipe wording', () => {
+  const t = addMealToGrocery(createGroceryTask(), linked, NOW)
+  assert.deepEqual(t.oneOffs.map((i) => i.text), ['2 bell peppers'])
+  // The salt the recipe listed is assumed to be in the kitchen already.
+  assert.ok(!t.oneOffs.some((i) => /salt/i.test(i.text)))
+})
+
+test('addMealToGrocery: kept options still ride along with a pulled list', () => {
+  const withSides = { ...linked, options: ['Miso Soup'] }
+  const t = addMealToGrocery(createGroceryTask(), withSides, NOW)
+  assert.deepEqual(t.oneOffs.map((i) => i.text).sort(), ['2 bell peppers', 'Miso Soup'])
 })

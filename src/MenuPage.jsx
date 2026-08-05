@@ -15,9 +15,15 @@ import VerifiedIcon from '@mui/icons-material/Verified'
 import HelpOutlineIcon from '@mui/icons-material/HelpOutline'
 import AddIcon from '@mui/icons-material/Add'
 import { isElectron } from './platform'
-import { loadTasks, loadMeals, addMeal, addTask as upsertTask } from './storage'
+import {
+  loadTasks,
+  loadMeals,
+  addMeal,
+  pullIngredients,
+  addTask as upsertTask,
+} from './storage'
 import { isGroceryTask, createGroceryTask } from './grocery'
-import { addMealToGrocery } from './menu'
+import { addMealToGrocery, shoppingList } from './menu'
 
 // "Add recipe": one box that takes either a link to a recipe page or the
 // recipe pasted as text — the server figures out which and parses it, so the
@@ -109,18 +115,44 @@ function VerifiedBadge({ verified }) {
   )
 }
 
-// Where to read the actual recipe: the library's own labelled links, or the
-// single source link an imported recipe carries. Empty for household meals,
-// whose steps are right there in the dialog.
+// Where to read the actual recipe. Every meal has somewhere to point:
+//
+//   * a library dish carries its own labelled links (the replacement link
+//     first, when its original couldn't be read — scripts/recipe-links.cjs),
+//   * an imported recipe carries the single source it was read from,
+//   * and a household meal is its own source: nobody else publishes Kevin's
+//     chicken, and the steps are right there in this dialog, so it links to
+//     its permalink on this page.
+//
+// The permalink is a real URL in the browser (/menu/meal-pad-thai) and the hash
+// route in Electron, matching useRoute. Electron loads the app from file://,
+// where `location.origin` isn't dependable, so the current href (minus any hash
+// already on it) is what the hash route gets appended to.
+function mealPermalink(meal) {
+  const path = `/menu/${meal.id}`
+  if (isElectron) return `${window.location.href.split('#')[0]}#${path}`
+  return `${window.location.origin}${path}`
+}
+
 function recipeLinks(meal) {
   if (meal.links?.length) return meal.links
-  return meal.sourceUrl ? [{ label: 'View the original recipe', url: meal.sourceUrl }] : []
+  if (meal.sourceUrl) return [{ label: 'View the original recipe', url: meal.sourceUrl }]
+  return [{ label: 'Link to this recipe', url: mealPermalink(meal), self: true }]
 }
 
 // The recipe view: a meal's ingredients (optional extras marked as such) and
 // cleaned-up steps in a dialog, with its own "add to groceries" action so the
 // week can be planned from here too.
-function RecipeDialog({ meal, onClose, onAdd }) {
+//
+// The ingredients listed here are the recipe's own, exactly as published — the
+// grocery list gets the tidied version instead (shoppingList), so what's on the
+// counter matches the page and what's in the cart reads like a shopping list.
+function RecipeDialog({ meal, onClose, onAdd, onPull, pulling }) {
+  const links = meal ? recipeLinks(meal) : []
+  // A library dish still shopping from `produce`: its link hasn't been read
+  // yet (or the site was down when the backfill ran), so offer the retry.
+  const canPull = Boolean(meal && !meal.shopping && !meal.steps?.length && meal.sourceUrl)
+
   return (
     <Dialog open={Boolean(meal)} onClose={onClose} fullWidth maxWidth="sm">
       {meal && (
@@ -132,9 +164,40 @@ function RecipeDialog({ meal, onClose, onAdd }) {
             </Stack>
           </DialogTitle>
           <DialogContent dividers>
-            <Typography variant="subtitle2" color="text.secondary" sx={{ mb: 1 }}>
-              Ingredients
-            </Typography>
+            <Stack
+              direction="row"
+              alignItems="center"
+              justifyContent="space-between"
+              sx={{ mb: 1 }}
+            >
+              <Typography variant="subtitle2" color="text.secondary">
+                Ingredients
+              </Typography>
+              {meal.shopping && (
+                <Tooltip title="Read from the linked recipe">
+                  <Chip size="small" variant="outlined" label="from the recipe" />
+                </Tooltip>
+              )}
+            </Stack>
+            {canPull && (
+              <Alert
+                severity="info"
+                sx={{ mb: 2 }}
+                action={
+                  <Button
+                    color="inherit"
+                    size="small"
+                    disabled={pulling}
+                    onClick={() => onPull(meal)}
+                  >
+                    {pulling ? 'Reading…' : 'Read it'}
+                  </Button>
+                }
+              >
+                Only the produce to shop for is saved here — the full ingredient list is
+                at the linked recipe.
+              </Alert>
+            )}
             <List dense disablePadding sx={{ mb: 2 }}>
               {(meal.ingredients || []).map((ing) => (
                 <ListItem key={ing} disableGutters sx={{ py: 0.25 }}>
@@ -171,38 +234,35 @@ function RecipeDialog({ meal, onClose, onAdd }) {
                 </List>
               </>
             ) : (
-              // Dishes pulled from the shared recipe library have no steps of
-              // their own — the method lives at the link they came with.
+              // Dishes from the shared recipe library have no steps of their
+              // own — the method lives at the link, which is always there.
               <Typography variant="body2" color="text.secondary">
-                No steps saved for this one
-                {recipeLinks(meal).length > 0 ? ' — the recipe is linked below.' : '.'}
+                No steps saved for this one — the recipe is linked below.
               </Typography>
             )}
-            {/* Keeps the original (photos, notes, the comments) one tap away —
-                whether it was imported from a link or came from the library. */}
-            {recipeLinks(meal).length > 0 && (
-              <>
-                <Typography variant="subtitle2" color="text.secondary" sx={{ mt: 2, mb: 1 }}>
-                  Recipe
-                </Typography>
-                <List dense disablePadding>
-                  {recipeLinks(meal).map(({ label, url }) => (
-                    <ListItem key={url} disableGutters sx={{ py: 0.25 }}>
-                      <ListItemIcon sx={{ minWidth: 24 }}>
-                        <MenuBookIcon sx={{ fontSize: 16 }} color="disabled" />
-                      </ListItemIcon>
-                      <ListItemText
-                        primary={
-                          <Link href={url} target="_blank" rel="noopener noreferrer">
-                            {label}
-                          </Link>
-                        }
-                      />
-                    </ListItem>
-                  ))}
-                </List>
-              </>
-            )}
+            {/* Every recipe has a link: the site it came from, or — for the
+                household's own meals, which nobody else publishes — a
+                permalink back to this page. */}
+            <Typography variant="subtitle2" color="text.secondary" sx={{ mt: 2, mb: 1 }}>
+              Recipe
+            </Typography>
+            <List dense disablePadding>
+              {links.map(({ label, url, self }) => (
+                <ListItem key={url} disableGutters sx={{ py: 0.25 }}>
+                  <ListItemIcon sx={{ minWidth: 24 }}>
+                    <MenuBookIcon sx={{ fontSize: 16 }} color="disabled" />
+                  </ListItemIcon>
+                  <ListItemText
+                    primary={
+                      <Link href={url} target="_blank" rel="noopener noreferrer">
+                        {label}
+                      </Link>
+                    }
+                    secondary={self ? 'This recipe lives here' : undefined}
+                  />
+                </ListItem>
+              ))}
+            </List>
           </DialogContent>
           <DialogActions>
             <Button onClick={onClose} color="inherit">
@@ -222,7 +282,7 @@ function RecipeDialog({ meal, onClose, onAdd }) {
   )
 }
 
-export default function MenuPage({ navigate }) {
+export default function MenuPage({ navigate, openMealId = null }) {
   // The grocery task doubles as this page's write target: picking a meal adds
   // its ingredients to the task's one-offs, exactly as if they'd been typed on
   // /grocery. Loaded (and seeded if missing) the same way GroceryPage does.
@@ -241,6 +301,8 @@ export default function MenuPage({ navigate }) {
   const [toppings, setToppings] = useState({})
   // Feedback after picking a meal: how many ingredients actually landed.
   const [toast, setToast] = useState(null)
+  // The meal whose recipe link is being read right now, or null.
+  const [pulling, setPulling] = useState(null)
   const skipNextSave = useRef(true)
 
   useEffect(() => {
@@ -285,6 +347,15 @@ export default function MenuPage({ navigate }) {
     }
   }, [])
 
+  // Landing on a recipe's permalink (/menu/meal-pad-thai) opens that recipe as
+  // soon as the catalog arrives — and following another one swaps the dialog
+  // over rather than leaving the first open.
+  useEffect(() => {
+    if (!openMealId || !meals) return
+    const wanted = meals.find((m) => m.id === openMealId)
+    if (wanted) setOpenMeal(wanted)
+  }, [openMealId, meals])
+
   // Persist the grocery task whenever a meal changes it (single-document
   // upsert, same as GroceryPage — the chores are never touched from here).
   useEffect(() => {
@@ -309,6 +380,34 @@ export default function MenuPage({ navigate }) {
     setToast({ severity: 'success', text: `${meal.name} added to the menu` })
   }
 
+  // Closing the dialog drops the permalink too, so the URL keeps matching what
+  // is on screen and the effect above doesn't reopen what was just closed.
+  const closeRecipe = () => {
+    setOpenMeal(null)
+    if (openMealId) navigate('/menu')
+  }
+
+  // Read a library dish's ingredients off its recipe link, then swap the richer
+  // meal into the catalog (and into the open dialog) so the grocery add that
+  // follows shops from the real list rather than the produce note.
+  const pullFor = async (meal) => {
+    setPulling(meal.id)
+    try {
+      const { ingredients, shopping } = await pullIngredients(meal.sourceUrl)
+      const next = { ...meal, ingredients, shopping }
+      setMeals((prev) => (prev ?? []).map((m) => (m.id === meal.id ? next : m)))
+      setOpenMeal((current) => (current?.id === meal.id ? next : current))
+      setToast({
+        severity: 'success',
+        text: `${meal.name}: ${shopping.length} ingredient${shopping.length === 1 ? '' : 's'} read from the recipe`,
+      })
+    } catch (err) {
+      setToast({ severity: 'error', text: `${meal.name}: ${err.message}` })
+    } finally {
+      setPulling(null)
+    }
+  }
+
   const selectedOptions = (meal) => toppings[meal.id] ?? meal.options ?? []
   const toggleTopping = (meal, name) =>
     setToppings((prev) => {
@@ -327,9 +426,9 @@ export default function MenuPage({ navigate }) {
     if (!grocery) return
     // A library dish may carry no shopping list at all — say so rather than
     // claiming everything is already on the list.
-    if ((meal.ingredients?.length ?? 0) + selectedOptions(meal).length === 0) {
+    if (shoppingList(meal).length + selectedOptions(meal).length === 0) {
       setToast({ severity: 'info', text: `${meal.name}: no ingredients saved for this one` })
-      setOpenMeal(null)
+      closeRecipe()
       return
     }
     const next = addMealToGrocery(grocery, meal, new Date(), selectedOptions(meal))
@@ -342,7 +441,7 @@ export default function MenuPage({ navigate }) {
         : { severity: 'info', list: true, text: `${meal.name}: everything is already on the grocery list` },
     )
     if (next !== grocery) setGrocery(next)
-    setOpenMeal(null)
+    closeRecipe()
   }
 
   return (
@@ -461,7 +560,7 @@ export default function MenuPage({ navigate }) {
                       size="small"
                       variant="outlined"
                       icon={<AddShoppingCartIcon />}
-                      label={`${(meal.ingredients?.length ?? 0) + selectedOptions(meal).length} ingredients`}
+                      label={`${shoppingList(meal).length + selectedOptions(meal).length} ingredients`}
                     />
                   </Stack>
                   <Typography variant="body2" color="text.secondary" sx={{ mt: 0.5 }}>
@@ -515,7 +614,13 @@ export default function MenuPage({ navigate }) {
         </Stack>
       </Container>
 
-      <RecipeDialog meal={openMeal} onClose={() => setOpenMeal(null)} onAdd={pickMeal} />
+      <RecipeDialog
+        meal={openMeal}
+        onClose={closeRecipe}
+        onAdd={pickMeal}
+        onPull={pullFor}
+        pulling={Boolean(pulling)}
+      />
 
       <AddRecipeDialog open={adding} onClose={() => setAdding(false)} onSave={saveRecipe} />
 

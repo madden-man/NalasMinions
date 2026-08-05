@@ -80,6 +80,19 @@ export async function addMeal(input) {
   return meal
 }
 
+// Read a recipe link's ingredients now and cache them, for a library dish that
+// is still shopping from its short `produce` note. Normally the backfill script
+// (npm run pull:ingredients) has already done this; this is the retry for a
+// page that was unreachable then. Rejects with the site's reason when it still
+// can't be read. Returns { url, name, ingredients, shopping }.
+export async function pullIngredients(url) {
+  const { ingredients } = await api('/ingredients', {
+    method: 'POST',
+    body: JSON.stringify({ url }),
+  })
+  return ingredients
+}
+
 // Small key/value app state (currently just the daily-reset date).
 export async function getMeta(key) {
   const { value } = await api(`/meta/${encodeURIComponent(key)}`)

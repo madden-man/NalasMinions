@@ -129,8 +129,11 @@ function findRecipeNode(node) {
   return node['@graph'] ? findRecipeNode(node['@graph']) : null
 }
 
-// A recipe page's HTML -> a meal, via its schema.org Recipe metadata.
-function parseRecipeHtml(html, sourceUrl) {
+// Every schema.org Recipe node a page publishes, in document order. A page can
+// carry several JSON-LD blocks (and one malformed block shouldn't hide a good
+// one), so this yields rather than returning the first hit — what counts as
+// usable differs by caller.
+function* recipeNodes(html) {
   const blocks = String(html || '').matchAll(
     /<script[^>]+type=["']application\/ld\+json["'][^>]*>([\s\S]*?)<\/script>/gi,
   )
@@ -139,12 +142,22 @@ function parseRecipeHtml(html, sourceUrl) {
     try {
       parsed = JSON.parse(raw.trim())
     } catch {
-      continue // one malformed block shouldn't hide a good one
+      continue
     }
     const recipe = findRecipeNode(parsed)
-    if (!recipe) continue
+    if (recipe) yield recipe
+  }
+}
 
-    const ingredients = [].concat(recipe.recipeIngredient || recipe.ingredients || [])
+const NO_RECIPE = "That page doesn't publish a readable recipe — paste the recipe text instead."
+
+const nodeIngredients = (node) => [].concat(node.recipeIngredient || node.ingredients || [])
+
+// A recipe page's HTML -> a meal, via its schema.org Recipe metadata. Needs
+// both halves: a meal joins the menu to be cooked from, so steps are the point.
+function parseRecipeHtml(html, sourceUrl) {
+  for (const recipe of recipeNodes(html)) {
+    const ingredients = nodeIngredients(recipe)
     const steps = instructionsToSteps(recipe.recipeInstructions)
     if (!ingredients.length || !steps.length) continue
 
@@ -156,9 +169,20 @@ function parseRecipeHtml(html, sourceUrl) {
       sourceUrl,
     })
   }
-  throw new Error(
-    'That page doesn\'t publish a readable recipe — paste the recipe text instead.',
-  )
+  throw new Error(NO_RECIPE)
+}
+
+// The same metadata read for its ingredients alone. Deliberately laxer than
+// parseRecipeHtml: this backs a dish that only links out (server/ingredients.cjs),
+// where the steps are read at the link and a page listing ingredients without
+// machine-readable instructions is still perfectly worth shopping from.
+function parseIngredientsHtml(html, sourceUrl) {
+  for (const recipe of recipeNodes(html)) {
+    const ingredients = nodeIngredients(recipe).map(clean).filter(Boolean)
+    if (!ingredients.length) continue
+    return { url: sourceUrl, name: clean(recipe.name) || 'Imported recipe', ingredients }
+  }
+  throw new Error(NO_RECIPE)
 }
 
 // Fetch a recipe page and parse it. Kept small and explicit about failures so
@@ -195,6 +219,7 @@ module.exports = {
   slugify,
   parseRecipeText,
   parseRecipeHtml,
+  parseIngredientsHtml,
   importFromUrl,
   mealFromInput,
 }

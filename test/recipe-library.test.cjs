@@ -7,7 +7,14 @@
 const test = require('node:test')
 const assert = require('node:assert/strict')
 
-const { RECIPES, LIBRARY_SORT, mealFromRecipe } = require('../server/recipe-library.cjs')
+const {
+  RECIPES,
+  LIBRARY_SORT,
+  mealFromRecipe,
+  linksFor,
+  recipeUrlsFor,
+} = require('../server/recipe-library.cjs')
+const { RECIPE_LINKS } = require('../scripts/recipe-links.cjs')
 
 const FEATURED = {
   _id: '6a70f2a8ec268d4f241e9b9b',
@@ -120,4 +127,101 @@ test('drops a link with no url, and labels a bare one by its url', () => {
 test('library ids cannot collide with the menu ones', () => {
   assert.ok(mealFromRecipe(FEATURED).id.startsWith('recipe-'))
   assert.ok(!mealFromRecipe(FEATURED).id.startsWith('meal-'))
+})
+
+// --- ingredients read off the link ----------------------------------------
+
+test('a pulled list replaces produce, and carries the grocery version with it', () => {
+  const pulled = {
+    ingredients: ['2 bell peppers (orange + red)', '1 tsp kosher salt'],
+    shopping: ['2 bell peppers'],
+  }
+  const meal = mealFromRecipe(FEATURED, pulled)
+  // The dialog shows what the recipe actually says…
+  assert.deepEqual(meal.ingredients, ['2 bell peppers (orange + red)', '1 tsp kosher salt'])
+  // …while the grocery list gets the tidied, de-stapled version.
+  assert.deepEqual(meal.shopping, ['2 bell peppers'])
+})
+
+test('without a pull, a dish still shops from produce and sets no shopping list', () => {
+  const meal = mealFromRecipe(FEATURED)
+  assert.deepEqual(meal.ingredients, ['Cabbage', 'Daikon', 'Carrots', 'Citrus'])
+  // No `shopping` means "this list is already written the way you'd shop".
+  assert.equal(meal.shopping, undefined)
+})
+
+test('an empty pull is treated as no pull rather than as an empty dish', () => {
+  const meal = mealFromRecipe(FEATURED, { ingredients: [], shopping: [] })
+  assert.deepEqual(meal.ingredients, ['Cabbage', 'Daikon', 'Carrots', 'Citrus'])
+})
+
+// --- replacement links ----------------------------------------------------
+
+test('an override leads the link list, and the dish keeps its other links', () => {
+  const links = linksFor(FEATURED, {
+    label: 'Chicken Katsu (replacement)',
+    url: 'https://example.com/new-katsu',
+  })
+  assert.deepEqual(links, [
+    { label: 'Chicken Katsu (replacement)', url: 'https://example.com/new-katsu' },
+    { label: 'Chicken Katsu (Just One Cookbook)', url: 'https://example.com/katsu' },
+    { label: 'Miso Soup', url: 'https://example.com/miso' },
+  ])
+})
+
+test('a link the override marked dead is dropped; a merely blocked one stays', () => {
+  const links = linksFor(FEATURED, {
+    label: 'New',
+    url: 'https://example.com/new',
+    // The katsu link 404s; the miso one only refuses this app, so it survives.
+    dead: ['https://example.com/katsu'],
+  })
+  assert.deepEqual(links.map((l) => l.url), [
+    'https://example.com/new',
+    'https://example.com/miso',
+  ])
+})
+
+test('an override is never listed twice when it matches a link already there', () => {
+  const links = linksFor(FEATURED, {
+    label: 'Chicken Katsu (Just One Cookbook)',
+    url: 'https://example.com/katsu',
+  })
+  assert.equal(links.filter((l) => l.url === 'https://example.com/katsu').length, 1)
+})
+
+test('the pull candidates are every link the dish shows, in the order shown', () => {
+  // All of them, not just the first: a dish keeps its own links when any one
+  // of them parses, so the leader can still be a page that has gone dead.
+  assert.deepEqual(recipeUrlsFor(FEATURED), [
+    'https://example.com/katsu',
+    'https://example.com/miso',
+  ])
+  assert.deepEqual(recipeUrlsFor({ _id: 'nope', dish: 'Nothing' }), [])
+})
+
+test('an overridden dish reads from the replacement first', () => {
+  const [id, entry] = Object.entries(RECIPE_LINKS)[0]
+  const urls = recipeUrlsFor({ _id: id, dish: entry.dish, links: [{ url: 'https://old.example' }] })
+  assert.equal(urls[0], entry.url)
+  assert.ok(urls.includes('https://old.example'))
+})
+
+test('every curated override names a dish and an http link', () => {
+  const entries = Object.entries(RECIPE_LINKS)
+  assert.ok(entries.length > 0)
+  for (const [id, entry] of entries) {
+    assert.match(id, /^[a-f0-9]{24}$/, `${entry.dish}: id should be a library _id`)
+    assert.ok(entry.dish, `${id} should say which dish it is for`)
+    assert.match(entry.url, /^https:\/\//, `${entry.dish}: link should be https`)
+    assert.ok(entry.label, `${entry.dish}: link should be labelled`)
+    for (const dead of entry.dead || []) {
+      assert.match(dead, /^https?:\/\//, `${entry.dish}: dead link should be a url`)
+    }
+  }
+})
+
+test('no two dishes are pointed at the same replacement recipe', () => {
+  const urls = Object.values(RECIPE_LINKS).map((e) => e.url)
+  assert.equal(new Set(urls).size, urls.length)
 })
