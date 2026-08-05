@@ -746,3 +746,53 @@ describe('filtering by store', () => {
     expect(screen.queryByRole('group', { name: /filter meals by store/i })).not.toBeInTheDocument()
   })
 })
+
+describe('tapping a meal', () => {
+  it('opens the recipe rather than shopping for it', async () => {
+    await renderPage()
+    await userEvent.click(screen.getByRole('button', { name: `${padThai.name} details` }))
+
+    const dialog = await screen.findByRole('dialog')
+    expect(within(dialog).getByText(padThai.name)).toBeInTheDocument()
+    expect(within(dialog).getByText(padThai.steps[0])).toBeInTheDocument()
+    // Nothing was added to the grocery list on the way.
+    expect(addTask).not.toHaveBeenCalled()
+  })
+
+  it('still reads as a recipe before the grocery task has loaded', async () => {
+    // Looking needs nothing; only shopping does.
+    loadTasks.mockReturnValue(new Promise(() => {}))
+    loadMeals.mockResolvedValue(MEALS)
+    render(<MenuPage navigate={vi.fn()} />)
+
+    const card = await screen.findByRole('button', { name: `${padThai.name} details` })
+    expect(card).toBeEnabled()
+    // The shopping action, by contrast, waits for somewhere to shop into.
+    expect(
+      screen.getByRole('button', { name: `add ${padThai.name} to this week` }),
+    ).toBeDisabled()
+
+    // Checked last: an open dialog hides the page behind it from the a11y tree.
+    await userEvent.click(card)
+    expect(await screen.findByRole('dialog')).toBeInTheDocument()
+  })
+
+  it('keeps "Add to this week" as the way to shop for it', async () => {
+    await renderPage()
+    await userEvent.click(
+      screen.getByRole('button', { name: `add ${padThai.name} to this week` }),
+    )
+    await waitFor(() => expect(addTask).toHaveBeenCalledTimes(1))
+    expect(addTask.mock.calls[0][0].oneOffs.map((i) => i.text)).toEqual(
+      expect.arrayContaining(padThai.ingredients),
+    )
+    // And it doesn't leave a dialog open behind the toast.
+    expect(screen.queryByRole('dialog')).not.toBeInTheDocument()
+  })
+
+  it('does not open the recipe when toggling an optional extra', async () => {
+    await renderPage()
+    await userEvent.click(screen.getByRole('button', { name: pizza.options[0] }))
+    expect(screen.queryByRole('dialog')).not.toBeInTheDocument()
+  })
+})

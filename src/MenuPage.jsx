@@ -791,8 +791,8 @@ export default function MenuPage({ navigate, openMealId = null }) {
           sx={{ mb: 2 }}
         >
           <Typography variant="body2" color="text.secondary">
-            Meals that can be prepped this week. Tap a meal to add its ingredients to the
-            grocery list; open the recipe for the how-to.
+            Meals that can be prepped this week. Tap a meal to read the recipe; use
+            &ldquo;Add to this week&rdquo; to put its ingredients on the grocery list.
           </Typography>
           <Button
             size="small"
@@ -846,7 +846,15 @@ export default function MenuPage({ navigate, openMealId = null }) {
         <Stack spacing={2}>
           {shownMeals.map((meal) => (
             <Card key={meal.id} elevation={1}>
-              <CardActionArea onClick={() => pickMeal(meal)} disabled={!grocery}>
+              {/* Tapping the meal itself opens it. Shopping for it is the
+                  explicit button below — a tap that silently put ten things on
+                  the grocery list was too easy to trigger by accident, and
+                  reading the recipe is the commoner reason to touch a card.
+                  Not disabled on the grocery task: looking needs nothing. */}
+              <CardActionArea
+                onClick={() => setOpenMeal(meal)}
+                aria-label={`${meal.name} details`}
+              >
                 <CardContent sx={{ pb: 1 }}>
                   <Stack direction="row" alignItems="center" justifyContent="space-between">
                     <Stack direction="row" alignItems="center" spacing={1} sx={{ minWidth: 0 }}>
