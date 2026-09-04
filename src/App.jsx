@@ -294,6 +294,18 @@ function ChoresPage({ navigate }) {
     if (effectiveView === 'today') return choreTasks.filter((t) => isDueOn(t))
     if (effectiveView === 'monthly' && selectedDay)
       return choreTasks.filter((t) => isDueOn(t, selectedDay))
+    // All tasks: earliest date first, sorting on each chore's anchor (its due
+    // date, else its creation time). Chores with neither sink to the bottom.
+    if (effectiveView === 'all') {
+      return [...choreTasks].sort((a, b) => {
+        const da = taskAnchor(a)
+        const db = taskAnchor(b)
+        if (!da && !db) return 0
+        if (!da) return 1
+        if (!db) return -1
+        return da - db
+      })
+    }
     return choreTasks
   }, [choreTasks, effectiveView, selectedDay])
 
