@@ -1,0 +1,565 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>🇯🇵 Japan Trip 2026 — Thomas & Alison</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Shippori+Mincho:wght@600;700;800&family=Zen+Kaku+Gothic+New:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --indigo:#1f3a5f;
+    --indigo-deep:#152a45;
+    --vermillion:#c1432c;
+    --momiji:#d1495b;
+    --gold:#dca34a;
+    --cream:#fdf7ee;
+    --paper:#ffffff;
+    --ink:#2c2c2c;
+    --muted:#6b6b6b;
+    --line:#ecdfce;
+    --green:#3f8f5b;
+    --shadow:0 6px 24px rgba(31,58,95,.10);
+  }
+  *{box-sizing:border-box;}
+  html{scroll-behavior:smooth;}
+  body{
+    margin:0;
+    font-family:'Zen Kaku Gothic New',system-ui,-apple-system,'Segoe UI','Hiragino Sans',sans-serif;
+    color:var(--ink);
+    background:var(--cream);
+    line-height:1.6;
+    -webkit-text-size-adjust:100%;
+    overflow-x:hidden;
+  }
+  h1,h2,h3{font-family:'Shippori Mincho','Hiragino Mincho ProN','Yu Mincho',Georgia,serif;line-height:1.25;}
+
+  /* Hero */
+  .hero{
+    position:relative;
+    background:linear-gradient(135deg,var(--indigo-deep) 0%,var(--indigo) 55%,var(--vermillion) 140%);
+    color:#fff;overflow:hidden;
+    padding:56px 24px 64px;
+    text-align:center;
+  }
+  .hero::after{
+    content:"⛩️";position:absolute;right:-10px;bottom:-30px;font-size:220px;opacity:.09;transform:rotate(-8deg);
+  }
+  .hero::before{
+    content:"🍁";position:absolute;left:16px;top:12px;font-size:90px;opacity:.12;transform:rotate(12deg);
+  }
+  .hero h1{margin:0 0 8px;font-size:clamp(2rem,5vw,3.4rem);font-weight:800;letter-spacing:.5px;}
+  .hero .dates{font-size:1.15rem;font-weight:500;opacity:.95;}
+  .hero .who{margin-top:6px;opacity:.85;}
+  .route{
+    margin:22px auto 0;max-width:900px;display:flex;flex-wrap:wrap;gap:6px 8px;justify-content:center;
+  }
+  .route .stop{
+    background:rgba(255,255,255,.14);border:1px solid rgba(255,255,255,.25);
+    padding:4px 12px;border-radius:999px;font-size:.85rem;font-weight:500;backdrop-filter:blur(2px);
+  }
+
+  /* Nav */
+  nav{
+    position:sticky;top:0;z-index:50;background:rgba(255,255,255,.92);backdrop-filter:blur(8px);
+    border-bottom:1px solid var(--line);box-shadow:0 2px 10px rgba(0,0,0,.04);
+  }
+  nav .inner{max-width:1000px;margin:0 auto;display:flex;flex-wrap:wrap;gap:2px;padding:8px 12px;justify-content:center;}
+  nav a{
+    color:var(--indigo);text-decoration:none;font-weight:600;font-size:.86rem;
+    padding:6px 12px;border-radius:8px;transition:.15s;
+  }
+  nav a:hover{background:var(--cream);color:var(--vermillion);}
+
+  main{max-width:1000px;margin:0 auto;padding:28px 18px 60px;}
+  section{margin:30px 0;}
+  .card{
+    background:var(--paper);border:1px solid var(--line);border-radius:16px;
+    padding:22px 24px;box-shadow:var(--shadow);
+  }
+  h2.section-title{
+    font-size:1.6rem;margin:0 0 4px;color:var(--indigo);display:flex;align-items:center;gap:10px;
+  }
+  h2.section-title .em{font-size:1.5rem;}
+  .subtle{color:var(--muted);font-size:.92rem;margin-top:0;}
+
+  /* Season banner */
+  .banner{
+    border-left:5px solid var(--gold);background:#fff8ea;border-radius:10px;
+    padding:14px 18px;margin:0 0 6px;font-size:.95rem;
+  }
+  .banner.warn{border-left-color:var(--vermillion);background:#fdeeea;}
+
+  /* Tables */
+  .table-wrap{overflow-x:auto;}
+  table{border-collapse:collapse;width:100%;font-size:.9rem;margin-top:6px;}
+  th,td{padding:10px 12px;text-align:left;border-bottom:1px solid var(--line);vertical-align:top;}
+  th{background:var(--indigo);color:#fff;font-weight:600;font-size:.82rem;letter-spacing:.3px;}
+  tr:nth-child(even) td{background:#fbf5ec;}
+  td strong{color:var(--indigo-deep);}
+  .paid{color:var(--green);font-weight:700;}
+  .due{color:var(--vermillion);font-weight:700;}
+
+  /* Budget */
+  .stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:14px;margin:8px 0 20px;}
+  .stat{background:var(--cream);border:1px solid var(--line);border-radius:14px;padding:16px;text-align:center;}
+  .stat .num{font-family:'Shippori Mincho',serif;font-size:1.7rem;font-weight:800;color:var(--indigo);}
+  .stat .lbl{font-size:.78rem;text-transform:uppercase;letter-spacing:.6px;color:var(--muted);margin-top:2px;}
+  .stat.good .num{color:var(--green);}
+  .stat.due .num{color:var(--vermillion);}
+  .bar{display:flex;height:30px;border-radius:999px;overflow:hidden;border:1px solid var(--line);margin:6px 0 10px;}
+  .bar .seg{display:flex;align-items:center;justify-content:center;color:#fff;font-size:.72rem;font-weight:700;white-space:nowrap;}
+  .seg.paid{background:var(--green);}
+  .seg.topay{background:var(--vermillion);}
+  .seg.buffer{background:var(--gold);color:#4a3410;}
+  .legend{display:flex;flex-wrap:wrap;gap:14px;font-size:.82rem;color:var(--muted);}
+  .legend span{display:inline-flex;align-items:center;gap:6px;}
+  .dot{width:12px;height:12px;border-radius:3px;display:inline-block;}
+
+  /* Day-by-day */
+  .leg{margin-top:18px;}
+  .leg-head{
+    font-family:'Shippori Mincho',serif;font-size:1.15rem;font-weight:700;color:#fff;
+    background:var(--indigo);border-radius:10px 10px 0 0;padding:9px 16px;
+  }
+  .leg.izu .leg-head{background:#2f6b52;}
+  .leg.yoko .leg-head{background:#3a5a8c;}
+  .leg.osaka .leg-head{background:#a3562b;}
+  .leg.kumano .leg-head{background:#5a6b2f;}
+  .leg.kyoto .leg-head{background:var(--vermillion);}
+  .leg.tokyo .leg-head{background:#4a3d7a;}
+  .leg-body{border:1px solid var(--line);border-top:none;border-radius:0 0 10px 10px;padding:6px 16px 14px;}
+  .day{padding:12px 0;border-bottom:1px dashed var(--line);}
+  .day:last-child{border-bottom:none;}
+  .day .date{
+    display:inline-block;background:var(--cream);border:1px solid var(--line);color:var(--indigo-deep);
+    font-weight:700;font-size:.8rem;padding:2px 10px;border-radius:999px;margin-right:8px;
+  }
+  .fun{margin:8px 0 4px;padding-left:20px;}
+  .fun li{margin:3px 0;}
+  .prep{font-size:.85rem;color:var(--muted);font-style:italic;margin:4px 0 0;background:#f7f1e7;border-radius:8px;padding:6px 10px;display:inline-block;}
+  .note-inline{font-size:.85rem;color:var(--muted);font-style:italic;}
+
+  /* Checklist */
+  .progress-line{font-weight:600;color:var(--indigo);margin:2px 0 14px;}
+  .chk-group{margin:16px 0;}
+  .chk-group h3{font-size:1.05rem;color:var(--vermillion);margin:0 0 8px;}
+  .chk{
+    display:flex;align-items:flex-start;gap:11px;padding:9px 12px;border:1px solid var(--line);
+    border-radius:10px;margin:7px 0;background:var(--paper);transition:.15s;cursor:pointer;
+  }
+  .chk:hover{border-color:var(--gold);background:#fffdf8;}
+  .chk input{
+    appearance:none;-webkit-appearance:none;min-width:22px;height:22px;margin-top:2px;
+    border:2px solid var(--indigo);border-radius:6px;cursor:pointer;position:relative;transition:.15s;
+  }
+  .chk input:checked{background:var(--green);border-color:var(--green);}
+  .chk input:checked::after{content:"✓";color:#fff;position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:900;}
+  .chk .txt{font-size:.92rem;}
+  .chk input:checked ~ .txt{text-decoration:line-through;color:var(--muted);}
+  .tag{display:inline-block;font-size:.68rem;font-weight:700;text-transform:uppercase;letter-spacing:.4px;
+    background:var(--vermillion);color:#fff;padding:1px 7px;border-radius:999px;margin-left:6px;vertical-align:middle;}
+
+  ul.clean{margin:8px 0;padding-left:20px;}
+  ul.clean li{margin:5px 0;}
+  .footer{text-align:center;color:var(--muted);font-size:.82rem;padding:30px 16px;}
+  a.inline{color:var(--vermillion);}
+  @media(max-width:640px){
+    main{padding:16px 12px 48px;}
+    section{margin:22px 0;}
+    .card{padding:16px 14px;border-radius:14px;}
+    .hero{padding:40px 18px 46px;}
+    .hero::after{font-size:150px;right:-16px;bottom:-24px;}
+    .hero::before{font-size:60px;}
+    .hero .dates{font-size:1rem;}
+    /* nav becomes a horizontal swipe strip */
+    nav .inner{flex-wrap:nowrap;overflow-x:auto;justify-content:flex-start;-webkit-overflow-scrolling:touch;padding:8px 8px;scrollbar-width:none;}
+    nav .inner::-webkit-scrollbar{display:none;}
+    nav a{font-size:.8rem;padding:6px 10px;white-space:nowrap;flex:0 0 auto;}
+    h2.section-title{font-size:1.35rem;}
+    /* tables scroll sideways with a hint of momentum */
+    .table-wrap{-webkit-overflow-scrolling:touch;}
+    th,td{padding:8px 10px;font-size:.84rem;}
+    table{font-size:.84rem;}
+    .stats{grid-template-columns:repeat(2,1fr);gap:10px;}
+    .stat .num{font-size:1.4rem;}
+    .bar{height:26px;}
+    .bar .seg{font-size:.62rem;}
+    .legend{font-size:.76rem;gap:10px;}
+    .leg-head{font-size:1.02rem;padding:9px 12px;}
+    .leg-body{padding:6px 12px 12px;}
+    .day .date{display:inline-block;margin-bottom:4px;}
+    /* bigger tap targets for the checklist */
+    .chk{padding:12px;gap:13px;}
+    .chk input{min-width:26px;height:26px;}
+    .chk .txt{font-size:.9rem;}
+  }
+  @media(max-width:380px){
+    .stats{grid-template-columns:1fr 1fr;}
+    .hero h1{font-size:1.9rem;}
+    .route .stop{font-size:.78rem;padding:3px 9px;}
+  }
+</style>
+</head>
+<body>
+
+<header class="hero">
+  <h1>Japan 2026</h1>
+  <div class="dates">Oct 30 – Nov 22, 2026 · 23 days</div>
+  <div class="who">Thomas Madden &amp; Alison Harshberger</div>
+  <div class="route">
+    <span class="stop">✈️ Tokyo</span><span class="stop">♨️ Izu / Itō</span>
+    <span class="stop">🌃 Yokohama</span><span class="stop">🎋 Kamakura</span>
+    <span class="stop">🍜 Osaka</span><span class="stop">🥾 Kumano Kodo</span>
+    <span class="stop">🍁 Kyoto</span><span class="stop">🦌 Nara</span>
+    <span class="stop">⛩️ Ise</span><span class="stop">🗼 Tokyo</span>
+  </div>
+</header>
+
+<nav>
+  <div class="inner">
+    <a href="#flights">✈️ Flights</a>
+    <a href="#stay">🏨 Stay</a>
+    <a href="#transit">🚆 Transit</a>
+    <a href="#budget">💰 Budget</a>
+    <a href="#itinerary">📅 Day-by-Day</a>
+    <a href="#checklist">✅ Checklist</a>
+    <a href="#notes">📝 Doc Fixes</a>
+  </div>
+</nav>
+
+<main>
+
+  <div class="banner">🍂 <strong>Season note:</strong> Late autumn. Kyoto foliage will be near peak (gorgeous but crowded — go early). Mid-November daylight is short — <strong>sunset ~4:50 pm</strong> — so hiking days start early, especially Nov 10 (compressed arrival day) and Nov 14 (long final stage).</div>
+
+  <!-- FLIGHTS -->
+  <section id="flights" class="card">
+    <h2 class="section-title"><span class="em">✈️</span> Flights</h2>
+    <p class="subtle">Chase Travel · Trip ID 1019751002 · Airline conf. <strong>BF7TEH</strong> · Paid on Visa ••2253 ($11,497.26 for two) · <strong>Non-refundable</strong></p>
+    <div class="table-wrap">
+    <table>
+      <tr><th></th><th>Date</th><th>Route</th><th>Times</th><th>Flight</th><th>Class</th></tr>
+      <tr><td><strong>Out</strong></td><td>Fri Oct 30 (arr. Sat Oct 31)</td><td>DEN → NRT</td><td>12:20 pm → 3:35 pm (+1) · 12h15m</td><td>ANA <strong>NH 7033</strong> (op. by United), 787-9</td><td>Premium Economy</td></tr>
+      <tr><td><strong>Return</strong></td><td>Sun Nov 22</td><td>NRT → DEN</td><td>5:40 pm → 12:15 pm · 10h35m</td><td>United <strong>UA 142</strong>, 787-9</td><td>Premium Economy</td></tr>
+    </table>
+    </div>
+  </section>
+
+  <!-- STAY -->
+  <section id="stay" class="card">
+    <h2 class="section-title"><span class="em">🏨</span> Accommodations <span style="font-size:.8rem;color:var(--green);font-weight:600;">— all confirmed</span></h2>
+    <p class="subtle">Every night Oct 31 → Nov 22 is covered — no gaps.</p>
+    <div class="table-wrap">
+    <table>
+      <tr><th>Dates</th><th>Nts</th><th>Hotel</th><th>Room / Plan</th><th>Conf #</th><th>Cost</th></tr>
+      <tr><td>Oct 31–Nov 1</td><td>1</td><td><strong>Mitsui Garden Ueno</strong> · Tokyo</td><td>Superior, 2 beds · breakfast</td><td>3742-4963-3380</td><td>¥56,200 <span class="paid">(prepaid)</span></td></tr>
+      <tr><td>Nov 1–6</td><td>5</td><td><strong>Itō Ryokuyu</strong> (ryokan) · Izu</td><td>12-tatami room, private open-air garden bath · dinner + breakfast</td><td>3566-5382-2358</td><td>¥492,500 <span class="due">(pay at hotel)</span></td></tr>
+      <tr><td>Nov 6–8</td><td>2</td><td><strong>Mitsui Garden Yokohama Minato Mirai Premier</strong></td><td>Deluxe King · breakfast + 1 drink · sky pool</td><td>3568-7411-6231</td><td>¥130,380 <span class="paid">(web pay)</span></td></tr>
+      <tr><td>Nov 8–10</td><td>2</td><td><strong>Royal Park Canvas – Osaka Kitahama</strong></td><td>Compact Double · breakfast · QR check-in</td><td>20261108-12996</td><td>¥38,950 <span class="paid">(prepaid)</span></td></tr>
+      <tr><td>Nov 10–15</td><td>5</td><td><strong>Kumano Kodo trek</strong> · Kii Peninsula</td><td>self-guided pkg · meals + luggage shuttle</td><td><strong>DP200503</strong></td><td>¥316,000 <span class="paid">(paid)</span></td></tr>
+      <tr><td>Nov 15–19</td><td>4</td><td><strong>Park Hyatt Kyoto</strong> · Higashiyama</td><td>1 King Garden Terrace (45 sqm) · breakfast</td><td>40023B17214319</td><td>¥1.32M <span class="due">(deposit paid; balance at hotel)</span></td></tr>
+      <tr><td>Nov 19–22</td><td>3</td><td><strong>JR Kyushu Hotel Blossom Shinjuku</strong> · Tokyo</td><td>Standard Double Queen · check-in 3pm</td><td>3568-8840-0377</td><td>$1,355 <span class="paid">(paid)</span></td></tr>
+    </table>
+    </div>
+    <p class="note-inline">Park Hyatt: 360 Kodaiji Masuyacho, Higashiyama-ku, Kyoto · +81 75-531-1234. Kyoto City accommodation tax (¥10,000/person/night) is collected separately at checkout.</p>
+  </section>
+
+  <!-- TRANSIT -->
+  <section id="transit" class="card">
+    <h2 class="section-title"><span class="em">🚆</span> Getting Around</h2>
+    <p><strong>Skip the nationwide JR Pass.</strong> Your long-haul rides are spread across Nov 8–19 — too far apart for a 7-day pass, and a 14-day pass (~¥80k) likely won't pay off for only four big trips. Better: <strong>point-to-point Shinkansen + a regional pass for the Kumano/Ise segment</strong> (look at the <em>Ise-Kumano-Wakayama Area Tourist Pass</em>). The Kintetsu line (Kyoto↔Nara, Kyoto↔Ise) isn't covered by any JR pass anyway.</p>
+    <p><strong>Reserve seats (foliage crowds + luggage):</strong></p>
+    <ul class="clean">
+      <li><strong>Nov 8</strong> — Shin-Yokohama → Shin-Osaka (Shinkansen)</li>
+      <li><strong>Nov 10</strong> — Shin-Osaka → Kii-Tanabe (Kuroshio) — <strong>must arrive 11:22 am</strong> for the luggage handoff</li>
+      <li><strong>Nov 15</strong> — Kii-Katsuura/Shingū → Kyoto (long ~4.5–5 hr day)</li>
+      <li><strong>Nov 19</strong> — Kyoto → Tokyo (Shinkansen)</li>
+    </ul>
+    <p class="note-inline"><strong>Buy on the day:</strong> NRT→Ueno (Skyliner/N'EX) · Tokyo→Itō (Odoriko) · Itō→Yokohama · Kyoto↔Nara &amp; Kyoto↔Ise (Kintetsu) · Shinjuku→NRT (N'EX — leave by ~1 pm for the 5:40 flight).</p>
+  </section>
+
+  <!-- BUDGET -->
+  <section id="budget" class="card">
+    <h2 class="section-title"><span class="em">💰</span> Budget</h2>
+    <p class="subtle">Total budget <strong>$42,000</strong>. USD at ~¥150/USD, anchored to the JTB charge (¥202,900 = $1,355). Every "paid" item verified against a real confirmation email.</p>
+
+    <div class="stats">
+      <div class="stat"><div class="num">$42,000</div><div class="lbl">Total budget</div></div>
+      <div class="stat good"><div class="num">$18,960</div><div class="lbl">Paid so far</div></div>
+      <div class="stat due"><div class="num">$22,040</div><div class="lbl">Still to pay</div></div>
+      <div class="stat good"><div class="num">~$1,000</div><div class="lbl">Projected buffer</div></div>
+    </div>
+
+    <div class="bar" title="Share of the $42,000 budget">
+      <div class="seg paid" style="width:45.1%">Paid 45%</div>
+      <div class="seg topay" style="width:52.5%">To pay 53%</div>
+      <div class="seg buffer" style="width:2.4%">Buf</div>
+    </div>
+    <div class="legend">
+      <span><span class="dot" style="background:var(--green)"></span> Paid $18,960</span>
+      <span><span class="dot" style="background:var(--vermillion)"></span> Still to pay $22,040</span>
+      <span><span class="dot" style="background:var(--gold)"></span> Buffer ~$1,000</span>
+    </div>
+
+    <h3 style="color:var(--green);margin-top:22px;">Paid so far — $18,960</h3>
+    <div class="table-wrap">
+    <table>
+      <tr><th>Item</th><th>Amount</th><th>Confirmation</th></tr>
+      <tr><td>Flights (round-trip ×2)</td><td>$11,497</td><td>Chase Travel BF7TEH</td></tr>
+      <tr><td>Mitsui Garden Ueno</td><td>~$375</td><td>prepaid online</td></tr>
+      <tr><td>Mitsui Yokohama</td><td>~$869</td><td>web payment</td></tr>
+      <tr><td>Royal Park Canvas Osaka</td><td>~$260</td><td>prepaid</td></tr>
+      <tr><td>Kumano Kodo trek</td><td>~$2,107</td><td>DP200503 (paid)</td></tr>
+      <tr><td>JR Kyushu Blossom Shinjuku</td><td>$1,355</td><td>JTB (card, May 11)</td></tr>
+      <tr><td>Park Hyatt Kyoto — <strong>deposit only</strong></td><td>~$2,500</td><td>1-night deposit</td></tr>
+    </table>
+    </div>
+
+    <h3 style="color:var(--vermillion);margin-top:22px;">Still to pay — $22,040</h3>
+    <div class="table-wrap">
+    <table>
+      <tr><th>Item</th><th>Est.</th><th>When / notes</th></tr>
+      <tr><td>Park Hyatt Kyoto — <strong>balance</strong></td><td>~$9,500</td><td>at checkout; incl. 15% service + 10% tax + city tax</td></tr>
+      <tr><td>Itō Ryokuyu</td><td>~$3,300</td><td>at hotel (¥492,500)</td></tr>
+      <tr><td>Food (Kyoto + Tokyo + general)</td><td>~$5,500</td><td>many meals already included in lodging</td></tr>
+      <tr><td>Souvenirs</td><td>~$1,000</td><td></td></tr>
+      <tr><td>Transportation</td><td>~$1,300</td><td>Shinkansen/ltd exp + local</td></tr>
+      <tr><td>Admissions</td><td>~$1,100</td><td>teamLab ×2, Shibuya Sky, Ghibli, USJ, temples</td></tr>
+      <tr><td>Travel/medical insurance <span class="tag">new</span></td><td>~$300</td><td>3 wks, incl. hiking</td></tr>
+      <tr><td>eSIM / pocket Wi-Fi <span class="tag">new</span></td><td>~$40</td><td></td></tr>
+    </table>
+    </div>
+
+    <div class="banner warn" style="margin-top:16px;">⚠️ <strong>Cash-flow watch:</strong> ~$13k of the remaining spend hits <strong>at hotel checkouts in yen</strong> (Park Hyatt + Itō) — make sure card limits + FX headroom can absorb it. Projected all-in ≈ <strong>$41,000</strong>, leaving ~$1,000 under the $42,000 budget.</div>
+  </section>
+
+  <!-- ITINERARY -->
+  <section id="itinerary">
+    <div class="card">
+    <h2 class="section-title"><span class="em">📅</span> Day-by-Day</h2>
+
+    <div class="leg tokyo">
+      <div class="leg-head">✈️ Tokyo arrival + ♨️ Izu</div>
+      <div class="leg-body">
+        <div class="day"><span class="date">Fri Oct 30</span>Fly DEN → NRT (depart 12:20 pm).</div>
+        <div class="day"><span class="date">Sat Oct 31</span>Land NRT 3:35 pm → Skyliner/N'EX to Ueno → check in <strong>Mitsui Garden Ueno</strong>. Easy first night (jet lag).
+          <ul class="fun"><li><strong>Fun (low-key):</strong> wander <strong>Ameyoko</strong> alley by the hotel — izakaya + standing bars (<em>tachinomi</em>). Or one stop to <strong>Asakusa</strong>: <strong>Sensō-ji lit up at night</strong> + <strong>Hoppy Street</strong> izakaya; the Asakusa Culture Center free rooftop (to 10 pm) has Skytree views.</li></ul>
+          <p class="prep">Prep: bring cash — these bars are cash-first.</p>
+        </div>
+        <div class="day"><span class="date">Sun Nov 1</span>Odoriko ltd. exp. → <strong>Itō</strong> (Izu). Check in <strong>Itō Ryokuyu</strong> for 5 nights — onsen + kaiseki. (Nov ~13–18 °C.)</div>
+        <div class="day"><span class="date">Nov 2–5</span>Izu Peninsula — an onsen-and-relax stretch.
+          <ul class="fun">
+            <li><strong>Jōgasaki Coast</strong> — Kadowaki lighthouse + suspension bridge over the rocky shore.</li>
+            <li><strong>Mt. Ōmuro</strong> — chairlift up a grassy volcanic cone for 360° crater views.</li>
+            <li><strong>Izu Shaboten Zoo</strong> — 🦫 <strong>capybaras bathing in an onsen</strong> (seasonal, usually starts late Nov).</li>
+            <li><strong>Atami Plum Garden</strong> — autumn-foliage festival mid-Nov–early Dec.</li>
+            <li><strong>Shuzenji</strong> — riverside onsen town + bamboo grove.</li>
+            <li>Weather permitting: surf/snorkel/kayak at <strong>Shimoda</strong>.</li>
+          </ul>
+          <p class="prep">Prep: check capybara-onsen start date + Ōmuro chairlift hours; walking shoes for Jōgasaki.</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="leg yoko">
+      <div class="leg-head">🌃 Yokohama + 🎋 Kamakura</div>
+      <div class="leg-body">
+        <div class="day"><span class="date">Thu Nov 6</span>Train → <strong>Yokohama</strong>. Check in <strong>Mitsui Garden Yokohama Minato Mirai</strong>.
+          <ul class="fun">
+            <li><strong>Cup Noodles Museum</strong> — design your own cup (¥500); hands-on Chicken Ramen Factory workshop.</li>
+            <li><strong>Yokohama Air Cabin</strong> gondola + <strong>Cosmo World</strong> Ferris wheel — great at night.</li>
+            <li><strong>Sankeien Garden</strong> — historic buildings + autumn foliage.</li>
+            <li><strong>Chinatown</strong> for dinner; Minato Mirai waterfront; live jazz (Bar Bar Bar / Jazz Bar Venus); hotel sky pool.</li>
+          </ul>
+          <p class="prep">Prep: reserve the Chicken Ramen Factory workshop online in advance if wanted.</p>
+        </div>
+        <div class="day"><span class="date">Fri Nov 7</span><strong>Day trip — Kamakura:</strong> Great Buddha (Kōtoku-in), <strong>Hase-dera</strong> + sea views, <strong>Hōkoku-ji bamboo grove</strong> (matcha in the garden), <strong>Daibutsu Hiking Course</strong>, street food on <strong>Komachi-dōri</strong>, then <strong>Enoden</strong> → <strong>Enoshima</strong> for sunset. <span class="note-inline">Alt: Hakone — onsen with Mt. Fuji views.</span>
+          <p class="prep">Prep: cash + comfy shoes; Enoden gets crowded — go earlier.</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="leg osaka">
+      <div class="leg-head">🍜 Osaka</div>
+      <div class="leg-body">
+        <div class="day"><span class="date">Sat Nov 8</span>Shinkansen → <strong>Osaka</strong>. Check in <strong>Royal Park Canvas Osaka Kitahama</strong> (2 nights).
+          <ul class="fun">
+            <li><strong>Dōtonbori</strong> at night — neon, Glico sign, street food (takoyaki, kushikatsu).</li>
+            <li><strong>Kuromon Ichiba Market</strong> — food-stall grazing.</li>
+            <li><strong>Umeda Sky Building</strong> — Floating Garden rooftop at sunset.</li>
+            <li><strong>Osaka Castle</strong> + Nishinomaru garden; Shinsekai / Tsūtenkaku; <strong>teamLab Botanical Garden</strong> (night).</li>
+          </ul>
+        </div>
+        <div class="day"><span class="date">Sun Nov 9</span>Osaka. Optional: <strong>Universal Studios Japan</strong> (Super Nintendo World). Pack daypacks for the trek; main bags stay packed for the shuttle.
+          <p class="prep">Prep: buy teamLab timed tickets ahead; if doing USJ, buy park tickets + Express Pass well in advance.</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="leg kumano">
+      <div class="leg-head">🥾 Kumano Kodo Trek — CONFIRMED (DP200503, self-guided, ¥316,000)</div>
+      <div class="leg-body">
+        <p class="note-inline">Luggage shuttle (Hikyaku Maruo, 2 pieces) relays your suitcases town-to-town daily — hike with daypacks only. <strong>Print the voucher from your Kumano Travel MyPage.</strong></p>
+        <div class="day"><span class="date">Mon Nov 10</span>Checkout Osaka → Kuroshio to <strong>Kii-Tanabe (arr. 11:22 am)</strong> → hand 2 bags to the shuttle at Tanabe Tourist Info → bus to <strong>Takijiri-ōji</strong> → hike to <strong>Takahara</strong>. Pickup at Takahara rest area → <strong>Kominka Guest House Noko Noko</strong> (dinner + breakfast + lunch box). <span class="note-inline">Tight daylight — move promptly.</span></div>
+        <div class="day"><span class="date">Tue Nov 11</span>Hike <strong>Takahara → Chikatsuyu</strong>. <strong>Guest House Hiyodori</strong> (dinner + breakfast + lunch box).</div>
+        <div class="day"><span class="date">Wed Nov 12</span>Hike/bus <strong>Chikatsuyu → Hongū</strong>. See <strong>Kumano Hongū Taisha</strong> + <strong>Ōyunohara</strong> (Japan's tallest torii, ~34 m). <strong>Minshuku Yunosato, Yunomine Onsen</strong> — dinner + breakfast + <strong>onsen night</strong>.
+          <ul class="fun"><li><strong>Fun:</strong> book a private slot in <strong>Tsuboyu</strong>, the tiny World-Heritage riverside bath.</li></ul>
+          <p class="prep">Prep: small cash for the Tsuboyu ticket.</p>
+        </div>
+        <div class="day"><span class="date">Thu Nov 13</span>Hike <strong>Hongū → Koguchi</strong> (Kogumotori-goe). <strong>@koguchi</strong> (dinner + breakfast + lunch box; BOND bento delivered).</div>
+        <div class="day"><span class="date">Fri Nov 14</span>Hike <strong>Koguchi → Nachi</strong> (Ogumotori-goe, ~14 km — the hardest stage; <strong>start at first light</strong>). Finish at <strong>Kumano Nachi Taisha</strong> + <strong>Nachi Falls with Seiganto-ji's vermillion pagoda</strong>. <strong>Hotel Urashima, Kii-Katsuura</strong> — soak in <strong>Bōki-dō</strong>, its seaside cave onsen.</div>
+        <div class="day"><span class="date">Sat Nov 15</span>From Kii-Katsuura/Shingū (visit <strong>Kumano Hayatama Taisha</strong> to complete the <em>Kumano Sanzan</em>), long coastal train → <strong>Kyoto</strong> (carry your bags).</div>
+      </div>
+    </div>
+
+    <div class="leg kyoto">
+      <div class="leg-head">🍁 Kyoto + 🦌 Nara + ⛩️ Ise</div>
+      <div class="leg-body">
+        <div class="banner warn" style="margin:10px 0;">🍁 <strong>Foliage timing:</strong> peak is forecast <strong>Nov 25 – Dec 7</strong>, so Nov 15–19 colors will be <em>just turning</em>. The famous <strong>Kiyomizu-dera night illumination starts Nov 22</strong> — after you leave. <strong>Kōdai-ji</strong> (5-min walk from Park Hyatt) and <strong>Eikandō</strong> run mid-Nov light-ups that may already be on — verify and grab an evening.</div>
+        <div class="day"><span class="date">Sat Nov 15</span>Check in <strong>Park Hyatt Kyoto</strong> (4 nights). Easy evening in <strong>Higashiyama</strong>: Kōdai-ji, Ninen-zaka/Sannen-zaka lanes, <strong>Yasaka Pagoda</strong> at dusk.</div>
+        <div class="day"><span class="date">Sun Nov 16</span>Kyoto highlights (go early): <strong>Fushimi Inari</strong> at dawn, <strong>Kiyomizu-dera</strong> (day), <strong>Kinkaku-ji</strong>, <strong>Arashiyama</strong> bamboo grove, <strong>Nishiki Market</strong>, <strong>Gion / Pontochō</strong> in the evening.
+          <p class="prep">Prep/fun: book a tea ceremony; consider Nijō-jō early morning.</p>
+        </div>
+        <div class="day"><span class="date">Mon Nov 17</span><strong>Nara day trip</strong> (Kintetsu): <strong>Tōdai-ji</strong> Great Buddha (opens 8 am), <strong>Nara-kōen deer</strong> (buy <em>shika-senbei</em>), <strong>Kasuga Taisha</strong> lantern shrine, Isuien/Yoshikien gardens, lunch in <strong>Naramachi</strong>.
+          <p class="prep">Prep: cash for deer crackers.</p>
+        </div>
+        <div class="day"><span class="date">Tue Nov 18</span><strong>Ise day trip</strong> (Kintetsu ltd. exp., ~2 hr each way): <strong>Ise-Jingū</strong> (Naikū), then graze <strong>Okage Yokochō / Oharaimachi</strong> (Ise udon, Akafuku mochi), finish at 💍 <strong>Meoto Iwa (Wedded Rocks)</strong> at Futami.
+          <p class="prep">Prep: reserve a Kintetsu limited-express seat.</p>
+        </div>
+        <div class="day"><span class="date">Wed Nov 19</span>Shinkansen Kyoto → <strong>Tokyo</strong>. Check in <strong>JR Kyushu Hotel Blossom Shinjuku</strong> (3 nights).</div>
+      </div>
+    </div>
+
+    <div class="leg tokyo">
+      <div class="leg-head">🗼 Tokyo finale</div>
+      <div class="leg-body">
+        <div class="day"><span class="date">Thu Nov 20</span>Tokyo. <strong>teamLab Planets</strong> (book ahead — sells out), <strong>Shibuya Sky</strong> rooftop at sunset, plus <strong>Sensō-ji</strong>, <strong>Tokyo Skytree</strong>, <strong>Ueno</strong> museums, <strong>Ginza</strong>, and the <strong>Ghibli Museum</strong> (tickets released Oct 10 — see checklist).</div>
+        <div class="day"><span class="date">Fri Nov 21</span>Tokyo. Shinjuku near your hotel: <strong>Omoide Yokocho</strong> (yakitori alley) + <strong>Golden Gai</strong> (280 tiny bars), <strong>Shinjuku Gyoen</strong> foliage, sunset from the free <strong>Metropolitan Gov't observation deck</strong>, sushi omakase.
+          <p class="prep">Prep: cash for Golden Gai (some bars have cover charges).</p>
+        </div>
+        <div class="day"><span class="date">Sat Nov 22</span>Checkout by 11 am → N'EX to NRT (leave Shinjuku by ~1 pm) → fly <strong>NRT → DEN</strong> (depart 5:40 pm). 🙂</div>
+      </div>
+    </div>
+
+    <p class="note-inline" style="margin-top:14px;">Removed: sumo at Ryōgoku — the November Grand Sumo tournament is in <strong>Fukuoka</strong>, not Tokyo, so it isn't feasible on this trip.</p>
+    </div>
+  </section>
+
+  <!-- CHECKLIST -->
+  <section id="checklist" class="card">
+    <h2 class="section-title"><span class="em">✅</span> Pre-Trip Checklist</h2>
+    <p class="progress-line" id="chkProgress">0 of 0 done</p>
+
+    <div class="chk-group">
+      <h3>⏰ Do now — time-sensitive</h3>
+      <label class="chk"><input type="checkbox" data-checklist-id="ghibli-tickets" data-category="time-sensitive"><span class="txt"><strong>Ghibli Museum tickets</strong> — released Oct 10, 10 am JST (Lawson); sell out fast. <span class="tag">Oct 10</span></span></label>
+      <label class="chk"><input type="checkbox" data-checklist-id="teamlab-planets" data-category="time-sensitive"><span class="txt"><strong>teamLab Planets (Tokyo)</strong> — timed tickets sell out 1–2 wks ahead; book for Nov 20.</span></label>
+      <label class="chk"><input type="checkbox" data-checklist-id="shibuya-sky" data-category="time-sensitive"><span class="txt"><strong>Shibuya Sky</strong> — reserve a timed sunset slot for Nov 20.</span></label>
+      <label class="chk"><input type="checkbox" data-checklist-id="teamlab-osaka" data-category="time-sensitive"><span class="txt"><strong>teamLab Botanical Garden (Osaka)</strong> — timed tickets for Nov 8/9.</span></label>
+      <label class="chk"><input type="checkbox" data-checklist-id="restaurant-reservations" data-category="time-sensitive"><span class="txt"><strong>Restaurant reservations</strong> — Kyoto kaiseki / Tokyo omakase / invite-only, open 1–3 mo out.</span></label>
+      <label class="chk"><input type="checkbox" data-checklist-id="kyoto-tea-ceremony" data-category="time-sensitive"><span class="txt"><strong>Kyoto tea ceremony</strong> — reserve a session.</span></label>
+      <label class="chk"><input type="checkbox" data-checklist-id="cup-noodles-workshop" data-category="time-sensitive"><span class="txt"><strong>Cup Noodles Museum</strong> — reserve Chicken Ramen Factory workshop (Nov 6) if wanted.</span></label>
+      <label class="chk"><input type="checkbox" data-checklist-id="verify-kyoto-lightups" data-category="time-sensitive"><span class="txt"><strong>Verify Kyoto light-up dates</strong> (Kōdai-ji / Eikandō) cover Nov 15–19.</span></label>
+      <label class="chk"><input type="checkbox" data-checklist-id="transport-passes-seats" data-category="time-sensitive"><span class="txt"><strong>Transport</strong> — decide passes &amp; reserve seats: Shinkansen (Nov 8, 19) + Kuroshio (Nov 10, 15) + Kintetsu to Ise (Nov 18).</span></label>
+      <label class="chk"><input type="checkbox" data-checklist-id="print-kumano-voucher" data-category="time-sensitive"><span class="txt"><strong>Print Kumano Travel voucher</strong> from MyPage.</span></label>
+    </div>
+
+    <div class="chk-group">
+      <h3>🛂 Documents &amp; health</h3>
+      <label class="chk"><input type="checkbox" data-checklist-id="passport-validity" data-category="documents"><span class="txt">Passports valid <strong>6 months past Nov 22</strong> (both travelers).</span></label>
+      <label class="chk"><input type="checkbox" data-checklist-id="visit-japan-web" data-category="documents"><span class="txt"><strong>Visit Japan Web</strong> — pre-register both for immigration/customs QR.</span></label>
+      <label class="chk"><input type="checkbox" data-checklist-id="medication-check" data-category="documents"><span class="txt"><strong>Medication check</strong> — Adderall/Vyvanse &amp; pseudoephedrine restricted; may need a <strong>Yakkan Shōmei</strong>. Bring 23 days of prescriptions + motion-sickness pills.</span></label>
+      <label class="chk"><input type="checkbox" data-checklist-id="travel-insurance" data-category="documents"><span class="txt"><strong>Travel medical/evacuation insurance</strong> — confirm purchased &amp; covers hiking.</span></label>
+    </div>
+
+    <div class="chk-group">
+      <h3>💴 Money &amp; connectivity</h3>
+      <label class="chk"><input type="checkbox" data-checklist-id="esim-wifi" data-category="money"><span class="txt"><strong>eSIM / pocket Wi-Fi</strong> + download offline maps (trail signal is patchy).</span></label>
+      <label class="chk"><input type="checkbox" data-checklist-id="trail-cash" data-category="money"><span class="txt"><strong>Cash for the trail</strong> — withdraw before leaving Tanabe (7-Eleven / Japan Post ATMs).</span></label>
+      <label class="chk"><input type="checkbox" data-checklist-id="no-fx-cards" data-category="money"><span class="txt">Confirm cards have <strong>no foreign-transaction fees</strong>; notify banks.</span></label>
+      <label class="chk"><input type="checkbox" data-checklist-id="ito-credit-check" data-category="money"><span class="txt">Confirm <strong>Itō Ryokuyu (¥492,500 pay-at-hotel)</strong> takes credit at checkout.</span></label>
+      <label class="chk"><input type="checkbox" data-checklist-id="park-hyatt-cancel-date" data-category="money"><span class="txt">Note: <strong>Park Hyatt free-cancellation ends ~Oct 16</strong> (then forfeit 1 night).</span></label>
+    </div>
+
+    <div class="chk-group">
+      <h3>🎒 Packing (beyond the basics)</h3>
+      <label class="chk"><input type="checkbox" data-checklist-id="packing-hiking-gear" data-category="packing"><span class="txt">Broken-in <strong>hiking boots</strong>, <strong>headlamp</strong> (short daylight), poles, rain shell, quick-dry layers, blister kit.</span></label>
+      <label class="chk"><input type="checkbox" data-checklist-id="packing-battery-adapter" data-category="packing"><span class="txt">Portable battery + chargers (Japan = Type-A, 100V — US plugs fit).</span></label>
+      <label class="chk"><input type="checkbox" data-checklist-id="packing-copies" data-category="packing"><span class="txt">Printed/offline copies of all reservations + passport photocopies.</span></label>
+    </div>
+
+    <div class="chk-group">
+      <h3>🏠 Home (23 days away)</h3>
+      <label class="chk"><input type="checkbox" data-checklist-id="home-logistics" data-category="home"><span class="txt">Mail hold, home/pet/plant care, autopay/bills, thermostat.</span></label>
+    </div>
+  </section>
+
+  <!-- NOTES -->
+  <section id="notes" class="card">
+    <h2 class="section-title"><span class="em">📝</span> Stale notes to fix in the "To Japan!" doc</h2>
+    <ul class="clean">
+      <li><strong>Kyoto tab</strong> still says "Asai Kyoto" → real booking is <strong>Park Hyatt Kyoto</strong>.</li>
+      <li><strong>Overview end date</strong> says Nov 21 → return flight is <strong>Nov 22</strong>.</li>
+      <li><strong>Flight details table</strong> is blank → add the ANA/United details.</li>
+      <li><strong>Action items</strong> ("Book Kumano / Kyoto / other hotels — not started") → all <strong>booked</strong>.</li>
+      <li><strong>"Kumano Kodo Booking" tab</strong> (Nov 9 start) → superseded by confirmed DP200503 (Nov 10 start).</li>
+      <li><strong>"Store luggage at Tanabe" note</strong> → N/A for a through-hike; the shuttle handles bags.</li>
+    </ul>
+  </section>
+
+</main>
+
+<div class="footer">
+  Made for Thomas &amp; Alison · Japan, Autumn 2026 🍁 · Every booking cross-checked against confirmation emails.
+</div>
+
+<script>
+/* =========================================================================
+   Checklist state handling
+   -------------------------------------------------------------------------
+   TEMPORARY: state is persisted to localStorage so the checkboxes work today.
+   LATER: replace the body of loadState() and saveState() with calls to your
+   existing database. Each checkbox exposes a stable key via
+   `data-checklist-id` (and a `data-category`). The single integration point
+   is persistCheckbox(id, checked, category) below.
+   ========================================================================= */
+(function () {
+  var STORAGE_KEY = 'japan2026-checklist';
+  var boxes = Array.prototype.slice.call(document.querySelectorAll('input[type="checkbox"][data-checklist-id]'));
+
+  function loadState() {
+    // TODO(db): fetch saved checkbox states from the database and return
+    //           an object like { "ghibli-tickets": true, ... }
+    try { return JSON.parse(localStorage.getItem(STORAGE_KEY)) || {}; }
+    catch (e) { return {}; }
+  }
+
+  function persistCheckbox(id, checked, category) {
+    // TODO(db): write { id, checked, category } to the database here.
+    var state = loadState();
+    state[id] = checked;
+    try { localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); } catch (e) {}
+  }
+
+  function updateProgress() {
+    var done = boxes.filter(function (b) { return b.checked; }).length;
+    document.getElementById('chkProgress').textContent =
+      done + ' of ' + boxes.length + ' done' + (done === boxes.length && boxes.length ? '  🎉' : '');
+  }
+
+  var saved = loadState();
+  boxes.forEach(function (b) {
+    var id = b.getAttribute('data-checklist-id');
+    if (saved[id]) b.checked = true;
+    b.addEventListener('change', function () {
+      persistCheckbox(id, b.checked, b.getAttribute('data-category'));
+      updateProgress();
+    });
+  });
+  updateProgress();
+})();
+</script>
+
+</body>
+</html>

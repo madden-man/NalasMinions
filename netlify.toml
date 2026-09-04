@@ -34,6 +34,14 @@
   to = "/.netlify/functions/api/:splat"
   status = 200
 
+# Standalone Japan itinerary — a self-contained static page (public/japan.html),
+# unrelated to the React app. Served at the clean /japan URL. Listed before the
+# SPA fallback so the app doesn't claim the route.
+[[redirects]]
+  from = "/japan"
+  to = "/japan.html"
+  status = 200
+
 # SPA fallback: serve index.html for any non-file, non-API path.
 [[redirects]]
   from = "/*"
