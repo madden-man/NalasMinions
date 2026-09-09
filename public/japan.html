@@ -141,6 +141,28 @@
   .prep{font-size:.85rem;color:var(--muted);font-style:italic;margin:4px 0 0;background:#f7f1e7;border-radius:8px;padding:6px 10px;display:inline-block;}
   .note-inline{font-size:.85rem;color:var(--muted);font-style:italic;}
 
+  /* Weather + what-to-wear strip (top of each leg) */
+  .wx{
+    display:grid;grid-template-columns:minmax(180px,290px) 1fr;gap:10px 22px;align-items:start;
+    background:#f3f6fb;border:1px solid #d9e3f0;border-radius:10px;padding:12px 14px;margin:12px 0 4px;font-size:.88rem;
+  }
+  .wx .temps{display:flex;flex-direction:column;gap:6px;}
+  .wx .where{font-size:.72rem;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:var(--indigo);}
+  .wx .t{display:flex;align-items:baseline;gap:7px;line-height:1.2;}
+  .wx .t .lbl{font-size:.7rem;text-transform:uppercase;letter-spacing:.5px;color:var(--muted);min-width:34px;}
+  .wx .t .val{font-family:'Shippori Mincho',serif;font-weight:800;font-size:1.15rem;color:var(--indigo-deep);}
+  .wx .t .c{font-size:.78rem;color:var(--muted);}
+  .wx .sky{font-size:.8rem;color:var(--muted);font-style:italic;margin-top:2px;}
+  .wx .temps + .temps{margin-top:6px;padding-top:8px;border-top:1px dashed #d9e3f0;}
+  .wx .wear-title{font-size:.72rem;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:var(--vermillion);margin-bottom:4px;}
+  .wx .wear ul{margin:0;padding-left:18px;}
+  .wx .wear li{margin:3px 0;}
+  .wx .wear strong{color:var(--indigo-deep);}
+  @media(max-width:640px){
+    .wx{grid-template-columns:1fr;padding:10px 12px;font-size:.84rem;}
+    .wx .t .val{font-size:1.05rem;}
+  }
+
   /* Checklist */
   .progress-line{font-weight:600;color:var(--indigo);margin:2px 0 14px;}
   .chk-group{margin:16px 0;}
@@ -160,6 +182,14 @@
   .chk input:checked ~ .txt{text-decoration:line-through;color:var(--muted);}
   .tag{display:inline-block;font-size:.68rem;font-weight:700;text-transform:uppercase;letter-spacing:.4px;
     background:var(--vermillion);color:#fff;padding:1px 7px;border-radius:999px;margin-left:6px;vertical-align:middle;}
+
+  /* Packing list */
+  .pack{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:14px;margin-top:12px;}
+  .pack-group{background:var(--cream);border:1px solid var(--line);border-radius:12px;padding:12px 14px;}
+  .pack-group h3{font-size:.95rem;color:var(--indigo);margin:0 0 6px;}
+  .pack-group ul{margin:0;padding-left:18px;font-size:.88rem;}
+  .pack-group li{margin:3px 0;}
+  .pack-group li strong{color:var(--indigo-deep);}
 
   ul.clean{margin:8px 0;padding-left:20px;}
   ul.clean li{margin:5px 0;}
@@ -224,6 +254,7 @@
     <a href="#transit">🚆 Transit</a>
     <a href="#budget">💰 Budget</a>
     <a href="#itinerary">📅 Day-by-Day</a>
+    <a href="#packing">🎒 Packing</a>
     <a href="#checklist">✅ Checklist</a>
     <a href="#notes">📝 Doc Fixes</a>
   </div>
@@ -342,12 +373,38 @@
     <div class="leg tokyo">
       <div class="leg-head">✈️ Tokyo arrival + ♨️ Izu</div>
       <div class="leg-body">
+        <div class="wx">
+          <div>
+          <div class="temps">
+            <div class="where">Tokyo · Oct 31</div>
+            <div class="t"><span class="lbl">High</span><span class="val">66°F</span><span class="c">19 °C</span></div>
+            <div class="t"><span class="lbl">Low</span><span class="val">54°F</span><span class="c">12 °C</span></div>
+            
+          </div>
+          <div class="temps">
+            <div class="where">Itō / Izu coast · Nov 1–6</div>
+            <div class="t"><span class="lbl">High</span><span class="val">66°F</span><span class="c">19 °C</span></div>
+            <div class="t"><span class="lbl">Low</span><span class="val">55°F</span><span class="c">13 °C</span></div>
+            <div class="sky">Mild and often sunny; the ocean keeps nights soft. Budget for one wet day from a passing front.</div>
+          </div>
+          </div>
+          <div class="wear">
+            <div class="wear-title">👕 What to wear</div>
+            <ul>
+              <li><strong>Days:</strong> long-sleeve tee or light shirt + a light jacket or cardigan. Jeans/chinos are fine.</li>
+              <li><strong>Evenings:</strong> add a fleece or sweater for Ameyoko / Asakusa and the coast after dark.</li>
+              <li><strong>Izu outings:</strong> windbreaker for the Ōmuro chairlift and Jōgasaki cliffs (breezy), walking shoes.</li>
+              <li><strong>Ryokan:</strong> yukata + slippers provided; swimsuit only if Shimoda water play is on (sea ~70°F, wetsuit for surfing).</li>
+              <li>Compact umbrella.</li>
+            </ul>
+          </div>
+        </div>
         <div class="day"><span class="date">Fri Oct 30</span>Fly DEN → NRT (depart 12:20 pm).</div>
         <div class="day"><span class="date">Sat Oct 31</span>Land NRT 3:35 pm → Skyliner/N'EX to Ueno → check in <strong>Mitsui Garden Ueno</strong>. Easy first night (jet lag).
           <ul class="fun"><li><strong>Fun (low-key):</strong> wander <strong>Ameyoko</strong> alley by the hotel — izakaya + standing bars (<em>tachinomi</em>). Or one stop to <strong>Asakusa</strong>: <strong>Sensō-ji lit up at night</strong> + <strong>Hoppy Street</strong> izakaya; the Asakusa Culture Center free rooftop (to 10 pm) has Skytree views.</li></ul>
           <p class="prep">Prep: bring cash — these bars are cash-first.</p>
         </div>
-        <div class="day"><span class="date">Sun Nov 1</span>Odoriko ltd. exp. → <strong>Itō</strong> (Izu). Check in <strong>Itō Ryokuyu</strong> for 5 nights — onsen + kaiseki. (Nov ~13–18 °C.)</div>
+        <div class="day"><span class="date">Sun Nov 1</span>Odoriko ltd. exp. → <strong>Itō</strong> (Izu). Check in <strong>Itō Ryokuyu</strong> for 5 nights — onsen + kaiseki.</div>
         <div class="day"><span class="date">Nov 2–5</span>Izu Peninsula — an onsen-and-relax stretch.
           <ul class="fun">
             <li><strong>Jōgasaki Coast</strong> — Kadowaki lighthouse + suspension bridge over the rocky shore.</li>
@@ -365,6 +422,25 @@
     <div class="leg yoko">
       <div class="leg-head">🌃 Yokohama + 🎋 Kamakura</div>
       <div class="leg-body">
+        <div class="wx">
+          <div>
+          <div class="temps">
+            <div class="where">Yokohama · Kamakura · Nov 6–8</div>
+            <div class="t"><span class="lbl">High</span><span class="val">64°F</span><span class="c">18 °C</span></div>
+            <div class="t"><span class="lbl">Low</span><span class="val">52°F</span><span class="c">11 °C</span></div>
+            <div class="sky">Pleasant days; the waterfront and Enoshima feel several degrees cooler in the wind once the sun drops (~4:40 pm).</div>
+          </div>
+          </div>
+          <div class="wear">
+            <div class="wear-title">👕 What to wear</div>
+            <ul>
+              <li><strong>Days:</strong> same light layers as Izu; shed to a long sleeve by midday on the Kamakura hiking course.</li>
+              <li><strong>Nights:</strong> a real jacket for the Air Cabin / Ferris wheel and the Enoshima sunset.</li>
+              <li>Sneakers with grip for the Daibutsu trail (dirt, some roots). Swimsuit for the hotel sky pool.</li>
+              <li>Socks you don't mind showing: shoes come off at Hase-dera and Hōkoku-ji tea room.</li>
+            </ul>
+          </div>
+        </div>
         <div class="day"><span class="date">Thu Nov 6</span>Train → <strong>Yokohama</strong>. Check in <strong>Mitsui Garden Yokohama Minato Mirai</strong>.
           <ul class="fun">
             <li><strong>Cup Noodles Museum</strong> — design your own cup (¥500); hands-on Chicken Ramen Factory workshop.</li>
@@ -383,6 +459,25 @@
     <div class="leg osaka">
       <div class="leg-head">🍜 Osaka</div>
       <div class="leg-body">
+        <div class="wx">
+          <div>
+          <div class="temps">
+            <div class="where">Osaka · Nov 8–10</div>
+            <div class="t"><span class="lbl">High</span><span class="val">65°F</span><span class="c">18 °C</span></div>
+            <div class="t"><span class="lbl">Low</span><span class="val">50°F</span><span class="c">10 °C</span></div>
+            <div class="sky">Typically a dry, sunny stretch; nights are noticeably cooler than Izu.</div>
+          </div>
+          </div>
+          <div class="wear">
+            <div class="wear-title">👕 What to wear</div>
+            <ul>
+              <li><strong>Days:</strong> light jacket over a tee; Dōtonbori and Kuromon are warm from the crowds and grills.</li>
+              <li><strong>Rooftops:</strong> the Umeda Sky Building deck is open-air and windy at sunset: bring the fleece.</li>
+              <li><strong>USJ (if going):</strong> comfortable shoes and layers you can peel off while queuing outdoors all day.</li>
+              <li><strong>Nov 9:</strong> lay out trek clothes; everything else goes in the bags for the shuttle.</li>
+            </ul>
+          </div>
+        </div>
         <div class="day"><span class="date">Sat Nov 8</span>Shinkansen → <strong>Osaka</strong>. Check in <strong>Royal Park Canvas Osaka Kitahama</strong> (2 nights).
           <ul class="fun">
             <li><strong>Dōtonbori</strong> at night — neon, Glico sign, street food (takoyaki, kushikatsu).</li>
@@ -401,6 +496,33 @@
       <div class="leg-head">🥾 Kumano Kodo Trek — CONFIRMED (DP200503, self-guided, ¥316,000)</div>
       <div class="leg-body">
         <p class="note-inline">Luggage shuttle (Hikyaku Maruo, 2 pieces) relays your suitcases town-to-town daily — hike with daypacks only. <strong>Print the voucher from your Kumano Travel MyPage.</strong></p>
+        <div class="wx">
+          <div>
+          <div class="temps">
+            <div class="where">Coast · Tanabe / Kii-Katsuura</div>
+            <div class="t"><span class="lbl">High</span><span class="val">64°F</span><span class="c">18 °C</span></div>
+            <div class="t"><span class="lbl">Low</span><span class="val">50°F</span><span class="c">10 °C</span></div>
+            
+          </div>
+          <div class="temps">
+            <div class="where">Trail villages · Takahara → Koguchi (300–800 m)</div>
+            <div class="t"><span class="lbl">High</span><span class="val">58°F</span><span class="c">14 °C</span></div>
+            <div class="t"><span class="lbl">Low</span><span class="val">43°F</span><span class="c">6 °C</span></div>
+            <div class="sky">Dawn starts can dip toward 37–40°F (3–4 °C); the passes are cooler still. The Kii Peninsula is Japan's wettest region, and though November is its drier season, plan on at least one rainy stage. Shaded, humid trail: you sweat on the climbs and chill fast at stops.</div>
+          </div>
+          </div>
+          <div class="wear">
+            <div class="wear-title">👕 What to wear</div>
+            <ul>
+              <li><strong>Layering system:</strong> wicking base layer → fleece or light puffy → waterproof/breathable shell (rain and wind). No cotton.</li>
+              <li><strong>Legs &amp; feet:</strong> hiking pants (not shorts: mud, branches), wool socks, broken-in boots, gaiters optional.</li>
+              <li><strong>Dawn starts (esp. Nov 14):</strong> beanie + light gloves + headlamp; stash them once the sun is up.</li>
+              <li><strong>Rain:</strong> pack cover or dry bag for the daypack; spare socks.</li>
+              <li><strong>Evenings:</strong> minshuku are casual and lend yukata, but old wooden houses get cold: warm sleep layer + thick socks.</li>
+              <li><strong>Onsen (Yunomine, Tsuboyu, Bōki-dō):</strong> no swimsuit; bring a small towel.</li>
+            </ul>
+          </div>
+        </div>
         <div class="day"><span class="date">Mon Nov 10</span>Checkout Osaka → Kuroshio to <strong>Kii-Tanabe (arr. 11:22 am)</strong> → hand 2 bags to the shuttle at Tanabe Tourist Info → bus to <strong>Takijiri-ōji</strong> → hike to <strong>Takahara</strong>. Pickup at Takahara rest area → <strong>Kominka Guest House Noko Noko</strong> (dinner + breakfast + lunch box). <span class="note-inline">Tight daylight — move promptly.</span></div>
         <div class="day"><span class="date">Tue Nov 11</span>Hike <strong>Takahara → Chikatsuyu</strong>. <strong>Guest House Hiyodori</strong> (dinner + breakfast + lunch box).</div>
         <div class="day"><span class="date">Wed Nov 12</span>Hike/bus <strong>Chikatsuyu → Hongū</strong>. See <strong>Kumano Hongū Taisha</strong> + <strong>Ōyunohara</strong> (Japan's tallest torii, ~34 m). <strong>Minshuku Yunosato, Yunomine Onsen</strong> — dinner + breakfast + <strong>onsen night</strong>.
@@ -416,6 +538,32 @@
     <div class="leg kyoto">
       <div class="leg-head">🍁 Kyoto + 🦌 Nara + ⛩️ Ise</div>
       <div class="leg-body">
+        <div class="wx">
+          <div>
+          <div class="temps">
+            <div class="where">Kyoto · Nov 15–19</div>
+            <div class="t"><span class="lbl">High</span><span class="val">61°F</span><span class="c">16 °C</span></div>
+            <div class="t"><span class="lbl">Low</span><span class="val">46°F</span><span class="c">8 °C</span></div>
+            
+          </div>
+          <div class="temps">
+            <div class="where">Nara ~1° cooler · Ise ~1° milder</div>
+            <div class="t"><span class="lbl">High</span><span class="val">60°F</span><span class="c">16 °C</span></div>
+            <div class="t"><span class="lbl">Low</span><span class="val">45°F</span><span class="c">7 °C</span></div>
+            <div class="sky">Kyoto sits in a basin: crisp, often clear mornings (Fushimi Inari at dawn ≈ 45°F) that warm nicely by lunch. Mostly dry. Meoto Iwa is windy at the shore.</div>
+          </div>
+          </div>
+          <div class="wear">
+            <div class="wear-title">👕 What to wear</div>
+            <ul>
+              <li><strong>Proper fall wardrobe:</strong> sweater or fleece + a medium jacket or wool coat, scarf. Not overkill for dawn temples and evening light-ups.</li>
+              <li><strong>Midday:</strong> layer down to a long sleeve; 10–15 km walking days, so closed shoes with cushion for gravel and stairs.</li>
+              <li><strong>Nicer notch:</strong> one smart-casual outfit for Park Hyatt, kaiseki, and the tea ceremony (no dress code, but you'll want it).</li>
+              <li><strong>Socks matter:</strong> shoes come off at temples, the tea house, and Tōdai-ji halls. Hole-free, easy on/off shoes.</li>
+              <li><strong>Nara:</strong> deer are pushy; skip loose dangling bags with snacks.</li>
+            </ul>
+          </div>
+        </div>
         <div class="banner warn" style="margin:10px 0;">🍁 <strong>Foliage timing:</strong> peak is forecast <strong>Nov 25 – Dec 7</strong>, so Nov 15–19 colors will be <em>just turning</em>. The famous <strong>Kiyomizu-dera night illumination starts Nov 22</strong> — after you leave. <strong>Kōdai-ji</strong> (5-min walk from Park Hyatt) and <strong>Eikandō</strong> run mid-Nov light-ups that may already be on — verify and grab an evening.</div>
         <div class="day"><span class="date">Sat Nov 15</span>Check in <strong>Park Hyatt Kyoto</strong> (4 nights). Easy evening in <strong>Higashiyama</strong>: Kōdai-ji, Ninen-zaka/Sannen-zaka lanes, <strong>Yasaka Pagoda</strong> at dusk.</div>
         <div class="day"><span class="date">Sun Nov 16</span>Kyoto highlights (go early): <strong>Fushimi Inari</strong> at dawn, <strong>Kiyomizu-dera</strong> (day), <strong>Kinkaku-ji</strong>, <strong>Arashiyama</strong> bamboo grove, <strong>Nishiki Market</strong>, <strong>Gion / Pontochō</strong> in the evening.
@@ -434,6 +582,25 @@
     <div class="leg tokyo">
       <div class="leg-head">🗼 Tokyo finale</div>
       <div class="leg-body">
+        <div class="wx">
+          <div>
+          <div class="temps">
+            <div class="where">Tokyo · Nov 19–22</div>
+            <div class="t"><span class="lbl">High</span><span class="val">59°F</span><span class="c">15 °C</span></div>
+            <div class="t"><span class="lbl">Low</span><span class="val">46°F</span><span class="c">8 °C</span></div>
+            <div class="sky">Late November is Tokyo's clear, dry season. Sunset ~4:30 pm; the open-air Shibuya Sky deck is breezy and cold once the sun is gone.</div>
+          </div>
+          </div>
+          <div class="wear">
+            <div class="wear-title">👕 What to wear</div>
+            <ul>
+              <li><strong>Days:</strong> sweater + medium jacket or coat; long sleeves underneath for Shinjuku Gyoen and museums.</li>
+              <li><strong>Nights:</strong> Omoide Yokocho is open-air; Golden Gai bars are tiny and warm inside. Coat + scarf, easy to shed.</li>
+              <li><strong>teamLab Planets:</strong> you go barefoot through knee-deep water: wear pants that roll above the knee (they lend shorts and lockers).</li>
+              <li><strong>Flight home:</strong> comfy layers; the plane runs cold on the 10-hour hop.</li>
+            </ul>
+          </div>
+        </div>
         <div class="day"><span class="date">Thu Nov 20</span>Tokyo. <strong>teamLab Planets</strong> (book ahead — sells out), <strong>Shibuya Sky</strong> rooftop at sunset, plus <strong>Sensō-ji</strong>, <strong>Tokyo Skytree</strong>, <strong>Ueno</strong> museums, <strong>Ginza</strong>, and the <strong>Ghibli Museum</strong> (tickets released Oct 10 — see checklist).</div>
         <div class="day"><span class="date">Fri Nov 21</span>Tokyo. Shinjuku near your hotel: <strong>Omoide Yokocho</strong> (yakitori alley) + <strong>Golden Gai</strong> (280 tiny bars), <strong>Shinjuku Gyoen</strong> foliage, sunset from the free <strong>Metropolitan Gov't observation deck</strong>, sushi omakase.
           <p class="prep">Prep: cash for Golden Gai (some bars have cover charges).</p>
@@ -443,6 +610,79 @@
     </div>
 
     <p class="note-inline" style="margin-top:14px;">Removed: sumo at Ryōgoku — the November Grand Sumo tournament is in <strong>Fukuoka</strong>, not Tokyo, so it isn't feasible on this trip.</p>
+    </div>
+  </section>
+
+  <!-- PACKING -->
+  <section id="packing" class="card">
+    <h2 class="section-title"><span class="em">🎒</span> Must-Pack</h2>
+    <p class="subtle">Preliminary list of the non-negotiables. Clothing follows the per-leg "what to wear" strips above; everything else is easy to buy in Japan (Don Quijote, 7-Eleven, Uniqlo).</p>
+    <div class="pack">
+      <div class="pack-group">
+        <h3>🛂 Documents &amp; money</h3>
+        <ul>
+          <li><strong>Passports</strong> (+ photocopies, separate bag)</li>
+          <li>Visit Japan Web QR codes (screenshot)</li>
+          <li>Printed confirmations, incl. <strong>Kumano voucher</strong></li>
+          <li>2 no-FX-fee cards + a backup card</li>
+          <li>¥30–50k starting cash; small coin pouch</li>
+          <li>Travel insurance card / policy PDF</li>
+        </ul>
+      </div>
+      <div class="pack-group">
+        <h3>👕 Clothing core</h3>
+        <ul>
+          <li><strong>Medium jacket or wool coat</strong> (Kyoto, late Tokyo)</li>
+          <li>Rain shell (doubles as trek shell)</li>
+          <li>Fleece or light puffy; 2 sweaters</li>
+          <li>Long-sleeve tees ×4, tees ×3, jeans/chinos ×2</li>
+          <li>Scarf, beanie, light gloves</li>
+          <li>1 smart-casual outfit (Park Hyatt, kaiseki, tea ceremony)</li>
+          <li><strong>Comfortable walking shoes</strong>, easy on/off; hole-free socks ×8</li>
+          <li>Swimsuits (Yokohama sky pool; Shimoda if on)</li>
+        </ul>
+      </div>
+      <div class="pack-group">
+        <h3>🥾 Kumano trek kit</h3>
+        <ul>
+          <li><strong>Broken-in boots</strong> + wool socks ×3</li>
+          <li>Wicking base layers ×2, hiking pants</li>
+          <li>Daypacks ×2 with rain covers</li>
+          <li><strong>Headlamp</strong>, poles, blister kit</li>
+          <li>Water bottles, electrolyte tabs, trail snacks</li>
+          <li>Small onsen towel, dry bag for phone</li>
+        </ul>
+      </div>
+      <div class="pack-group">
+        <h3>🔌 Tech</h3>
+        <ul>
+          <li>Phones with <strong>eSIM</strong> + offline maps (Kumano, Kyoto)</li>
+          <li>Portable battery (20k mAh), cables</li>
+          <li>Chargers (US plugs fit; no adapter needed)</li>
+          <li>Suica/PASMO in Apple Wallet before landing</li>
+          <li>Earbuds for the flights</li>
+        </ul>
+      </div>
+      <div class="pack-group">
+        <h3>💊 Health &amp; toiletries</h3>
+        <ul>
+          <li><strong>23 days of prescriptions</strong> in original bottles (+ Yakkan Shōmei if needed)</li>
+          <li>Ibuprofen, motion-sickness pills, antacids, Imodium</li>
+          <li>Sunscreen, lip balm, hand sanitizer</li>
+          <li>Deodorant (hard to find locally), contact supplies</li>
+          <li>Compact umbrella</li>
+        </ul>
+      </div>
+      <div class="pack-group">
+        <h3>🧳 Bags &amp; misc</h3>
+        <ul>
+          <li><strong>2 suitcases only</strong> (shuttle limit on Kumano)</li>
+          <li>Packing cubes; a foldable tote for souvenirs</li>
+          <li>Laundry: small detergent sheets (ryokan/hotels have coin machines)</li>
+          <li>Ziplocks for trash (few public bins)</li>
+          <li>Pen for customs forms; small gifts for minshuku hosts (optional)</li>
+        </ul>
+      </div>
     </div>
   </section>
 
