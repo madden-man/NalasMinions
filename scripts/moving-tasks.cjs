@@ -8,7 +8,7 @@
 
 const MOVING_TASKS = [
   { id: "r1", due: "2026-09-18", workstream: "Repairs", text: "Get three in-person tile bids for the downstairs bathroom", notes: "Call the bid list Monday; walkthroughs this week. Same scope sheet and photos to each. Written bid with materials, waterproofing method, start and finish dates." },
-  { id: "d3", due: "2026-09-18", workstream: "Renting", text: "Pull rent comps for 3–4 bedroom houses in 80232", notes: "Zillow and Apartments.com, filtered to houses with a basement and a garage listed in the last 60 days. Note asking rent and days on market. This is the $3,000 sanity check." },
+  { id: "d3", due: "2026-09-18", workstream: "Renting", text: "Read the rent comps and confirm $3,000", notes: "Comps were pulled Sep 13 and are in the listing playbook; $3,000 sits mid-cluster. Check whether 1631 S Allison next door is still listed and at what price. Re-pull the week you list." },
   { id: "d1", due: "2026-09-18", workstream: "Repairs", text: "Studio: lift one panel and one vinyl edge, count fasteners, check the ceiling", notes: "Multiply fasteners on a 4-foot stretch by wall length for the hole count, then buy patching supplies to match. Ceiling vinyl would reopen the drywall-over option; see the vinyl section." },
   { id: "p1", due: "2026-09-15", workstream: "Packing", text: "Buy packing supplies", notes: "Roughly 90–130 boxes across sizes, 6–8 wardrobe boxes, dish packs, 8+ rolls of tape, markers, colored labels per destination room, bubble wrap and paper." },
   { id: "p2", due: "2026-09-19", workstream: "Packing", text: "Purge pass through every room", notes: "Sell, donate, trash. Book a donation pickup or junk haul for the week of Sep 21 so it's gone before the hard packing." },
