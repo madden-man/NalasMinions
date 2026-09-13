@@ -606,9 +606,9 @@ body{margin:0}
 <section id="budget">
   <div class="sec-head"><h2>Budget</h2><p>Estimates for every step, low to high, Denver-area prices for fall 2026. Replace a range with the real number as bids and receipts come in. The Allison mortgage and utilities are counted for every month the house is yours to carry without rent: October in both plans, November too in Plan B.</p><a class="up" href="#contents">Contents ↑</a></div>
   <div class="bud-ctl">
-    <label for="carry"><span class="eyebrow">Allison mortgage, per month</span><span class="small muted">Paid every month the house is empty.</span></label>
+    <label for="carry"><span class="eyebrow">Allison mortgage, per month</span><span class="small muted">$2,750. Edit for a what-if; the page reloads with the real figure.</span></label>
     <div class="bud-in"><span>$</span><input id="carry" type="number" min="0" step="50" inputmode="numeric" value="2750"></div>
-    <label for="util"><span class="eyebrow">Utilities while empty, per month</span><span class="small muted">Gas, electric, water kept on for the contractor, showings, and freeze protection.</span></label>
+    <label for="util"><span class="eyebrow">Utilities while empty, per month</span><span class="small muted">$500. Gas, electric, water kept on for the contractor, showings, and freeze protection.</span></label>
     <div class="bud-in"><span>$</span><input id="util" type="number" min="0" step="25" inputmode="numeric" value="500"></div>
   </div>
   <div class="tblwrap">
@@ -878,7 +878,11 @@ body{margin:0}
   ];
   const carryEl=$('#carry');
   const utilEl=$('#util');
-  try{const savedCarry=localStorage.getItem('a2w-carry');if(savedCarry)carryEl.value=savedCarry;const savedUtil=localStorage.getItem('a2w-util');if(savedUtil!==null&&savedUtil!=='')utilEl.value=savedUtil;}catch(e){}
+  // The plan's figures: $2,750 mortgage, $500 utilities. Always load with these;
+  // edits are what-ifs for this visit only and are not remembered.
+  const MORTGAGE=2750, UTILITIES=500;
+  carryEl.value=MORTGAGE; utilEl.value=UTILITIES;
+  try{localStorage.removeItem('a2w-carry');localStorage.removeItem('a2w-util');}catch(e){}
   const money=n=>(n<0?'−':'')+'$'+Math.abs(Math.round(n)).toLocaleString('en-US');
   function renderBudget(){
     const tb=$('#budTable tbody');tb.innerHTML='';
@@ -910,8 +914,8 @@ body{margin:0}
       <div><span class="eyebrow">Plan A · tenant Nov 1</span><span class="big">${money(aLo)} – ${money(aHi)}</span><span class="small muted">+ October (${money(month)}) + November mortgage (${money(carry)}) − November rent (${money(RENT)})</span></div>
       <div><span class="eyebrow">Plan B · tenant Dec 1</span><span class="big b">${money(bLo)} – ${money(bHi)}</span><span class="small muted">+ October and November in full (${money(month*2)}), no rent until December. Plan B costs ${money(gap)} more than Plan A.</span></div>`;
   }
-  carryEl.addEventListener('input',()=>{try{localStorage.setItem('a2w-carry',carryEl.value);}catch(e){}renderBudget();});
-  utilEl.addEventListener('input',()=>{try{localStorage.setItem('a2w-util',utilEl.value);}catch(e){}renderBudget();});
+  carryEl.addEventListener('input',renderBudget);
+  utilEl.addEventListener('input',renderBudget);
   renderBudget();
 
   // shared db
