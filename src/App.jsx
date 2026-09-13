@@ -49,6 +49,9 @@ const recurrenceLabel = (value) =>
 
 const startOfMonth = (d) => new Date(d.getFullYear(), d.getMonth(), 1)
 
+const ONE_TIME_ONLY_KEY = 'chores.oneTimeOnly'
+const isOneTime = (task) => !task.recurrence || task.recurrence === 'once'
+
 // Compact label for a due date stored as a "YYYY-MM-DDTHH:mm" string, e.g.
 // "Today 2:30 PM" or "Jun 14, 9:00 AM". Returns null for missing/invalid input.
 function dueLabel(dueAt) {
@@ -195,6 +198,23 @@ function ChoresPage({ navigate }) {
   // within it — when set, the monthly list narrows to that day's chores.
   const [calMonth, setCalMonth] = useState(() => startOfMonth(new Date()))
   const [selectedDay, setSelectedDay] = useState(null)
+  // Filter: hide recurring chores and show only the one-time ones (e.g. to see
+  // just the moving and trip to-dos). Applies to every view and is remembered
+  // per browser; storage can be missing or blocked, so reads/writes are guarded.
+  const [oneTimeOnly, setOneTimeOnly] = useState(() => {
+    try {
+      return window.localStorage.getItem(ONE_TIME_ONLY_KEY) === '1'
+    } catch {
+      return false
+    }
+  })
+  useEffect(() => {
+    try {
+      window.localStorage.setItem(ONE_TIME_ONLY_KEY, oneTimeOnly ? '1' : '0')
+    } catch {
+      // No storage available — the filter still works for this visit.
+    }
+  }, [oneTimeOnly])
   // Set when a change was already persisted by a targeted op (e.g. an insert),
   // so the bulk array-sync effect skips that one render and doesn't write twice.
   const skipNextSave = useRef(false)
@@ -277,6 +297,12 @@ function ChoresPage({ navigate }) {
   // `tasks` so the bulk save doesn't delete it, while every chores view below
   // works from this filtered list.
   const choreTasks = useMemo(() => tasks.filter((t) => !isGroceryTask(t)), [tasks])
+  // The chores in scope for the views below: everything, or with the one-time
+  // filter on, just the chores that don't recur.
+  const scopedTasks = useMemo(
+    () => (oneTimeOnly ? choreTasks.filter(isOneTime) : choreTasks),
+    [choreTasks, oneTimeOnly],
+  )
 
   // The tasks shown in the list area for the active view. Counts and progress
   // below track this set, so the header reflects what the user is looking at.
@@ -284,16 +310,16 @@ function ChoresPage({ navigate }) {
     // Today: what's due today, with anything overdue floated to the top so a
     // missed chore can't hide below the day's fresh ones.
     if (effectiveView === 'today') {
-      const listed = choreTasks.filter((t) => isListedOn(t))
+      const listed = scopedTasks.filter((t) => isListedOn(t))
       const overdue = listed.filter((t) => isOverdue(t))
       return [...overdue, ...listed.filter((t) => !overdue.includes(t))]
     }
     if (effectiveView === 'monthly' && selectedDay)
-      return choreTasks.filter((t) => isListedOn(t, selectedDay))
+      return scopedTasks.filter((t) => isListedOn(t, selectedDay))
     // All tasks: earliest date first, sorting on each chore's anchor (its due
     // date, else its creation time). Chores with neither sink to the bottom.
     if (effectiveView === 'all') {
-      return [...choreTasks].sort((a, b) => {
+      return [...scopedTasks].sort((a, b) => {
         const da = taskAnchor(a)
         const db = taskAnchor(b)
         if (!da && !db) return 0
@@ -302,8 +328,8 @@ function ChoresPage({ navigate }) {
         return da - db
       })
     }
-    return choreTasks
-  }, [choreTasks, effectiveView, selectedDay])
+    return scopedTasks
+  }, [scopedTasks, effectiveView, selectedDay])
 
   const remaining = useMemo(() => visibleTasks.filter((t) => !t.done).length, [visibleTasks])
   const progress = visibleTasks.length
@@ -376,6 +402,11 @@ function ChoresPage({ navigate }) {
   const dayPicked = effectiveView === 'monthly' && selectedDay
   const empty = !choreTasks.length
     ? { primary: 'No chores yet', secondary: 'Tap + in the top right to add the first one.' }
+    : oneTimeOnly && !scopedTasks.length
+    ? {
+        primary: 'No one-time chores',
+        secondary: 'Every chore here recurs. Turn off "One-time only" to see them.',
+      }
     : dayPicked
     ? {
         primary: `Nothing on ${selectedDay.toLocaleDateString(undefined, { weekday: 'short', month: 'short', day: 'numeric' })}`,
@@ -485,7 +516,7 @@ function ChoresPage({ navigate }) {
           Chores to keep the house running for Nala. Tap a checkbox when a minion finishes a task.
         </Typography>
 
-        <Box sx={{ mb: 2 }}>
+        <Stack direction="row" spacing={1} useFlexGap flexWrap="wrap" sx={{ mb: 2 }}>
           <ToggleButtonGroup
             exclusive
             size="small"
@@ -507,7 +538,20 @@ function ChoresPage({ navigate }) {
               Monthly
             </ToggleButton>
           </ToggleButtonGroup>
-        </Box>
+          {/* Filter, not a view: it narrows whichever view is active. */}
+          <ToggleButton
+            value="oneTimeOnly"
+            size="small"
+            color="primary"
+            selected={oneTimeOnly}
+            onChange={() => setOneTimeOnly((v) => !v)}
+            aria-label="one-time chores only"
+            aria-pressed={oneTimeOnly}
+          >
+            <LooksOneIcon fontSize="small" sx={{ mr: 0.75 }} />
+            One-time only
+          </ToggleButton>
+        </Stack>
 
         {/* Task list — calendar + all-tasks list side by side in monthly view,
             a single list otherwise. */}
@@ -522,7 +566,7 @@ function ChoresPage({ navigate }) {
                 month={calMonth}
                 onPrevMonth={() => setCalMonth((m) => new Date(m.getFullYear(), m.getMonth() - 1, 1))}
                 onNextMonth={() => setCalMonth((m) => new Date(m.getFullYear(), m.getMonth() + 1, 1))}
-                getCount={(date) => choreTasks.filter((t) => isListedOn(t, date)).length}
+                getCount={(date) => scopedTasks.filter((t) => isListedOn(t, date)).length}
                 dayKey={todayKey}
                 todayKey={todayKey()}
                 selectedKey={selectedDay ? todayKey(selectedDay) : null}
@@ -562,12 +606,17 @@ function ChoresPage({ navigate }) {
           <Typography variant="caption" color="text.secondary">
             {effectiveView === 'today' ? 'Today: ' : dayPicked ? 'Selected: ' : 'All: '}
             {visibleTasks.length} task{visibleTasks.length === 1 ? '' : 's'} · {remaining} remaining
+            {oneTimeOnly ? ' · one-time only' : ''}
           </Typography>
+          {/* Clears finished chores in scope — with the filter on, recurring
+              ones that are hidden stay put. */}
           <Button
             size="small"
             color="inherit"
-            onClick={() => setTasks((prev) => prev.filter((t) => !t.done))}
-            disabled={remaining === choreTasks.length}
+            onClick={() =>
+              setTasks((prev) => prev.filter((t) => !(t.done && (!oneTimeOnly || isOneTime(t)))))
+            }
+            disabled={!scopedTasks.some((t) => t.done)}
           >
             Clear completed
           </Button>

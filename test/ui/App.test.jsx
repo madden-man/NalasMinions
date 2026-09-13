@@ -134,3 +134,44 @@ describe('chores linked to a public page', () => {
     expect(screen.queryByRole('dialog')).not.toBeInTheDocument()
   })
 })
+
+describe('one-time only filter', () => {
+  const both = [
+    { id: '1', text: 'Vacuum upstairs', done: false, recurrence: 'weekly', dueAt: '2026-01-05T09:00' },
+    { id: '2', text: 'Book the movers', done: false, recurrence: 'once' },
+  ]
+
+  beforeEach(() => window.localStorage.clear())
+
+  it('hides recurring chores while on, and brings them back when off', async () => {
+    loadTasks.mockResolvedValue(both)
+    renderAt('/')
+    await userEvent.click(await screen.findByRole('button', { name: /all chores/i }))
+    expect(await screen.findByText('Vacuum upstairs')).toBeInTheDocument()
+    expect(screen.getByText('Book the movers')).toBeInTheDocument()
+
+    await userEvent.click(screen.getByRole('button', { name: /one-time chores only/i }))
+    expect(screen.queryByText('Vacuum upstairs')).not.toBeInTheDocument()
+    expect(screen.getByText('Book the movers')).toBeInTheDocument()
+
+    await userEvent.click(screen.getByRole('button', { name: /one-time chores only/i }))
+    expect(screen.getByText('Vacuum upstairs')).toBeInTheDocument()
+  })
+
+  it('is remembered across visits', async () => {
+    window.localStorage.setItem('chores.oneTimeOnly', '1')
+    loadTasks.mockResolvedValue(both)
+    renderAt('/')
+    await userEvent.click(await screen.findByRole('button', { name: /all chores/i }))
+    expect(await screen.findByText('Book the movers')).toBeInTheDocument()
+    expect(screen.queryByText('Vacuum upstairs')).not.toBeInTheDocument()
+    expect(screen.getByRole('button', { name: /one-time chores only/i })).toHaveAttribute('aria-pressed', 'true')
+  })
+
+  it('explains an empty list caused by the filter', async () => {
+    loadTasks.mockResolvedValue([both[0]])
+    renderAt('/')
+    await userEvent.click(await screen.findByRole('button', { name: /one-time chores only/i }))
+    expect(await screen.findByText('No one-time chores')).toBeInTheDocument()
+  })
+})
