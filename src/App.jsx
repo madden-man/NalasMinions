@@ -12,6 +12,7 @@ import RepeatIcon from '@mui/icons-material/Repeat'
 import PersonIcon from '@mui/icons-material/Person'
 import ScheduleIcon from '@mui/icons-material/Schedule'
 import TodayIcon from '@mui/icons-material/Today'
+import WarningAmberIcon from '@mui/icons-material/WarningAmber'
 import ViewListIcon from '@mui/icons-material/ViewList'
 import CalendarMonthIcon from '@mui/icons-material/CalendarMonth'
 import CleaningServicesIcon from '@mui/icons-material/CleaningServices'
@@ -31,6 +32,7 @@ import useRoute from './useRoute'
 // Electron uses a frameless title bar (titleBarStyle: 'hiddenInset'), so the
 // top bar doubles as the OS drag handle there.
 import { isElectron } from './platform'
+import { taskAnchor, isDueOn, isOverdue, isListedOn, sameDay } from './due'
 
 // Local calendar day, e.g. "2026-06-12". Used to detect a midnight rollover.
 function todayKey(d = new Date()) {
@@ -43,45 +45,7 @@ function todayKey(d = new Date()) {
 const recurrenceLabel = (value) =>
   RECURRENCE_OPTIONS.find((o) => o.value === value)?.label ?? 'Once'
 
-const startOfDay = (d) => new Date(d.getFullYear(), d.getMonth(), d.getDate())
 const startOfMonth = (d) => new Date(d.getFullYear(), d.getMonth(), 1)
-const sameDay = (a, b) => startOfDay(a).getTime() === startOfDay(b).getTime()
-const weeksBetween = (a, b) =>
-  Math.floor(Math.abs(startOfDay(b) - startOfDay(a)) / (7 * 24 * 60 * 60 * 1000))
-
-// The date a task's schedule is anchored to: its explicit due date if set,
-// otherwise the creation time encoded in its numeric id. null when neither is
-// available (e.g. the legacy seed tasks), which callers treat as "always due".
-function taskAnchor(task) {
-  if (task.dueAt) {
-    const d = new Date(task.dueAt)
-    if (!Number.isNaN(d.getTime())) return d
-  }
-  const n = Number(task.id)
-  if (Number.isFinite(n) && n > 1e12) return new Date(n)
-  return null
-}
-
-// Whether a task belongs on a given day's list. Daily chores always do; the
-// other cadences match the weekday / day-of-month of the task's anchor date; a
-// one-off shows only on its due day (or always, if it never got a due date).
-function isDueOn(task, date = new Date()) {
-  const rec = task.recurrence || 'once'
-  if (rec === 'daily') return true
-  const anchor = taskAnchor(task)
-  if (!anchor) return true
-  switch (rec) {
-    case 'weekly':
-      return anchor.getDay() === date.getDay()
-    case 'biweekly':
-      return anchor.getDay() === date.getDay() && weeksBetween(anchor, date) % 2 === 0
-    case 'monthly':
-      return anchor.getDate() === date.getDate()
-    case 'once':
-    default:
-      return task.dueAt ? sameDay(anchor, date) : true
-  }
-}
 
 // Compact label for a due date stored as a "YYYY-MM-DDTHH:mm" string, e.g.
 // "Today 2:30 PM" or "Jun 14, 9:00 AM". Returns null for missing/invalid input.
@@ -163,6 +127,11 @@ function TaskRow({ task, onToggle, onRemove, onEdit }) {
                   color={!task.done && new Date(task.dueAt) < new Date() ? 'error' : 'default'}
                 />
               )}
+              {/* Overdue chores stay on the Today list until done; say why
+                  they're there, since their due day (if any) isn't today. */}
+              {isOverdue(task) && (
+                <Chip size="small" color="error" icon={<WarningAmberIcon />} label="Overdue" />
+              )}
             </Stack>
           }
         />
@@ -198,7 +167,8 @@ function ChoresPage({ navigate }) {
   const [dialogOpen, setDialogOpen] = useState(false)
   // The chore currently being edited in the dialog, or null when adding a new one.
   const [editingTask, setEditingTask] = useState(null)
-  // View mode: 'today' = chores due today, 'all' = every task as a flat list,
+  // View mode: 'today' = chores due today plus any overdue ones still waiting,
+  // 'all' = every task as a flat list,
   // 'monthly' = the calendar grid beside the all-tasks list (wide screens only).
   const [view, setView] = useState('today')
   // The month shown by the calendar (anchored to its 1st), and the day picked
@@ -291,9 +261,15 @@ function ChoresPage({ navigate }) {
   // The tasks shown in the list area for the active view. Counts and progress
   // below track this set, so the header reflects what the user is looking at.
   const visibleTasks = useMemo(() => {
-    if (effectiveView === 'today') return choreTasks.filter((t) => isDueOn(t))
+    // Today: what's due today, with anything overdue floated to the top so a
+    // missed chore can't hide below the day's fresh ones.
+    if (effectiveView === 'today') {
+      const listed = choreTasks.filter((t) => isListedOn(t))
+      const overdue = listed.filter((t) => isOverdue(t))
+      return [...overdue, ...listed.filter((t) => !overdue.includes(t))]
+    }
     if (effectiveView === 'monthly' && selectedDay)
-      return choreTasks.filter((t) => isDueOn(t, selectedDay))
+      return choreTasks.filter((t) => isListedOn(t, selectedDay))
     // All tasks: earliest date first, sorting on each chore's anchor (its due
     // date, else its creation time). Chores with neither sink to the bottom.
     if (effectiveView === 'all') {
@@ -526,7 +502,7 @@ function ChoresPage({ navigate }) {
                 month={calMonth}
                 onPrevMonth={() => setCalMonth((m) => new Date(m.getFullYear(), m.getMonth() - 1, 1))}
                 onNextMonth={() => setCalMonth((m) => new Date(m.getFullYear(), m.getMonth() + 1, 1))}
-                getCount={(date) => choreTasks.filter((t) => isDueOn(t, date)).length}
+                getCount={(date) => choreTasks.filter((t) => isListedOn(t, date)).length}
                 dayKey={todayKey}
                 todayKey={todayKey()}
                 selectedKey={selectedDay ? todayKey(selectedDay) : null}
