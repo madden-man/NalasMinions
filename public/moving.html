@@ -604,9 +604,9 @@ body{margin:0}
 </section>
 
 <section id="budget">
-  <div class="sec-head"><h2>Budget</h2><p>Estimates for every step, low to high, Denver-area prices for fall 2026. Replace a range with the real number as bids and receipts come in; the contractor's tile bid is the one that moves the total most. Enter your monthly carrying cost on Allison to size the vacancy lines.</p><a class="up" href="#contents">Contents ↑</a></div>
+  <div class="sec-head"><h2>Budget</h2><p>Estimates for every step, low to high, Denver-area prices for fall 2026. Replace a range with the real number as bids and receipts come in. The Allison mortgage is counted for every month the house is yours to carry without rent: October in both plans, November too in Plan B.</p><a class="up" href="#contents">Contents ↑</a></div>
   <div class="bud-ctl">
-    <label for="carry"><span class="eyebrow">Allison monthly carrying cost</span><span class="small muted">Mortgage is $2,750/mo. Add utilities while it sits empty if you want them counted.</span></label>
+    <label for="carry"><span class="eyebrow">Allison mortgage, per month</span><span class="small muted">$2,750. Add utilities while it sits empty if you want them counted too.</span></label>
     <div class="bud-in"><span>$</span><input id="carry" type="number" min="0" step="50" inputmode="numeric" value="2750"></div>
   </div>
   <div class="tblwrap">
@@ -616,7 +616,7 @@ body{margin:0}
   </table>
   </div>
   <div class="bud-sum" id="budSum"></div>
-  <p class="small muted" style="margin-top:10px">Not counted: the security deposit (it's the tenant's money), your own hours, and the Woods Dr mortgage, which you pay either way. The first month's rent on Nov 1 offsets one month of Plan A vacancy; Plan B carries two.</p>
+  <p class="small muted" style="margin-top:10px">Not counted: the security deposit (it's the tenant's money), your own hours, and the Woods Dr mortgage, which you pay either way. The difference between the two plans is one month of Allison mortgage plus one month of rent, about $5,750, which is what the Oct 23 gate is protecting.</p>
 </section>
 
 <div class="foot" id="notes">
@@ -887,13 +887,19 @@ body{margin:0}
       lo+=glo;hi+=ghi;
     });
     const carry=Number(carryEl.value)||0;
-    const g=document.createElement('tr');g.className='grp vac';g.innerHTML=`<td colspan="4">Vacancy on Allison<span>${carry?money(carry)+' / month':'enter carrying cost above'}</span></td>`;tb.appendChild(g);
-    const vac=[['Oct 2 – Oct 31: empty either way',1],['November, Plan B only',1]];
-    vac.forEach(([t,m])=>{const r=document.createElement('tr');r.innerHTML=`<td>${t}</td><td class="num">${carry?money(carry*m):'—'}</td><td class="num">${carry?money(carry*m):'—'}</td><td class="small muted">${m} month of carrying cost</td>`;tb.appendChild(r);});
-    const a=[lo+carry,hi+carry];
-    $('#budSum').innerHTML=`<div><span class="eyebrow">One-time costs</span><span class="big">${money(lo)} – ${money(hi)}</span><span class="small muted">Everything above net of resale, both plans, before vacancy</span></div>
-      <div><span class="eyebrow">Plan A · tenant Nov 1</span><span class="big">${carry?money(a[0])+' – '+money(a[1]):money(lo)+' – '+money(hi)+' + 1 mo'}</span><span class="small muted">One-time costs plus October vacancy</span></div>
-      <div><span class="eyebrow">Plan B · tenant Dec 1</span><span class="big b">${carry?money(lo+carry*2)+' – '+money(hi+carry*2):money(lo)+' – '+money(hi)+' + 2 mo'}</span><span class="small muted">Plus November vacancy; the agent line is already in the high end</span></div>`;
+    const RENT=3000;
+    const g=document.createElement('tr');g.className='grp vac';g.innerHTML=`<td colspan="4">Allison mortgage while you carry it<span>${carry?money(carry)+' / month':'enter the mortgage above'}</span></td>`;tb.appendChild(g);
+    const rows=[
+      ['October mortgage',carry,carry,'House empty from Oct 2 either way. September is your housing, not a move cost.'],
+      ['November mortgage',carry,carry,'Plan A: covered by the rent below. Plan B: no rent until Dec 1, so you carry it.'],
+      ['Rent in, Nov 1 (Plan A only)',-RENT,-RENT,'$3,000 first month. Offsets November in Plan A; absent in Plan B.'],
+      ['December onward',0,0,'Rent covers the mortgage in both plans, so nothing is counted here.'],
+    ];
+    rows.forEach(([t,l,h,b])=>{const r=document.createElement('tr');r.innerHTML=`<td>${t}</td><td class="num">${carry||l<0?money(l):'—'}</td><td class="num">${carry||h<0?money(h):'—'}</td><td class="small muted">${b}</td>`;tb.appendChild(r);});
+    const aLo=lo+carry*2-RENT, aHi=hi+carry*2-RENT, bLo=lo+carry*2, bHi=hi+carry*2;
+    $('#budSum').innerHTML=`<div><span class="eyebrow">One-time costs</span><span class="big">${money(lo)} – ${money(hi)}</span><span class="small muted">Everything above net of resale, before the mortgage</span></div>
+      <div><span class="eyebrow">Plan A · tenant Nov 1</span><span class="big">${carry?money(aLo)+' – '+money(aHi):'enter the mortgage'}</span><span class="small muted">One-time costs + October and November mortgage − November rent</span></div>
+      <div><span class="eyebrow">Plan B · tenant Dec 1</span><span class="big b">${carry?money(bLo)+' – '+money(bHi):'enter the mortgage'}</span><span class="small muted">One-time costs + October and November mortgage, no rent until December; the agent line is in the high end</span></div>`;
   }
   carryEl.addEventListener('input',()=>{try{localStorage.setItem('a2w-carry',carryEl.value);}catch(e){}renderBudget();});
   renderBudget();
