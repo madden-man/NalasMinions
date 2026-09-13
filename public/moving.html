@@ -153,6 +153,21 @@ td.room{font-weight:600}
 .path>div{display:grid;grid-template-columns:96px 1fr;gap:14px;padding:10px 0;border-bottom:1px solid var(--line);align-items:baseline}
 .path .pd{font-family:"Barlow Condensed",sans-serif;font-weight:700;font-size:18px;font-variant-numeric:tabular-nums}
 .path .pd.hard{color:var(--deadline)}
+.bud-ctl{display:flex;flex-wrap:wrap;align-items:end;justify-content:space-between;gap:10px 20px;background:var(--surface);border:1px solid var(--line);padding:12px 16px;margin-bottom:14px}
+.bud-ctl label{display:grid;gap:2px}
+.bud-in{display:flex;align-items:center;gap:6px;font-family:"Barlow Condensed",sans-serif;font-size:22px;font-weight:700}
+.bud-in input{width:130px;font:700 22px "Barlow Condensed",sans-serif;padding:4px 8px;border:1px solid var(--line-strong);background:var(--bg);color:var(--ink);font-variant-numeric:tabular-nums}
+#budTable td.num,#budTable th.num{text-align:right;white-space:nowrap;font-variant-numeric:tabular-nums}
+#budTable tr.grp td{font-family:"Barlow Condensed",sans-serif;font-weight:700;font-size:15px;letter-spacing:.06em;text-transform:uppercase;padding-top:16px;border-bottom:2px solid var(--line-strong)}
+#budTable tr.grp td span{margin-left:10px;color:var(--muted);font-weight:600}
+#budTable tr.sub td{font-weight:600;background:var(--surface-2)}
+#budTable tr.grp.pack td{color:var(--pack)}#budTable tr.grp.fix td{color:var(--fix)}#budTable tr.grp.rent td{color:var(--rent)}#budTable tr.grp.new td{color:var(--new)}#budTable tr.grp.vac td{color:var(--deadline)}
+#budTable tr.grp td span{color:var(--muted)}
+.bud-sum{display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:var(--line);border:1px solid var(--line);margin-top:14px}
+.bud-sum>div{background:var(--surface);padding:12px 16px;display:grid;gap:2px}
+.bud-sum .big{font-family:"Barlow Condensed",sans-serif;font-size:30px;font-weight:700;line-height:1;font-variant-numeric:tabular-nums}
+.bud-sum .big.b{color:var(--deadline)}
+@media (max-width:640px){.bud-sum{grid-template-columns:1fr}}
 .foot{margin-top:56px;padding-top:16px;border-top:2px solid var(--ink);display:grid;gap:8px;color:var(--muted);font-size:14px}
 .foot ul{margin:0;padding-left:18px;display:grid;gap:4px}
 button.reset{font:600 13px "Barlow Condensed",sans-serif;letter-spacing:.08em;text-transform:uppercase;background:none;border:1px solid var(--line-strong);color:var(--muted);padding:5px 10px;cursor:pointer}
@@ -497,6 +512,22 @@ body{margin:0}
   </div>
 </section>
 
+<section id="budget">
+  <div class="sec-head"><h2>Budget</h2><p>Estimates for every step, low to high, Denver-area prices for fall 2026. Replace a range with the real number as bids and receipts come in; the contractor's tile bid is the one that moves the total most. Enter your monthly carrying cost on Allison to size the vacancy lines.</p></div>
+  <div class="bud-ctl">
+    <label for="carry"><span class="eyebrow">Allison monthly carrying cost</span><span class="small muted">Mortgage + taxes + insurance + utilities while empty</span></label>
+    <div class="bud-in"><span>$</span><input id="carry" type="number" min="0" step="50" inputmode="numeric" placeholder="e.g. 2800"></div>
+  </div>
+  <div class="tblwrap">
+  <table id="budTable">
+    <thead><tr><th>Step</th><th class="num">Low</th><th class="num">High</th><th>Basis</th></tr></thead>
+    <tbody></tbody>
+  </table>
+  </div>
+  <div class="bud-sum" id="budSum"></div>
+  <p class="small muted" style="margin-top:10px">Not counted: the security deposit (it's the tenant's money), your own hours, and the Woods Dr mortgage, which you pay either way. The first month's rent on Nov 1 offsets one month of Plan A vacancy; Plan B carries two.</p>
+</section>
+
 <div class="foot">
   <b class="disp" style="font-size:18px;text-transform:uppercase;letter-spacing:.04em;color:var(--ink)">Assumptions to confirm</b>
   <ul>
@@ -706,6 +737,63 @@ body{margin:0}
       document.querySelectorAll('.week').forEach(w=>{const any=[...w.querySelectorAll('.task')].some(t=>!t.classList.contains('hidden'));w.style.display=any?'':'none';});
     });
   });
+
+  // budget
+  const BUD=[
+    ['pack','Packing & moving',[
+      ['Moving company, local 3–4 bed with basement',2000,3500,'Already booked; plug in the quote. Two trucks or a long carry pushes it up.'],
+      ['Piano handling',150,300,'Upright, one flight of stairs. Confirm it\'s in the movers\' quote or a line item.'],
+      ['Boxes, wardrobe boxes, dish packs, tape, paper',350,550,'95–135 boxes at retail. Free boxes from Facebook or U-Haul returns cut it in half.'],
+      ['Donation pickup or junk haul',0,350,'Free if a charity picks up; a half-load junk haul runs $200–350.'],
+      ['Movers\' tips, food, water',120,200,'$20–40 per crew member per day.'],
+    ]],
+    ['fix','Allison repairs',[
+      ['Downstairs bathroom tile',2500,6000,'Floor plus tub or shower surround, labor and in-stock tile. Floor-only is the low end; a full shower rebuild is the high end. The contractor\'s bid replaces this line.'],
+      ['Mural: stain-blocking primer, paint, rollers, drop cloths',120,200,'Two gallons primer, two gallons finish, supplies.'],
+      ['Studio: patch and paint after the vinyl comes down',120,250,'Spackle, mesh patches, joint compound, 12-inch knife, torn-paper sealer, PVA primer, paint. Add $500–900 if a handyman does it.'],
+      ['Punch list: bulbs, filter, caulk, touch-up, hardware',75,150,''],
+      ['Deep clean plus carpet clean',350,600,'Whole house empty; basement carpet and stairs.'],
+      ['Radon test',30,150,'Kit is $30; a pro test is $150. Required lease disclosure either way.'],
+    ]],
+    ['rent','Finding the tenant',[
+      ['Listing tool (Avail / TurboTenant / Zillow)',0,60,'Free tiers cover this; Zillow may charge a weekly fee after the first listing.'],
+      ['Yard sign, QR code, printouts',25,40,''],
+      ['Screening',0,0,'Applicant-paid, capped at your actual cost.'],
+      ['Lease review by a Colorado landlord attorney',150,400,'One-time; optional if you use the tool\'s Colorado lease. Worth it on a first lease.'],
+      ['Landlord (DP-3) policy, increase over homeowners',300,800,'Annual delta. Ask about loss-of-rent coverage.'],
+      ['Keys, lockbox for the contractor and Plan B showings',40,250,'Two key copies and a code lockbox at the low end; a smart self-showing lockbox at the high end.'],
+      ['Leasing-only agent (Plan B only)',0,1500,'About half a month\'s rent if you hand off showings while away Oct 30–Nov 22.'],
+    ]],
+    ['new','Woods Dr',[
+      ['Utility connections, deposits, internet install',100,250,''],
+      ['Rekey or replace locks',100,250,'Locksmith rekey is the low end; smart lock the high end.'],
+      ['Address changes, DMV, plates',30,60,''],
+      ['Well, septic, or propane service check',0,400,'Only if the house has them. Zero otherwise.'],
+    ]],
+  ];
+  const carryEl=$('#carry');
+  try{carryEl.value=localStorage.getItem('a2w-carry')||'';}catch(e){}
+  const money=n=>'$'+Math.round(n).toLocaleString('en-US');
+  function renderBudget(){
+    const tb=$('#budTable tbody');tb.innerHTML='';
+    let lo=0,hi=0;
+    BUD.forEach(([ws,name,items])=>{
+      let glo=0,ghi=0;items.forEach(i=>{glo+=i[1];ghi+=i[2];});
+      const g=document.createElement('tr');g.className='grp '+ws;g.innerHTML=`<td colspan="4">${name}<span>${money(glo)} – ${money(ghi)}</span></td>`;tb.appendChild(g);
+      items.forEach(([t,l,h,b])=>{const r=document.createElement('tr');r.innerHTML=`<td>${t}</td><td class="num">${money(l)}</td><td class="num">${money(h)}</td><td class="small muted">${b}</td>`;tb.appendChild(r);});
+      lo+=glo;hi+=ghi;
+    });
+    const carry=Number(carryEl.value)||0;
+    const g=document.createElement('tr');g.className='grp vac';g.innerHTML=`<td colspan="4">Vacancy on Allison<span>${carry?money(carry)+' / month':'enter carrying cost above'}</span></td>`;tb.appendChild(g);
+    const vac=[['Oct 2 – Oct 31: empty either way',1],['November, Plan B only',1]];
+    vac.forEach(([t,m])=>{const r=document.createElement('tr');r.innerHTML=`<td>${t}</td><td class="num">${carry?money(carry*m):'—'}</td><td class="num">${carry?money(carry*m):'—'}</td><td class="small muted">${m} month of carrying cost</td>`;tb.appendChild(r);});
+    const a=[lo+carry,hi+carry];
+    $('#budSum').innerHTML=`<div><span class="eyebrow">One-time costs</span><span class="big">${money(lo)} – ${money(hi)}</span><span class="small muted">Everything above, both plans, before vacancy</span></div>
+      <div><span class="eyebrow">Plan A · tenant Nov 1</span><span class="big">${carry?money(a[0])+' – '+money(a[1]):money(lo)+' – '+money(hi)+' + 1 mo'}</span><span class="small muted">One-time costs plus October vacancy</span></div>
+      <div><span class="eyebrow">Plan B · tenant Dec 1</span><span class="big b">${carry?money(lo+carry*2)+' – '+money(hi+carry*2):money(lo)+' – '+money(hi)+' + 2 mo'}</span><span class="small muted">Plus November vacancy; the agent line is already in the high end</span></div>`;
+  }
+  carryEl.addEventListener('input',()=>{try{localStorage.setItem('a2w-carry',carryEl.value);}catch(e){}renderBudget();});
+  renderBudget();
 
   // shared db
   (async()=>{
