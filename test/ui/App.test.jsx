@@ -78,3 +78,33 @@ describe('toolbar navigation to the menu', () => {
     ).toBeInTheDocument()
   })
 })
+
+describe('overdue chores on the Today list', () => {
+  const iso = (d) =>
+    `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`
+  const daysFromNow = (n) => {
+    const d = new Date()
+    d.setDate(d.getDate() + n)
+    return `${iso(d)}T09:00`
+  }
+
+  it('keeps an unfinished chore whose due day has passed, flagged Overdue', async () => {
+    loadTasks.mockResolvedValue([
+      { id: '1', text: 'Return the cable box', done: false, recurrence: 'once', dueAt: daysFromNow(-2) },
+      { id: '2', text: 'Book the movers', done: false, recurrence: 'once', dueAt: daysFromNow(3) },
+    ])
+    renderAt('/')
+    expect(await screen.findByText('Return the cable box')).toBeInTheDocument()
+    expect(screen.getByText('Overdue')).toBeInTheDocument()
+    expect(screen.queryByText('Book the movers')).not.toBeInTheDocument()
+  })
+
+  it('drops a past-due chore once it is checked off', async () => {
+    loadTasks.mockResolvedValue([
+      { id: '1', text: 'Return the cable box', done: true, recurrence: 'once', dueAt: daysFromNow(-2) },
+    ])
+    renderAt('/')
+    expect(await screen.findByText('Nothing due today')).toBeInTheDocument()
+    expect(screen.queryByText('Return the cable box')).not.toBeInTheDocument()
+  })
+})
