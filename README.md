@@ -161,5 +161,13 @@ from an iPad/iPhone, then **Share → Add to Home Screen** to use it like an app
 npm run electron:build   # output in ./release
 ```
 
+## Public pages (/moving, /japan)
+
+Standalone pages under `public/` hold the long-form context for a set of chores, and chores
+link back to them. They're registered in `PAGES` in `src/links.js`, which drives the link picks
+in the chore dialog, the link chip on each row, and a per-page filter button beside
+Today / All / Monthly. Adding a page means following the checklist in `CLAUDE.md` —
+`test/pages.test.mjs` enforces it.
+
 ## Stack
 React 18 · MUI 5 · Vite 4 · Electron 26 · MongoDB (Atlas)

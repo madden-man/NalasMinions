@@ -33,7 +33,8 @@ async function main() {
   // its details when it has one, else its own row in the week-by-week plan.
   const linkFor = (t) => {
     const section = MOVING_SECTIONS[t.id] && sectionFor(`/moving#${MOVING_SECTIONS[t.id]}`)
-    return section ? { ...section } : { ...sectionFor('/moving#plan'), href: `/moving#chk-${t.id}` }
+    if (section) return { href: section.href, label: section.label }
+    return { href: `/moving#chk-${t.id}`, label: sectionFor('/moving#plan').label }
   }
   const existing = new Map((await mongo.loadTasks()).map((t) => [t.id, t]))
   let added = 0

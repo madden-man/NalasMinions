@@ -14,6 +14,7 @@ import ScheduleIcon from '@mui/icons-material/Schedule'
 import TodayIcon from '@mui/icons-material/Today'
 import WarningAmberIcon from '@mui/icons-material/WarningAmber'
 import OpenInNewIcon from '@mui/icons-material/OpenInNew'
+import LinkIcon from '@mui/icons-material/Link'
 import ViewListIcon from '@mui/icons-material/ViewList'
 import CalendarMonthIcon from '@mui/icons-material/CalendarMonth'
 import CleaningServicesIcon from '@mui/icons-material/CleaningServices'
@@ -34,7 +35,7 @@ import useRoute from './useRoute'
 // top bar doubles as the OS drag handle there.
 import { isElectron } from './platform'
 import { taskAnchor, isDueOn, isOverdue, isListedOn, sameDay } from './due'
-import { resolveLink, linkLabel } from './links'
+import { resolveLink, linkLabel, PAGES, pageForTask } from './links'
 
 // Local calendar day, e.g. "2026-06-12". Used to detect a midnight rollover.
 function todayKey(d = new Date()) {
@@ -50,6 +51,7 @@ const recurrenceLabel = (value) =>
 const startOfMonth = (d) => new Date(d.getFullYear(), d.getMonth(), 1)
 
 const ONE_TIME_ONLY_KEY = 'chores.oneTimeOnly'
+const PAGE_FILTER_KEY = 'chores.page'
 const isOneTime = (task) => !task.recurrence || task.recurrence === 'once'
 
 // Compact label for a due date stored as a "YYYY-MM-DDTHH:mm" string, e.g.
@@ -208,13 +210,26 @@ function ChoresPage({ navigate }) {
       return false
     }
   })
+  // Filter: only chores connected to one public page (the moving plan, the
+  // Japan trip, …) — one button per entry in PAGES, so a newly registered page
+  // gets its filter for free. Holds the page key, or null for no page filter.
+  const [pageFilter, setPageFilter] = useState(() => {
+    try {
+      const key = window.localStorage.getItem(PAGE_FILTER_KEY)
+      return PAGES.some((p) => p.key === key) ? key : null
+    } catch {
+      return null
+    }
+  })
   useEffect(() => {
     try {
       window.localStorage.setItem(ONE_TIME_ONLY_KEY, oneTimeOnly ? '1' : '0')
+      if (pageFilter) window.localStorage.setItem(PAGE_FILTER_KEY, pageFilter)
+      else window.localStorage.removeItem(PAGE_FILTER_KEY)
     } catch {
-      // No storage available — the filter still works for this visit.
+      // No storage available — the filters still work for this visit.
     }
-  }, [oneTimeOnly])
+  }, [oneTimeOnly, pageFilter])
   // Set when a change was already persisted by a targeted op (e.g. an insert),
   // so the bulk array-sync effect skips that one render and doesn't write twice.
   const skipNextSave = useRef(false)
@@ -297,12 +312,16 @@ function ChoresPage({ navigate }) {
   // `tasks` so the bulk save doesn't delete it, while every chores view below
   // works from this filtered list.
   const choreTasks = useMemo(() => tasks.filter((t) => !isGroceryTask(t)), [tasks])
-  // The chores in scope for the views below: everything, or with the one-time
-  // filter on, just the chores that don't recur.
+  // The chores in scope for the views below, after the filters: the one-time
+  // toggle drops recurring chores; a page filter keeps only chores connected
+  // to that page (by project or link). Both can be on at once.
+  const inScope = (t) =>
+    (!oneTimeOnly || isOneTime(t)) && (!pageFilter || pageForTask(t)?.key === pageFilter)
   const scopedTasks = useMemo(
-    () => (oneTimeOnly ? choreTasks.filter(isOneTime) : choreTasks),
-    [choreTasks, oneTimeOnly],
+    () => (oneTimeOnly || pageFilter ? choreTasks.filter(inScope) : choreTasks),
+    [choreTasks, oneTimeOnly, pageFilter], // eslint-disable-line react-hooks/exhaustive-deps
   )
+  const filteredPage = PAGES.find((p) => p.key === pageFilter) ?? null
 
   // The tasks shown in the list area for the active view. Counts and progress
   // below track this set, so the header reflects what the user is looking at.
@@ -402,6 +421,11 @@ function ChoresPage({ navigate }) {
   const dayPicked = effectiveView === 'monthly' && selectedDay
   const empty = !choreTasks.length
     ? { primary: 'No chores yet', secondary: 'Tap + in the top right to add the first one.' }
+    : filteredPage && !scopedTasks.length
+    ? {
+        primary: `No ${filteredPage.name} chores${oneTimeOnly ? ' left to do once' : ''}`,
+        secondary: `Nothing is connected to /${filteredPage.key}. Tap ${filteredPage.name} again to show every chore.`,
+      }
     : oneTimeOnly && !scopedTasks.length
     ? {
         primary: 'No one-time chores',
@@ -551,6 +575,23 @@ function ChoresPage({ navigate }) {
             <LooksOneIcon fontSize="small" sx={{ mr: 0.75 }} />
             One-time only
           </ToggleButton>
+          {/* Page filters: one per public page in the registry. Tapping the
+              active one clears it (exclusive group, nullable). */}
+          <ToggleButtonGroup
+            exclusive
+            size="small"
+            color="primary"
+            value={pageFilter}
+            onChange={(_, v) => setPageFilter(v)}
+            aria-label="filter by page"
+          >
+            {PAGES.map((p) => (
+              <ToggleButton key={p.key} value={p.key} aria-label={`${p.name} chores only`}>
+                <LinkIcon fontSize="small" sx={{ mr: 0.75 }} />
+                {p.name}
+              </ToggleButton>
+            ))}
+          </ToggleButtonGroup>
         </Stack>
 
         {/* Task list — calendar + all-tasks list side by side in monthly view,
@@ -607,15 +648,13 @@ function ChoresPage({ navigate }) {
             {effectiveView === 'today' ? 'Today: ' : dayPicked ? 'Selected: ' : 'All: '}
             {visibleTasks.length} task{visibleTasks.length === 1 ? '' : 's'} · {remaining} remaining
             {oneTimeOnly ? ' · one-time only' : ''}
+            {filteredPage ? ` · ${filteredPage.name}` : ''}
           </Typography>
-          {/* Clears finished chores in scope — with the filter on, recurring
-              ones that are hidden stay put. */}
+          {/* Clears finished chores in scope — anything a filter hides stays put. */}
           <Button
             size="small"
             color="inherit"
-            onClick={() =>
-              setTasks((prev) => prev.filter((t) => !(t.done && (!oneTimeOnly || isOneTime(t)))))
-            }
+            onClick={() => setTasks((prev) => prev.filter((t) => !(t.done && inScope(t))))}
             disabled={!scopedTasks.some((t) => t.done)}
           >
             Clear completed

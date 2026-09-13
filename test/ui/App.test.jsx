@@ -175,3 +175,42 @@ describe('one-time only filter', () => {
     expect(await screen.findByText('No one-time chores')).toBeInTheDocument()
   })
 })
+
+describe('filter by connected page', () => {
+  const mixed = [
+    { id: '1', text: 'Vacuum upstairs', done: false, recurrence: 'weekly', dueAt: '2026-01-05T09:00' },
+    { id: '2', text: 'Get three tile bids', done: false, recurrence: 'once', project: 'moving', link: { href: '/moving#bids', label: 'Moving plan · Tile bids' } },
+    { id: '3', text: 'Japan: Buy Ghibli tickets', done: false, recurrence: 'once', link: { href: '/japan#item-ghibli-tickets', label: 'Japan' } },
+  ]
+
+  beforeEach(() => window.localStorage.clear())
+
+  it('offers one button per registered page and narrows to that page', async () => {
+    loadTasks.mockResolvedValue(mixed)
+    renderAt('/')
+    await userEvent.click(await screen.findByRole('button', { name: /all chores/i }))
+    expect(await screen.findByText('Vacuum upstairs')).toBeInTheDocument()
+
+    await userEvent.click(screen.getByRole('button', { name: /moving plan chores only/i }))
+    expect(screen.getByText('Get three tile bids')).toBeInTheDocument()
+    expect(screen.queryByText('Vacuum upstairs')).not.toBeInTheDocument()
+    expect(screen.queryByText('Japan: Buy Ghibli tickets')).not.toBeInTheDocument()
+
+    // A link alone (no project field) is enough to connect a chore to a page.
+    await userEvent.click(screen.getByRole('button', { name: /japan chores only/i }))
+    expect(screen.getByText('Japan: Buy Ghibli tickets')).toBeInTheDocument()
+    expect(screen.queryByText('Get three tile bids')).not.toBeInTheDocument()
+
+    // Tapping the active page again clears the filter.
+    await userEvent.click(screen.getByRole('button', { name: /japan chores only/i }))
+    expect(screen.getByText('Vacuum upstairs')).toBeInTheDocument()
+  })
+
+  it('is remembered across visits and explains an empty result', async () => {
+    window.localStorage.setItem('chores.page', 'japan')
+    loadTasks.mockResolvedValue([mixed[0]])
+    renderAt('/')
+    expect(await screen.findByText('No Japan chores')).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: /japan chores only/i })).toHaveAttribute('aria-pressed', 'true')
+  })
+})
