@@ -43,6 +43,24 @@ npm run seed:meals
 
 That upserts every meal in `scripts/meals-data.cjs` — edit a recipe there and re-run it.
 
+The moving plan's tasks go in the same way:
+
+```bash
+npm run seed:moving
+```
+
+Each entry in `scripts/moving-tasks.cjs` becomes a one-time chore due at 9:00 AM on its
+day, assigned to Tommy (override with `MOVING_ASSIGNEE=Alison`), with a reminder the day
+before. Ids are stable (`moving-<id>`), so a re-run refreshes text and dates and leaves
+checked-off chores done. The plan itself, with the context behind each task, is the
+standalone page at `/moving` (`public/moving.html`, same setup as `/japan`).
+
+### Reminders a day early
+A chore can carry `remindDaysBefore` (whole days, default 0). Its ntfy push then fires
+that many days ahead of the due time at the same hour, worded "Due tomorrow: …"; if that
+early slot has already passed when the chore is added, it fires at the due time instead.
+The add/edit dialog doesn't expose the field yet — it's set by the seed script.
+
 A meal can name a `store` — where its ingredients are bought — which shows as a chip on
 the card and in the recipe dialog, so a week can be planned around a single trip. There
 are exactly five legal values, listed in `server/stores.cjs`:

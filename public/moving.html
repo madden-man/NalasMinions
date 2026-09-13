@@ -1,0 +1,728 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="robots" content="noindex">
+<title>Allison to Woods — moving plan</title>
+<link rel="icon" href="/favicon-32.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=Source+Sans+3:ital,wght@0,400;0,600;1,400&display=swap">
+<style>
+:root{
+  --bg:#F1F2ED; --surface:#FFFFFF; --surface-2:#E9EBE4; --ink:#1E2422; --muted:#5F6764; --line:#D3D7CF; --line-strong:#B9BEB6;
+  --pack:#B4731A; --fix:#A6432E; --rent:#2E7A57; --new:#2D5EA2; --decide:#6A4DA3; --deadline:#B4231F; --deadline-bg:#F8E4E2;
+  --pack-bg:#F6EBD9; --fix-bg:#F5E1DC; --rent-bg:#DFEFE6; --new-bg:#DEE8F6; --decide-bg:#E8E1F4;
+  --today:#B4731A; --focus:#2D5EA2;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#181B1A; --surface:#212625; --surface-2:#2A302E; --ink:#ECEEE9; --muted:#A3AAA5; --line:#343A38; --line-strong:#4A524F;
+    --pack:#DE9B3F; --fix:#DC6E55; --rent:#54AD82; --new:#7BA3E3; --decide:#A48EE0; --deadline:#E85B54; --deadline-bg:#3A2323;
+    --pack-bg:#3A2E1B; --fix-bg:#3B241F; --rent-bg:#1E3329; --new-bg:#1F2C41; --decide-bg:#2C2540;
+    --today:#DE9B3F; --focus:#7BA3E3;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#181B1A; --surface:#212625; --surface-2:#2A302E; --ink:#ECEEE9; --muted:#A3AAA5; --line:#343A38; --line-strong:#4A524F;
+  --pack:#DE9B3F; --fix:#DC6E55; --rent:#54AD82; --new:#7BA3E3; --decide:#A48EE0; --deadline:#E85B54; --deadline-bg:#3A2323;
+  --pack-bg:#3A2E1B; --fix-bg:#3B241F; --rent-bg:#1E3329; --new-bg:#1F2C41; --decide-bg:#2C2540;
+  --today:#DE9B3F; --focus:#7BA3E3;
+}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font-family:"Source Sans 3",system-ui,-apple-system,"Segoe UI",sans-serif;font-size:16px;line-height:1.5;padding-inline:clamp(16px,4vw,40px);padding-block:28px 80px}
+.wrap{max-width:1080px;margin:0 auto}
+h1,h2,h3,.disp{font-family:"Barlow Condensed","Arial Narrow",Impact,sans-serif;text-wrap:balance;margin:0}
+h1{font-size:clamp(40px,7vw,64px);font-weight:700;line-height:.95;letter-spacing:-.01em;text-transform:uppercase}
+h2{font-size:30px;font-weight:600;line-height:1.05;text-transform:uppercase;letter-spacing:.01em}
+h3{font-size:22px;font-weight:600;line-height:1.1}
+p{margin:0}
+a{color:var(--new)}
+.eyebrow{font-family:"Barlow Condensed",sans-serif;font-weight:600;text-transform:uppercase;letter-spacing:.12em;font-size:13px;color:var(--muted)}
+.num{font-variant-numeric:tabular-nums}
+.lede{font-size:18px;max-width:62ch;color:var(--ink)}
+.muted{color:var(--muted)}
+.small{font-size:14px}
+
+/* header */
+header.top{display:grid;gap:18px;padding-bottom:24px;border-bottom:2px solid var(--ink)}
+.addr{display:grid;grid-template-columns:1fr auto 1fr;gap:14px;align-items:center;max-width:720px}
+.addr .from,.addr .to{font-family:"Barlow Condensed",sans-serif;font-size:20px;font-weight:600;line-height:1.1}
+.addr .lab{display:block;font-size:12px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);font-weight:600}
+.addr .arrow{font-family:"Barlow Condensed",sans-serif;font-size:28px;color:var(--pack);font-weight:700}
+@media (max-width:520px){.addr{grid-template-columns:1fr}.addr .arrow{display:none}}
+
+/* status strip */
+.strip{display:grid;grid-template-columns:repeat(4,1fr);gap:1px;background:var(--line);border:1px solid var(--line);margin-top:26px}
+.strip>div{background:var(--surface);padding:14px 16px;display:grid;gap:2px}
+.strip .big{font-family:"Barlow Condensed",sans-serif;font-size:36px;font-weight:700;line-height:1;font-variant-numeric:tabular-nums}
+.strip .big.dl{color:var(--deadline)}
+.strip .big.ok{color:var(--rent)}
+@media (max-width:760px){.strip{grid-template-columns:repeat(2,1fr)}}
+.sync{display:inline-flex;align-items:center;gap:6px;font-size:13px;color:var(--muted)}
+.sync i{width:8px;height:8px;border-radius:50%;background:var(--muted);display:inline-block}
+.sync.on i{background:var(--rent)}
+.sync.local i{background:var(--pack)}
+.decided{margin-top:18px;border-left:4px solid var(--decide);background:var(--decide-bg);padding:12px 16px;display:grid;gap:6px}
+.decided ul{margin:0;padding-left:18px;display:grid;gap:4px;font-size:15px}
+
+/* sections */
+section{margin-top:56px}
+.sec-head{display:flex;flex-wrap:wrap;align-items:baseline;justify-content:space-between;gap:8px 20px;margin-bottom:14px;padding-bottom:8px;border-bottom:1px solid var(--line-strong)}
+.sec-head p{max-width:70ch;color:var(--muted)}
+
+/* timeline */
+.tl{overflow-x:auto;padding-bottom:6px}
+.tl-grid{display:grid;grid-template-columns:repeat(13,minmax(76px,1fr));min-width:1000px;gap:0;border-left:1px solid var(--line-strong)}
+.tl-wk{border-right:1px solid var(--line);padding:8px 8px 10px;display:grid;align-content:start;gap:4px;min-height:96px;position:relative}
+.tl-wk .wl{font-family:"Barlow Condensed",sans-serif;font-weight:600;font-size:14px;text-transform:uppercase;letter-spacing:.06em;color:var(--muted)}
+.tl-wk .wd{font-size:13px;color:var(--muted);font-variant-numeric:tabular-nums}
+.tl-wk .ph{font-family:"Barlow Condensed",sans-serif;font-weight:600;font-size:15px;line-height:1.1;margin-top:4px}
+.tl-wk.today{background:var(--surface)}
+.tl-wk.away{background:repeating-linear-gradient(135deg,transparent 0 6px,var(--line) 6px 7px)}
+.tl-wk.away .ph{color:var(--muted)}
+.week.away .wh .wk{color:var(--muted)}
+.tl-wk.today::before{content:"now";position:absolute;top:-1px;left:0;font-family:"Barlow Condensed",sans-serif;font-size:11px;letter-spacing:.12em;text-transform:uppercase;background:var(--today);color:#fff;padding:1px 6px}
+.tl-bar{display:grid;grid-template-columns:repeat(13,minmax(76px,1fr));min-width:1000px;border-left:1px solid var(--line-strong)}
+.tl-bar .seg{height:10px;border-right:1px solid var(--line)}
+.seg.pack{background:var(--pack)}.seg.fix{background:var(--fix)}.seg.rent{background:var(--rent)}.seg.new{background:var(--new)}.seg.ghost{background:transparent}
+.tl-lanes{display:grid;gap:3px;margin-top:6px}
+.lane{display:grid;grid-template-columns:110px 1fr;align-items:center;gap:8px}
+.lane .ln{font-family:"Barlow Condensed",sans-serif;font-size:13px;letter-spacing:.08em;text-transform:uppercase;font-weight:600;text-align:right;color:var(--muted)}
+.ms-list{display:grid;gap:0;margin-top:20px;border-top:1px solid var(--line)}
+.ms{display:grid;grid-template-columns:120px 1fr;gap:16px;padding:10px 0;border-bottom:1px solid var(--line);align-items:baseline}
+.ms .d{font-family:"Barlow Condensed",sans-serif;font-size:20px;font-weight:700;font-variant-numeric:tabular-nums;line-height:1.1}
+.ms .d span{display:block;font-size:12px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:var(--muted)}
+.ms .d.hard{color:var(--deadline)}
+.ms .t b{font-weight:600}
+@media (max-width:520px){.ms{grid-template-columns:1fr;gap:4px}}
+
+/* filters */
+.chips{display:flex;flex-wrap:wrap;gap:8px;margin:14px 0 18px}
+.chip{border:1px solid var(--line-strong);background:var(--surface);color:var(--ink);font:600 13px "Barlow Condensed",sans-serif;letter-spacing:.08em;text-transform:uppercase;padding:6px 12px;cursor:pointer;display:inline-flex;align-items:center;gap:8px}
+.chip i{width:10px;height:10px;display:inline-block}
+.chip[aria-pressed="true"]{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+.chip:focus-visible,.task input:focus-visible,button:focus-visible{outline:2px solid var(--focus);outline-offset:2px}
+.i-pack{background:var(--pack)}.i-fix{background:var(--fix)}.i-rent{background:var(--rent)}.i-new{background:var(--new)}.i-decide{background:var(--decide)}
+
+/* week blocks */
+.week{display:grid;grid-template-columns:200px 1fr;gap:0 28px;padding:22px 0;border-bottom:1px solid var(--line)}
+.week.past{opacity:.72}
+.week .wh{position:sticky;top:12px;align-self:start;display:grid;gap:4px}
+.week .wh .wk{font-family:"Barlow Condensed",sans-serif;font-size:26px;font-weight:700;line-height:1;text-transform:uppercase}
+.week .wh .rg{font-variant-numeric:tabular-nums;color:var(--muted)}
+.week .wh .goal{margin-top:6px;font-size:15px;max-width:26ch}
+.week .wh .cnt{font-family:"Barlow Condensed",sans-serif;font-size:14px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);margin-top:6px}
+.tasks{display:grid;gap:6px}
+.task{display:grid;grid-template-columns:22px 1fr;gap:12px;align-items:start;padding:8px 10px 8px 8px;background:var(--surface);border:1px solid var(--line);border-left:4px solid var(--line-strong)}
+.task.pack{border-left-color:var(--pack)}.task.fix{border-left-color:var(--fix)}.task.rent{border-left-color:var(--rent)}.task.new{border-left-color:var(--new)}.task.decide{border-left-color:var(--decide)}
+.task input{width:20px;height:20px;margin:3px 0 0;accent-color:var(--ink);cursor:pointer}
+.task label{cursor:pointer;display:grid;gap:2px}
+.task .tt{font-weight:600}
+.task .ts{font-size:14px;color:var(--muted)}
+.task .meta{display:flex;flex-wrap:wrap;gap:6px 12px;font-size:12px;letter-spacing:.06em;text-transform:uppercase;font-family:"Barlow Condensed",sans-serif;font-weight:600;color:var(--muted)}
+.task .meta .due{font-variant-numeric:tabular-nums}
+.task .meta .due.hard{color:var(--deadline)}
+.task.done .tt{text-decoration:line-through;color:var(--muted)}
+.task.hidden{display:none}
+@media (max-width:720px){.week{grid-template-columns:1fr;gap:12px}.week .wh{position:static}}
+
+/* tables */
+.tblwrap{overflow-x:auto}
+table{border-collapse:collapse;width:100%;min-width:560px;font-size:15px}
+th{font-family:"Barlow Condensed",sans-serif;font-weight:600;font-size:13px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);text-align:left;padding:8px 10px;border-bottom:2px solid var(--ink)}
+td{padding:9px 10px;border-bottom:1px solid var(--line);vertical-align:top}
+td.wkc{font-family:"Barlow Condensed",sans-serif;font-weight:700;white-space:nowrap}
+td.room{font-weight:600}
+.tag{display:inline-block;font:600 12px "Barlow Condensed",sans-serif;letter-spacing:.08em;text-transform:uppercase;padding:2px 7px;border:1px solid currentColor}
+.tag.fix{color:var(--fix)}.tag.decide{color:var(--decide)}.tag.pack{color:var(--pack)}
+
+/* memo / cards */
+.two{display:grid;grid-template-columns:1fr 1fr;gap:22px}
+@media (max-width:760px){.two{grid-template-columns:1fr}}
+.memo{background:var(--surface);border:1px solid var(--line);padding:20px 22px;display:grid;gap:12px}
+.memo ul,.plain ul{margin:0;padding-left:20px;display:grid;gap:6px}
+.memo .verdict{border-left:4px solid var(--decide);padding:10px 14px;background:var(--decide-bg)}
+.opt{display:grid;grid-template-columns:1fr;gap:10px}
+.opt>div{padding:12px 14px;border:1px solid var(--line);display:grid;gap:4px}
+.opt .oh{font-family:"Barlow Condensed",sans-serif;font-weight:700;font-size:18px;text-transform:uppercase;letter-spacing:.03em}
+.opt .oh span{font-weight:600;color:var(--muted);font-size:14px;letter-spacing:.08em;margin-left:8px}
+.callout{border-left:4px solid var(--deadline);background:var(--deadline-bg);padding:12px 16px;display:grid;gap:6px}
+.callout.rent{border-left-color:var(--rent);background:var(--rent-bg)}
+.path{display:grid;gap:0;border-top:1px solid var(--line)}
+.path>div{display:grid;grid-template-columns:96px 1fr;gap:14px;padding:10px 0;border-bottom:1px solid var(--line);align-items:baseline}
+.path .pd{font-family:"Barlow Condensed",sans-serif;font-weight:700;font-size:18px;font-variant-numeric:tabular-nums}
+.path .pd.hard{color:var(--deadline)}
+.foot{margin-top:56px;padding-top:16px;border-top:2px solid var(--ink);display:grid;gap:8px;color:var(--muted);font-size:14px}
+.foot ul{margin:0;padding-left:18px;display:grid;gap:4px}
+button.reset{font:600 13px "Barlow Condensed",sans-serif;letter-spacing:.08em;text-transform:uppercase;background:none;border:1px solid var(--line-strong);color:var(--muted);padding:5px 10px;cursor:pointer}
+@media (prefers-reduced-motion:no-preference){.task{transition:opacity .15s}}
+</style>
+<style>
+/* Standalone page: paint the ground ourselves since there's no host theme. */
+html{background:var(--bg)}
+body{margin:0}
+</style>
+</head>
+<body>
+
+
+<div class="wrap">
+<header class="top">
+  <div>
+    <div class="eyebrow">Move &amp; rental project plan · Fall 2026</div>
+    <h1>Allison to Woods</h1>
+  </div>
+  <div class="addr">
+    <div class="from"><span class="lab">Packing up &amp; renting out</span>1621 S Allison St, Lakewood</div>
+    <div class="arrow">→</div>
+    <div class="to"><span class="lab">Moving in</span>29866 Woods Dr</div>
+  </div>
+  <p class="lede">Three workstreams run at once: pack the brick ranch for the movers on <b>Fri Oct 2</b>, turn it over for renters at <b>$3,000/mo by Nov 1</b> (Dec 1 fallback), and land softly at Woods Dr. The critical path for renters is the downstairs bathroom tile, so your contractor gets a start date this week, before a single box is taped.</p>
+  <div class="strip">
+    <div><span class="eyebrow">Today</span><span class="big num" id="todayLbl">—</span><span class="small muted" id="todayDow"></span></div>
+    <div><span class="eyebrow">Days to move day</span><span class="big num dl" id="dMove">—</span><span class="small muted">Movers arrive Fri Oct 2</span></div>
+    <div><span class="eyebrow">Days to renters (Plan A)</span><span class="big num" id="dRent">—</span><span class="small muted">Tenant move-in Sun Nov 1 · Plan B Dec 1</span></div>
+    <div><span class="eyebrow">Tasks done</span><span class="big num ok" id="progress">0 / 0</span><span class="sync" id="sync"><i></i><span>Saved in this browser</span></span></div>
+  </div>
+  <div class="decided">
+    <span class="eyebrow">Decided Sep 13</span>
+    <ul>
+      <li><b>Self-managing.</b> No property manager. Listing, screening, lease, and rent collection run through your own tool.</li>
+      <li><b>Studio comes down.</b> Vinyl, panels, and guitar hooks out; patch and paint (Option A in the studio sections, kept below for reference).</li>
+      <li><b>Mural: you paint it.</b> Oct 3–4, since you're away Sep 26–27. Optional: primer coats on the evenings of Sep 23–24 if the room is empty.</li>
+      <li><b>Away Sep 26–27 and Oct 30–Nov 22.</b> Week 2 packing wraps Friday the 25th. Tenant handoff happens Oct 29, before you leave; a Plan B lease gets shown by lockbox or agent and signed remotely.</li>
+      <li><b>Tile: contractor chosen.</b> Get the written bid and a start date this week; no more bidding.</li>
+    </ul>
+  </div>
+</header>
+
+<section id="timeline">
+  <div class="sec-head"><h2>Milestones</h2><p>Eleven weeks from today to the Plan B tenant date. Hard dates in red. Each milestone is a Friday check: if it's not met, the next row tells you what to do.</p></div>
+  <div class="tl">
+    <div class="tl-grid" id="tlGrid"></div>
+    <div class="tl-lanes" id="tlLanes"></div>
+  </div>
+  <div class="ms-list">
+    <div class="ms"><div class="d">Fri Sep 18<span>M1</span></div><div class="t"><b>Tile booked, purge done.</b> Written tile bid with a start date, rent comps pulled, the self-management tool picked, moving supplies bought, donation pickup booked. Storage areas and off-season stuff packed.</div></div>
+    <div class="ms"><div class="d">Fri Sep 25<span>M2</span></div><div class="t"><b>Everything scheduled.</b> Tile start date in the contract. Mural weekend picked. Asking rent confirmed against comps. Insurance and utilities scheduled. Listing tool account live. Miss this and the Nov 1 date slips to Dec 1.</div></div>
+    <div class="ms"><div class="d">Fri Sep 25<span>Leave</span></div><div class="t"><b>Week 2 done before you go.</b> Downstairs, office, living and dining packed, decisions locked, utilities and insurance scheduled. Away Sat–Sun.</div></div>
+    <div class="ms"><div class="d">Thu Oct 1<span>M3</span></div><div class="t"><b>House is boxed.</b> Four working days after you're back: bedrooms, bathrooms, kitchen. Everything but the first-night bags is packed and labeled. Beds and desks come apart tonight.</div></div>
+    <div class="ms"><div class="d hard">Fri Oct 2<span>Move day</span></div><div class="t"><b>Movers load Allison, unload Woods Dr.</b> Hard deadline. Nothing on the rental side happens today.</div></div>
+    <div class="ms"><div class="d">Fri Oct 9<span>M4</span></div><div class="t"><b>Allison photo-ready.</b> Mural painted, punch list done, upstairs deep-cleaned, listing photos shot. Tile work in progress downstairs.</div></div>
+    <div class="ms"><div class="d">Sat Oct 10<span>M5</span></div><div class="t"><b>Listing live</b>, available Nov 1. First showings this weekend. Three weeks of marketing before move-in is the minimum that works.</div></div>
+    <div class="ms"><div class="d">Fri Oct 16<span>M6</span></div><div class="t"><b>Tile done, house fully show-ready.</b> Final clean downstairs. Second open-house weekend Oct 17–18.</div></div>
+    <div class="ms"><div class="d">Fri Oct 23<span>Plan B gate</span></div><div class="t"><b>Go / no-go on Nov 1.</b> Fewer than two qualified applications by tonight means you re-list with a Dec 1 availability and re-check the price. You leave in a week, so a Plan B listing needs a self-showing lockbox or a leasing agent set up before Oct 29.</div></div>
+    <div class="ms"><div class="d">Tue Oct 27<span>M7</span></div><div class="t"><b>Lease signed</b>, deposit and first month collected, utilities transfer scheduled.</div></div>
+    <div class="ms"><div class="d hard">Thu Oct 29<span>Handoff</span></div><div class="t"><b>Walkthrough, condition report, keys.</b> Possession from Oct 29 at no charge, rent starts Nov 1. House winterized if there's no tenant yet. You leave tomorrow.</div></div>
+    <div class="ms"><div class="d hard">Sun Nov 1<span>Plan A</span></div><div class="t"><b>Lease starts.</b> You're away; the tenant already has keys. Confirm first month landed and utilities switched, from your phone.</div></div>
+    <div class="ms"><div class="d">Nov 23<span>Back</span></div><div class="t"><b>Plan B handoff window.</b> If a Dec 1 lease was e-signed while you were away, do the walkthrough and keys Nov 23–30.</div></div>
+    <div class="ms"><div class="d hard">Tue Dec 1<span>Plan B</span></div><div class="t"><b>Fallback tenant move-in.</b> Budget one extra mortgage payment with no rent covering it.</div></div>
+  </div>
+</section>
+
+<section id="plan">
+  <div class="sec-head"><h2>Week by week</h2><p>Every task here is also a todo in Nala's Minions on its due date, with a reminder the day before. Checks on this page stay in this browser; the Minions list is the shared one.</p></div>
+  <div class="chips" id="chips">
+    <button class="chip" data-ws="all" aria-pressed="true">All</button>
+    <button class="chip" data-ws="pack" aria-pressed="false"><i class="i-pack"></i>Packing</button>
+    <button class="chip" data-ws="fix" aria-pressed="false"><i class="i-fix"></i>Repairs</button>
+    <button class="chip" data-ws="rent" aria-pressed="false"><i class="i-rent"></i>Renting</button>
+    <button class="chip" data-ws="new" aria-pressed="false"><i class="i-new"></i>Woods Dr</button>
+    <button class="chip" data-ws="decide" aria-pressed="false"><i class="i-decide"></i>Decisions</button>
+  </div>
+  <div id="weeks"></div>
+</section>
+
+<section id="rooms">
+  <div class="sec-head"><h2>Room packing order</h2><p>Built from the walkthrough video (IMG_6310, 4:21). Timestamps point at the frame to grab for each room. Least-used rooms first, the kitchen and your bed last. Box counts are estimates from what's visible; buy about 10% more than the total.</p></div>
+  <div class="tblwrap">
+  <table>
+    <thead><tr><th>Pack week</th><th>Room</th><th class="num">Video</th><th>What the video shows, what to do</th><th class="num">Boxes</th></tr></thead>
+    <tbody>
+      <tr><td class="wkc">Wk 1<br><span class="muted small num">Sep 13–19</span></td><td class="room">Detached garage</td><td class="num">2:08–2:20</td><td>Unfinished framing, bikes, garden tools, shovels, a window unit or fan, lumber. Sell or donate the lumber. Drain fuel from anything with an engine; movers refuse fuel and propane.</td><td class="num">6–10</td></tr>
+      <tr><td class="wkc">Wk 1</td><td class="room">Basement storage &amp; laundry</td><td class="num">2:48–3:04</td><td>Wire shelving, bins, backpacks, boxes already stacked. Washer and dryer stay if they're renting with the house (a real selling point; decide). Purge hardest here.</td><td class="num">10–14</td></tr>
+      <tr><td class="wkc">Wk 1</td><td class="room">Basement library nook</td><td class="num">2:40</td><td>Two tall bookcases, desk, lamp. Books in small boxes only, spines down. Cull a third.</td><td class="num">10–14</td></tr>
+      <tr><td class="wkc">Wk 1</td><td class="room">Gym room (basement)</td><td class="num">3:44</td><td>Cable machine, bench, bar, plates. Disassemble the machine yourself and bag the hardware; plates in small boxes, six to eight per box max.</td><td class="num">4–6 + equipment</td></tr>
+      <tr><td class="wkc">Wk 1</td><td class="room">Music studio (basement) <span class="tag decide">decision</span></td><td class="num">3:12–3:32</td><td>Black hung acoustic panels on walls and ceiling, wall-hung guitars, keyboard, desk with two monitors, futon, window with blinds. Pack instruments, cables, and desk gear this week; the panels come down in Week 2 once the decision is made (see memo). They're yours and reusable at Woods Dr.</td><td class="num">6–10 + cases</td></tr>
+      <tr><td class="wkc">Wk 1</td><td class="room">Basement kitchenette</td><td class="num">3:40</td><td>Wood cabinets, sink, toaster oven. Empty it; leave the appliances that stay with the house.</td><td class="num">2–3</td></tr>
+      <tr><td class="wkc">Wk 1</td><td class="room">Front porch &amp; backyard</td><td class="num">0:08 · 1:40–1:52</td><td>Green porch chairs, cooler, patio table and chairs, planters. Decide what stays for the listing (the patio set photographs well). Dead plants and pots go.</td><td class="num">2–4</td></tr>
+      <tr><td class="wkc">Wk 2<br><span class="muted small num">Sep 20–25</span></td><td class="room">Basement family room (mural wall) <span class="tag fix">repair</span></td><td class="num">2:36 · 2:44 · 3:08</td><td>Large sectional, ottoman, TV console, rainbow-and-sun mural on the end wall, three ukuleles and guitars hung on the blue wall. Pack it fully by Sep 23 and pull the console off the mural so the primer coats can go on Wed–Thu evenings, or on Oct 3.</td><td class="num">6–8</td></tr>
+      <tr><td class="wkc">Wk 2</td><td class="room">Basement bedroom</td><td class="num">3:52–4:16</td><td>Bed, nightstand, lamp, bookshelf, closet with shelving and bins. Strip and pack everything; disassemble the bed Oct 1.</td><td class="num">6–8</td></tr>
+      <tr><td class="wkc">Wk 2</td><td class="room">Bedroom / office (main floor)</td><td class="num">0:52–1:04</td><td>Desk, dresser, rug, full closet, ceiling fan. Wardrobe boxes for hanging clothes. Keep one laptop and the paperwork folder out.</td><td class="num">8–10</td></tr>
+      <tr><td class="wkc">Wk 2</td><td class="room">Living &amp; dining</td><td class="num">0:24–0:36 · 1:20</td><td>Sectional, armchairs, rug, TV, gallery wall, <b>upright piano</b>, dining table with six carved chairs. Photograph the gallery wall layout before it comes down. Confirm the movers handle pianos and price it separately.</td><td class="num">10–14</td></tr>
+      <tr><td class="wkc">Wk 2</td><td class="room">Kitchen, non-daily</td><td class="num">1:28–1:32</td><td>White cabinets, subway tile, stainless fridge. Small appliances, serving pieces, pantry overflow, the fridge-door collection. Eat the freezer down.</td><td class="num">8–12</td></tr>
+      <tr><td class="wkc">Wk 2</td><td class="room">Back entry / mudroom</td><td class="num">1:36</td><td>Small tiled room off the kitchen: shoes, bins, dog gear. Two boxes and a sweep.</td><td class="num">2</td></tr>
+      <tr><td class="wkc">Wk 3<br><span class="muted small num">Sep 28–Oct 1</span></td><td class="room">Primary bedroom</td><td class="num">1:00–1:08</td><td>Bed, nightstands, dresser, gray curtains, ceiling fan. Wardrobe boxes; dresser drawers can stay full if the movers agree. Jewelry rides with you.</td><td class="num">8–10</td></tr>
+      <tr><td class="wkc">Wk 3</td><td class="room">Main-floor bathroom</td><td class="num">0:44 · 1:16</td><td>Navy vanity, medicine cabinet, subway-tile shower. Pack to one shelf of daily items; toss half-empty bottles.</td><td class="num">2–3</td></tr>
+      <tr><td class="wkc">Wk 3</td><td class="room">Downstairs bathroom <span class="tag fix">repair</span></td><td class="num">not in video</td><td>Empty it completely, vanity included, so the tile crew has a clear room the Monday after you leave. Take five reference photos for the contractor bids this week.</td><td class="num">1–2</td></tr>
+      <tr><td class="wkc">Oct 1</td><td class="room">Kitchen essentials</td><td class="num"></td><td>Last box packed: coffee setup, one pan, a few plates, cutlery. Fridge emptied and wiped the night before if it's moving.</td><td class="num">3–5</td></tr>
+      <tr><td class="wkc">Oct 1</td><td class="room">First-night bags (ride with you)</td><td class="num"></td><td>Bedding for each bed, towels, toiletries, meds, chargers, TP, paper towels, box cutter, basic tools, snacks, dog food and bowls, leash.</td><td class="num">Bags, not boxes</td></tr>
+    </tbody>
+  </table>
+  </div>
+  <p class="small muted" style="margin-top:10px">Total: roughly 95–135 boxes plus the piano, gym machine, and instrument cases. Label every box on two sides with the <b>destination room at Woods Dr</b>, a one-line contents note, and a 1–3 priority. Tape a room name to each door at Woods Dr before the truck arrives.</p>
+</section>
+
+<section id="studio">
+  <div class="sec-head"><h2>The studio question</h2><p><b>Decided Sep 13: it comes down.</b> Vinyl, panels, and guitar hooks out, holes patched, walls painted. The reasoning and the other options stay here for reference.</p></div>
+  <div class="two">
+    <div class="memo">
+      <div class="verdict"><b>Recommendation: still take it down if you'll reuse the mass loaded vinyl at Woods Dr. If you won't, leave the vinyl on the wall and bury it under a new layer of drywall.</b> The video shows hung panels over the vinyl and a room that reads as a dark cave on camera. The basement already has a family room, a gym room, a kitchenette, and a bedroom. At $3,000 a month you're competing with clean 3- and 4-bedroom houses, and a fourth bedroom with a window rents that. The screw holes are real work either way; the section below walks through both repairs.</div>
+      <p><b>What restoring it actually involves</b></p>
+      <ul>
+        <li>Unhook the panels (they look hung on hooks or ties, so removal is a morning) and fold them for the move.</li>
+        <li>Fill anchor and hook holes. If the walls under the panels are painted dark, that's one coat of primer and two coats of the house white; if they're already light, touch-up only.</li>
+        <li>Pull the guitar hangers and patch. Clean the carpet with the rest of the basement.</li>
+        <li>Photograph it with the blinds open and a desk in it. It has the window, so it lists as a bedroom or office.</li>
+      </ul>
+      <p><b>Why not keep it:</b> it would only make sense if you'd rather attract a musician tenant than the widest pool, and even then it photographs badly. Decision made; the options below are the paths not taken.</p>
+    </div>
+    <div class="opt">
+      <div style="border-color:var(--decide)"><div class="oh">Option A <span>Chosen · strip it, patch, paint</span></div><p class="small">Oct 3–6. Panels and vinyl come with you, holes get patched, walls get painted. Lists as a 4th bedroom / office with a window. Pick this if the vinyl is going up again at Woods Dr.</p></div>
+      <div><div class="oh">Option D <span>Drywall over the vinyl</span></div><p class="small">Oct 5–8 by a drywall contractor. The vinyl stays sandwiched where it belongs, no holes to patch, and the room lists as a "quiet bedroom with soundproofed walls." Pick this if you're not reusing the vinyl, or if the ceiling has vinyl too.</p></div>
+      <div><div class="oh">Option B <span>Keep, list as a bonus room</span></div><p class="small">Leave the panels, call it a "quiet office / studio" in the listing, photograph it last. Zero work now, narrower pool, and you leave your panels behind.</p></div>
+      <div><div class="oh">Option C <span>Keep and lead with it</span></div><p class="small">Market it to musicians near Red Rocks and the Denver scene. Only makes sense if you'd take a slightly longer vacancy for the right tenant. Not recommended with a Nov 1 target.</p></div>
+      <div class="callout"><b>Still do this week</b><p class="small">Lift one panel and one vinyl edge, count fasteners on a 4-foot stretch, and check whether the ceiling has vinyl. That sets the shopping list: spackle and mesh patches, or a bucket of compound and a 12-inch knife for a skim coat.</p></div>
+    </div>
+  </div>
+</section>
+
+<section id="mlv">
+  <div class="sec-head"><h2>The vinyl on the walls</h2><p>Mass loaded vinyl screwed to the studs leaves a fastener hole every foot or two along every stud line, and sometimes torn drywall paper where washers pulled through. That's not a spackle-and-go job, but it's also not a reason to leave the room dark. <b>You chose Option A, strip and patch.</b> The three questions and the drywall-over path stay here in case a lifted panel reveals ceiling vinyl or torn-paper craters that change the math.</p></div>
+
+  <div class="two">
+    <div class="memo">
+      <h3>Decide with three questions</h3>
+      <div class="path">
+        <div><span class="pd">1</span><span><b>Will the vinyl go up again at Woods Dr?</b> It's the expensive part of any future studio, about a pound per square foot and a few hundred dollars for a room this size. Yes: take it down, Option A. No: it's worth more left on this wall than rolled in the garage, Option D.</span></div>
+        <div><span class="pd">2</span><span><b>Is there vinyl on the ceiling?</b> The video shows panels up there. If vinyl is under them, pulling a pound-per-foot sheet off a ceiling is a two-person misery and ceiling patches show in photos. Ceiling vinyl tips the whole room to Option D.</span></div>
+        <div><span class="pd">3</span><span><b>How bad are the holes?</b> Peel back one panel and one corner of vinyl this week. Screws with fender washers leave quarter- to half-inch holes: patchable. Toggle anchors, or washers that tore the paper face, leave inch-plus craters and fuzzy paper: still patchable, but at that point drywall-over is faster and looks better.</span></div>
+      </div>
+      <div class="callout" style="margin-top:12px"><b>This week's homework (by Fri Sep 18)</b><p class="small">Lift one panel and one vinyl edge, count the fasteners on one 4-foot stretch, and check the ceiling. Multiply by wall length for the hole count and buy patching supplies to match. If the ceiling turns out to have vinyl, reopen the drywall-over option before Sep 18; otherwise Option A stands.</p></div>
+    </div>
+    <div class="memo">
+      <h3>Cost and time, side by side</h3>
+      <div class="tblwrap">
+      <table style="min-width:0">
+        <thead><tr><th></th><th>A · Strip, patch, paint</th><th>D · Drywall over</th></tr></thead>
+        <tbody>
+          <tr><td class="room">Who</td><td>You two, or a handyman for the patch-and-paint</td><td>A drywall contractor; you handle baseboards and paint if you want to save</td></tr>
+          <tr><td class="room">Days</td><td class="num">3 to 4, mostly drying time</td><td class="num">3 to 4, mostly drying time</td></tr>
+          <tr><td class="room">Materials</td><td class="num">$120–250</td><td class="num">$350–500</td></tr>
+          <tr><td class="room">Hired</td><td class="num">$500–900 handyman</td><td class="num">$1,200–2,000 hung, finished, painted</td></tr>
+          <tr><td class="room">Window</td><td class="num">Oct 3–6</td><td class="num">Oct 5–8, booked by Sep 18</td></tr>
+          <tr><td class="room">Photos</td><td class="num">Oct 9</td><td class="num">Oct 16, with the bathroom</td></tr>
+          <tr><td class="room">Result</td><td>Ordinary bedroom, vinyl reused</td><td>Bedroom with a quiet-room selling point, vinyl gone for good</td></tr>
+        </tbody>
+      </table>
+      </div>
+      <p class="small muted" style="margin-top:8px">Both windows fit before the Oct 10 listing. Option D would move the studio-room photo to the bathroom's photo day. Your tile contractor likely does drywall or knows who does, if the ceiling check forces a change.</p>
+    </div>
+  </div>
+
+  <div class="two" style="margin-top:22px">
+    <div class="memo">
+      <h3>Option A, step by step</h3>
+      <ul class="small">
+        <li><b>Sat Oct 3, morning: take it down.</b> Drill driver, two people, one supporting the sheet while the other backs screws out. Start at the top edge. Roll each sheet as it comes free and label it by wall for reinstalling. Panels and guitar hangers off the same morning. Bag all screws and washers.</li>
+        <li><b>Sort the holes into three kinds.</b> Screw holes up to half an inch: lightweight spackle, two passes. Half inch to three inches, or a washer crater: self-adhesive mesh patch, three thin coats of joint compound feathered six inches out. Anything bigger or with crushed board: cut a clean square, screw in a wood backer, set a new drywall piece, tape and three coats.</li>
+        <li><b>Torn paper first.</b> Anywhere the face paper is fuzzy or peeled, seal it with a primer made for torn drywall paper (Zinsser Gardz or similar) before any compound touches it, or the compound bubbles and you do it twice.</li>
+        <li><b>If the holes are dense, skim instead.</b> More than one hole per square foot means it's faster to skim-coat each wall with a 12-inch knife than to patch individually. Two thin coats, overnight between.</li>
+        <li><b>Sun Oct 4: second coat and sand.</b> 150 then 220 grit, a light on the wall at a low angle to find ridges. Vacuum the dust; the tile crew is coming Monday.</li>
+        <li><b>Mon–Tue Oct 5–6, evenings: prime and paint.</b> PVA drywall primer over every patch or the whole wall if you skimmed; compound flashes through paint otherwise. Then two coats of the house white in eggshell. Flat ceiling paint on the whole ceiling if you patched up there.</li>
+        <li><b>Reassemble.</b> Outlet and switch covers, blinds open, a desk or a made bed for the photo on Oct 9.</li>
+      </ul>
+    </div>
+    <div class="memo">
+      <h3>Option D, step by step</h3>
+      <ul class="small">
+        <li><b>By Fri Sep 18: book it.</b> Ask for half-inch drywall over the existing vinyl, screws long enough to reach the studs, staggered seams, tape and three coats, primed. Get start and finish dates in writing; three to four days because of drying.</li>
+        <li><b>Before they arrive (Oct 3–4):</b> panels and hangers down, baseboards pried off and labeled, room empty, vinyl seams re-taped flat. Leave the vinyl screwed exactly where it is.</li>
+        <li><b>What they do (Oct 5–8):</b> hang, tape, mud, sand, prime. Ask them to add outlet and switch box extenders, which code requires once the box sits more than a quarter inch back, and to trim the door and window jambs with a half-inch extension so the reveal looks intended.</li>
+        <li><b>Optional upgrade while it's open:</b> a bead of Green Glue between the old surface and the new sheet makes it a proper isolation sandwich for another $80–120. Only worth it if you'll market the quiet room.</li>
+        <li><b>You (Oct 9–10 evenings):</b> two coats of the house white, baseboards back on with a caulk line, covers on. Photo Oct 16 with the new bathroom.</li>
+        <li><b>In the listing:</b> "Downstairs bedroom with soundproofed walls" in the body copy, not the headline. It's a nice surprise at a showing, not the reason someone comes.</li>
+      </ul>
+      <div class="callout rent" style="margin-top:8px"><b>What not to do</b><p class="small">Don't paint the vinyl, and don't leave it exposed under a "quiet room" label. Black vinyl walls read as unfinished in every photo, and paint doesn't stick to it well enough to survive a tenant.</p></div>
+    </div>
+  </div>
+</section>
+
+<section id="listing">
+  <div class="sec-head"><h2>Listing playbook at $3,000</h2><p>How to shoot it, where to list it, and how to pick the tenant who pays on time for two years. Everything here assumes you self-manage; a property manager does the middle of this for you but the criteria and the photos are still yours to get right.</p></div>
+
+  <h3 style="margin-bottom:8px">The numbers that follow from $3,000</h3>
+  <div class="tblwrap">
+  <table>
+    <thead><tr><th>Item</th><th class="num">Figure</th><th>Why</th></tr></thead>
+    <tbody>
+      <tr><td>Asking rent</td><td class="num">$3,000 / mo</td><td>Sanity-check against 3–4 bed houses in 80232 on Zillow the week you list. You want to be in the middle of the range, not the top.</td></tr>
+      <tr><td>Maximum income requirement</td><td class="num">$6,000 / mo gross</td><td>Colorado caps the income you can require at twice the rent. Write your criteria as "household gross income of at least $6,000/month" and no higher.</td></tr>
+      <tr><td>Security deposit</td><td class="num">$3,000</td><td>Legal cap is two months. One month keeps the move-in cost at $6,000, which is what a good applicant can actually write a check for.</td></tr>
+      <tr><td>Pet deposit and pet rent</td><td class="num">$300 · $35 / mo</td><td>Colorado caps a refundable pet deposit at $300 and pet rent at $35 or 1.5% of rent. Allowing dogs widens the pool a lot in Lakewood; the fenced yard is the reason someone with a dog picks this house.</td></tr>
+      <tr><td>Application fee</td><td class="num">actual cost, ~$35–50</td><td>You may only charge what screening costs you. If an applicant brings a portable screening report from the last 30 days, you must accept it and charge nothing.</td></tr>
+      <tr><td>Price check, day 7</td><td class="num">10 inquiries · 4 showings</td><td>Fewer than that in the first week means the price or the photos are wrong. Fix the photos first, then drop to $2,900 on day 10 and $2,800 on day 17.</td></tr>
+      <tr><td>Lease term</td><td class="num">19 months, to May 31, 2028</td><td>A 12-month lease from Nov 1 ends Oct 31, the slowest month to re-rent in Denver. Run the first lease long so it ends in late spring, then go 12 months from there.</td></tr>
+    </tbody>
+  </table>
+  </div>
+
+  <h3 style="margin:28px 0 8px">Photos: the shot list</h3>
+  <p class="muted" style="max-width:70ch;margin-bottom:12px">The first five photos decide whether anyone taps through. Shoot after the Oct 8 clean, in the morning, every light on, blinds open, phone in landscape at chest height, held level. Use the wide (0.5×) lens from a doorway corner, but not so wide the room bends. No pets, people, or open toilet lids in frame. Twenty to thirty photos, in this order.</p>
+  <div class="tblwrap">
+  <table>
+    <thead><tr><th class="num">#</th><th>Shot</th><th>How to get it</th></tr></thead>
+    <tbody>
+      <tr><td class="num">1</td><td class="room">Front exterior</td><td>From the sidewalk, slightly to the side, late morning with the sun behind you. Mow, edge, pull the dead planter, put the two green chairs back on the porch. This is the thumbnail.</td></tr>
+      <tr><td class="num">2</td><td class="room">Living room from the dining doorway</td><td>Hardwood in the foreground, windows in frame. Empty rooms photograph fine; staged is better. If anything stays for photos, it's the rug and one chair.</td></tr>
+      <tr><td class="num">3</td><td class="room">Kitchen, wide from the entry</td><td>White cabinets, subway tile, stainless. Clear every counter. Under-cabinet lights on.</td></tr>
+      <tr><td class="num">4</td><td class="room">Backyard from the patio</td><td>The yard is a headline feature: mature trees, full fence, big concrete patio. Leave the patio set out. Shoot toward the trees, not the garage.</td></tr>
+      <tr><td class="num">5</td><td class="room">Basement family room</td><td>After the mural is painted, from the stairs end, showing the length of the room. Blue wall with the hangers removed.</td></tr>
+      <tr><td class="num">6–7</td><td class="room">Kitchen second angle · dining room</td><td>Kitchen toward the window; dining from the living room with the light fixture in frame.</td></tr>
+      <tr><td class="num">8–9</td><td class="room">Primary bedroom · second bedroom</td><td>From the doorway corner, closet doors closed, curtains open. Ceiling fans on low blur nicely; off is safer.</td></tr>
+      <tr><td class="num">10–11</td><td class="room">Main-floor bathroom, two angles</td><td>Vanity and mirror; then the subway-tile shower with the curtain pulled fully open. Fresh towels, nothing on the counter.</td></tr>
+      <tr><td class="num">12–13</td><td class="room">Basement bedroom · restored studio room</td><td>Both with blinds open. If the studio stays treated, shoot it last instead.</td></tr>
+      <tr><td class="num">14</td><td class="room">Downstairs bathroom, new tile</td><td>Added the day the tile is done. Until then the listing says "bathroom being retiled, photos Oct 16."</td></tr>
+      <tr><td class="num">15–16</td><td class="room">Gym room · kitchenette</td><td>Gym room as an empty flex room. Kitchenette clean and lit; call it a wet bar or second kitchen.</td></tr>
+      <tr><td class="num">17–18</td><td class="room">Laundry · storage</td><td>Washer and dryer if included. One photo of the shelved storage. Renters count these.</td></tr>
+      <tr><td class="num">19–21</td><td class="room">Garage · patio detail · front porch</td><td>Garage swept with the door up. Patio table set. Porch from the walk.</td></tr>
+      <tr><td class="num">22+</td><td class="room">Floor plan sketch</td><td>Hand-drawn is fine, or the free CubiCasa or Magicplan phone scan. Listings with a floor plan get noticeably more saves on Zillow.</td></tr>
+    </tbody>
+  </table>
+  </div>
+  <p class="small muted" style="margin-top:10px">Stills from the walkthrough video are fine for a "coming soon" post to friends and for your own packing plan. They're not listing photos: portrait, cluttered, motion-blurred, and they show your stuff.</p>
+
+  <h3 style="margin:28px 0 8px">Where to list</h3>
+  <div class="tblwrap">
+  <table>
+    <thead><tr><th>Service</th><th>What it does</th><th>Cost</th><th>Use it for</th></tr></thead>
+    <tbody>
+      <tr><td class="room">Zillow Rental Manager</td><td>Listing syndicated to Zillow, Trulia, and HotPads. Applications with TransUnion credit, background, and eviction screening (applicant pays, one fee covers 30 days of applications). Lease templates and rent collection.</td><td>Free to list; a weekly fee after the first listing in some markets.</td><td>The primary listing. Most Denver-area renters start here.</td></tr>
+      <tr><td class="room">Apartments.com</td><td>Second-largest network; syndicates across its sister sites. Applications, screening, and rent collection too.</td><td>Free.</td><td>Post the same listing the same day. Different renters use different apps.</td></tr>
+      <tr><td class="room">Facebook Marketplace + Lakewood/Denver housing groups</td><td>Huge reach for single-family rentals in the metro. Also the biggest source of scam replies and of scammers copying your photos.</td><td>Free.</td><td>Reach. Reply only through your own application link; never text back and forth about deposits.</td></tr>
+      <tr><td class="room">Avail, TurboTenant, or RentRedi</td><td>Landlord software: one form syndicates to a dozen sites, plus screening, Colorado-specific lease, e-sign, rent collection, maintenance tracking.</td><td>Free to ~$15/mo.</td><td>Pick one if you self-manage. Avail's Colorado lease and its "portable screening" handling are the best fit for the state rules.</td></tr>
+      <tr><td class="room">Craigslist Denver</td><td>Still used for houses in Lakewood, mostly by older and long-tenured renters.</td><td>Free.</td><td>Worth 10 minutes. Same rules about scams.</td></tr>
+      <tr><td class="room">A leasing-only agent (MLS)</td><td>A Realtor lists it on the MLS and handles showings and screening, then hands you the tenant.</td><td>Roughly half a month's rent, once.</td><td>If by Oct 16 you don't have the bandwidth for showings. Also puts the house in front of relocation clients.</td></tr>
+      <tr><td class="room">Local employer boards</td><td>The Denver Federal Center, St. Anthony Hospital, Jeffco Public Schools, and Colorado Christian University are all in Lakewood and have internal housing boards or HR contacts.</td><td>Free.</td><td>Stable-income tenants who want a short commute. One email each.</td></tr>
+      <tr><td class="room">A yard sign</td><td>"For rent, [phone], available Nov 1."</td><td>$20.</td><td>Neighbors have friends who want into the neighborhood. Every showing also walks past it.</td></tr>
+    </tbody>
+  </table>
+  </div>
+
+  <div class="two" style="margin-top:28px">
+    <div class="memo">
+      <h3>Screening: how to find the reliable ones</h3>
+      <p class="small"><b>Write the criteria first, apply them identically to everyone, in the order applications arrive.</b> That is both fair-housing protection and the only way to say no cleanly. Post the criteria in the listing so weak applicants self-select out.</p>
+      <ul class="small">
+        <li><b>Income:</b> household gross of at least $6,000/mo, verified by the two most recent pay stubs plus an offer letter for new jobs, or two years of tax returns if self-employed. Housing vouchers count as income in Colorado and you can't decline them.</li>
+        <li><b>Credit:</b> set a floor (620 is common) but read the report, not the score. Collections from medical debt are noise; a recent unpaid utility or a prior landlord judgment is signal.</li>
+        <li><b>Rental history:</b> call the <i>previous</i> landlord, not just the current one. The current landlord may want a bad tenant gone; the previous one has no reason to lie. Ask: paid on time every month, any notices, any damage beyond the deposit, would you rent to them again.</li>
+        <li><b>Background:</b> eviction filings in the last five to seven years are the main disqualifier. Colorado limits how far back you can look at criminal history; use Zillow's or Avail's compliant report rather than a raw search.</li>
+        <li><b>Employment:</b> call the employer through the main switchboard number you find yourself, not the number on the application.</li>
+        <li><b>Identity:</b> ID name must match the application, the pay stubs, and the bank statement. Check that the pay-stub math (gross, taxes, net) actually adds up.</li>
+      </ul>
+    </div>
+    <div class="plain" style="display:grid;gap:14px">
+      <div class="memo">
+        <h3>Red flags that predict a bad year</h3>
+        <ul class="small">
+          <li>Wants to skip the application or "just pay cash up front." Several months of cash offered early is the most common scam and the most common problem-tenant tell.</li>
+          <li>Story arrives before the paperwork. A long explanation of why the credit or the reference is complicated.</li>
+          <li>Landlord reference number that doesn't trace back to the property owner. Look the address up on the Jefferson County assessor site and compare names.</li>
+          <li>Wants to move in this week. Good tenants give notice and plan a month out.</li>
+          <li>More occupants than the application lists, or pushback on the pet policy after the showing.</li>
+          <li>Won't come to a showing but wants to apply sight unseen.</li>
+        </ul>
+      </div>
+      <div class="memo">
+        <h3>Showings that produce applications</h3>
+        <ul class="small">
+          <li>Reply to every inquiry within an hour with three pre-screen questions: move-in date, who's living there, pets, and whether $6,000/mo household income and the deposit work. Then offer showing slots.</li>
+          <li>Two open-house Saturdays, Oct 17 and 24, 10am–1pm, plus weekday evenings by appointment. Group showings create urgency and save you twenty trips.</li>
+          <li>Bring the application link on a QR code. Applications within 24 hours of a showing are the ones that close.</li>
+          <li>Keep one sheet: name, date, source, showed, applied, decision. It's your fair-housing record if anyone asks.</li>
+        </ul>
+      </div>
+      <div class="callout rent">
+        <b>Lease clauses worth having</b>
+        <ul class="small">
+          <li>Renters insurance required, $100,000 liability, you named as interested party.</li>
+          <li>Rent due on the 1st, paid online; the 7-day grace period and $50 late fee cap are Colorado law, so write them in as-is.</li>
+          <li>Tenant handles lawn, snow within 24 hours (Lakewood code), and furnace filters; you handle everything else.</li>
+          <li>No subletting or short-term rental. Basement kitchenette is not a separate unit.</li>
+          <li>Move-in condition report with your dated photos attached, signed by both sides.</li>
+          <li>Radon disclosure and bed-bug notice attached. Lead-based paint disclosure if the house is pre-1978, which a Lakewood brick ranch almost certainly is.</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <div class="memo" style="margin-top:28px">
+    <h3>Listing copy, first draft</h3>
+    <p class="small muted">Fill in beds, baths, and square footage from the county record. Written from the video; cut anything that isn't true.</p>
+    <p><b>Updated brick ranch with finished basement, big fenced yard, and detached garage in Lakewood. Available Nov 1.</b></p>
+    <p class="small">Hardwood floors through the living and dining rooms, a bright kitchen with white cabinets, subway tile, stainless appliances, and under-cabinet lighting, and a renovated main-floor bath with a navy vanity and tiled shower. Two bedrooms up. Downstairs, a large finished family room, two more bedrooms or offices, a second bathroom (newly retiled), a flex room that fits a home gym, a kitchenette, laundry, and real storage. Out back: a big covered concrete patio, mature shade trees, a fully fenced yard, and a detached garage with room for bikes and tools. Quiet block minutes from Belmar, Bear Creek Lake Park, and the W Line. Dogs welcome with pet deposit. 19-month lease, then annual. $3,000/month, $3,000 deposit, tenant pays gas, electric, water, and internet. Household income of $6,000/month or more, credit and background screening on all adults, no smoking. Showings start Oct 10.</p>
+  </div>
+</section>
+
+<section id="rental">
+  <div class="sec-head"><h2>Renter critical path</h2><p>Everything on the rental side keys off two dates: the day the house is photo-ready and the day the listing goes live. Tile is the long pole, so it gets booked first and scheduled to start the Monday after you move.</p></div>
+  <div class="two">
+    <div>
+      <div class="path">
+        <div><span class="pd">Sep 14–18</span><span>Your tile contractor walks the bathroom and gives a written bid with a start date. Ask whether they can start while you're still living there. It's a downstairs bath; if you have another, let them start early.</span></div>
+        <div><span class="pd">Sep 18</span><span>Contract signed, deposit paid, dates in writing. Pick in-stock tile and materials that week; a special order is how a three-day job becomes a three-week wait.</span></div>
+        <div><span class="pd">Oct 3–4</span><span>Punch-list weekend at Allison: mural primed and painted (if not done pre-move), nail holes, touch-up paint, blinds, smoke and CO detectors, furnace filter, light bulbs.</span></div>
+        <div><span class="pd">Oct 5–16</span><span>Tile work window. Target done Oct 16, latest acceptable Oct 23.</span></div>
+        <div><span class="pd">Oct 8–9</span><span>Deep clean upstairs and main level, carpet clean, listing photos on Oct 9 in daylight. Shoot the bathroom later and add it.</span></div>
+        <div><span class="pd">Oct 10</span><span>Listing live on Zillow (which feeds Trulia and HotPads), Apartments.com, and Facebook Marketplace through your listing tool. Available Nov 1.</span></div>
+        <div><span class="pd">Oct 10–25</span><span>Showings. Two open-house style Saturdays, Oct 17 and Oct 24, plus individual showings. Screen as applications arrive.</span></div>
+        <div><span class="pd hard">Oct 23</span><span>Plan B gate. Fewer than two qualified applications: change availability to Dec 1, drop price 3–5% if showings have been under five a week.</span></div>
+        <div><span class="pd">Oct 27</span><span>Lease signed, deposit and first month in hand, utilities transfer date set.</span></div>
+        <div><span class="pd hard">Oct 29</span><span>Walkthrough with dated photos, condition report signed, keys handed over, possession from today at no charge. If there's no tenant: heat to 55°F, hose bibs off, neighbor on snow duty, insurer told about the vacancy dates. You leave Oct 30.</span></div>
+        <div><span class="pd hard">Nov 1</span><span>Lease and rent start while you're away. Plan B showings Nov 2–22 run by lockbox or a leasing agent; lease e-signed remotely; walkthrough Nov 23–30; Dec 1 move-in.</span></div>
+      </div>
+    </div>
+    <div class="plain">
+      <div class="memo">
+        <h3>Mural wall: Oct 3–4, with the primer optionally earlier</h3>
+        <p class="small">You're away Sep 26–27, so the mural shares the post-move weekend with the studio. Saturday: studio vinyl down in the morning, two primer coats on the mural in the afternoon (shellac primer recoats in under an hour). Sunday: two finish coats on the mural, second compound coat in the studio. If the family room is empty by Sep 23, knock out the primer coats on the Wednesday and Thursday evenings before you leave and Saturday gets a lot lighter. Heavy pigment needs two coats of stain-blocking primer or it ghosts through.</p>
+        <h3 style="margin-top:8px">Self-managing: what it costs you instead</h3>
+        <p class="small">You keep the 8–10% a manager would take, roughly $3,600 a year at this rent, plus a leasing fee. In exchange you own the inquiry inbox for three weeks, two open-house Saturdays, the screening calls, and every maintenance text for the life of the lease. Pick one tool (Avail, TurboTenant, or Zillow Rental Manager) and run everything through it so the paper trail is in one place. Keep a short list of a plumber, an electrician, and a handyman before the tenant moves in; the first call always comes at a bad time.</p>
+        <h3 style="margin-top:8px">Colorado rules to build into the lease</h3>
+        <p class="small">Deposit cap, late-fee cap, the 2× income limit, portable screening reports, radon and bed-bug attachments, and the for-cause eviction rules after 12 months are all folded into the listing playbook above. Use your listing tool's Colorado lease and have it reviewed once.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="foot">
+  <b class="disp" style="font-size:18px;text-transform:uppercase;letter-spacing:.04em;color:var(--ink)">Assumptions to confirm</b>
+  <ul>
+    <li>You're away Sep 26–27 and Oct 30–Nov 22. Every date here respects that; if either trip moves, the Oct 29 handoff and the Sep 25 packing cutoff move with it.</li>
+    <li>You have a second bathroom at Allison, so the downstairs tile job can overlap with living there.</li>
+    <li>The room list comes from the walkthrough video. The downstairs bathroom doesn't appear in it, so its condition and the scope of the tile job are unverified here.</li>
+    <li>The studio has mass loaded vinyl screwed to the studs under the panels. Hole count, ceiling coverage, and whether the vinyl moves to Woods Dr are unknown until you lift a panel; the vinyl section assumes fender-washer screw holes on standard stud spacing.</li>
+    <li>Woods Dr is move-in ready, so its tasks are limited to utilities, keys, locks, and address changes. If it's on well, septic, or propane, add a service check before Oct 2.</li>
+    <li>Colorado landlord rules are summarized from memory and change often. Have the lease reviewed once before it's signed.</li>
+  </ul>
+  <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;margin-top:6px"><span>Plan as of Sun Sep 13, 2026.</span><button class="reset" id="resetBtn" type="button">Clear all checks</button></div>
+</div>
+</div>
+
+<script>
+(function(){
+  const WEEKS=[
+    {k:'w1',label:'Week 1',start:'2026-09-13',end:'2026-09-19',goal:'Tile booked, tool picked, supplies, purge. Pack what you won\'t miss.',ph:'Book & purge'},
+    {k:'w2',label:'Week 2',start:'2026-09-20',end:'2026-09-25',goal:'Lock the rest. Pack the downstairs, office, living and dining by Friday.',ph:'Decide & pack'},
+    {k:'aw1',label:'Away',start:'2026-09-26',end:'2026-09-27',goal:'Out of town.',ph:'Away',away:true},
+    {k:'w3',label:'Week 3',start:'2026-09-28',end:'2026-10-01',goal:'Four days: bedrooms, bathrooms, kitchen last.',ph:'Box it all'},
+    {k:'mv',label:'Move day',start:'2026-10-02',end:'2026-10-02',goal:'Movers load Allison and unload Woods Dr.',ph:'Move Oct 2',hard:true},
+    {k:'w4',label:'Week 4',start:'2026-10-03',end:'2026-10-09',goal:'Turn Allison over: studio, mural, tile starts. Photos Friday.',ph:'Turnover'},
+    {k:'w5',label:'Week 5',start:'2026-10-10',end:'2026-10-16',goal:'Listing live. Tile finishes. Showings begin.',ph:'Listing live'},
+    {k:'w6',label:'Week 6',start:'2026-10-17',end:'2026-10-23',goal:'Showings and applications. Plan B gate Friday.',ph:'Showings'},
+    {k:'w7',label:'Week 7',start:'2026-10-24',end:'2026-10-29',goal:'Sign the lease, hand over keys, winterize. You leave Oct 30.',ph:'Sign & hand off'},
+    {k:'a',label:'Nov 1',start:'2026-10-30',end:'2026-11-01',goal:'Lease starts while you\'re away.',ph:'Lease starts',hard:true},
+    {k:'aw2',label:'Away',start:'2026-11-02',end:'2026-11-22',goal:'Plan B only: remote showings, e-sign.',ph:'Away · remote',away:true,planb:true},
+    {k:'bk',label:'Back',start:'2026-11-23',end:'2026-11-30',goal:'Plan B only: walkthrough and keys.',ph:'Plan B handoff',planb:true},
+    {k:'b',label:'Dec 1',start:'2026-12-01',end:'2026-12-01',goal:'Tenant move-in, Plan B.',ph:'Fallback',hard:true}
+  ];
+  const LANES=[
+    ['Packing',   ['pack','pack','ghost','pack','ghost','ghost','ghost','ghost','ghost','ghost','ghost','ghost','ghost']],
+    ['Repairs',   ['fix','fix','ghost','fix','ghost','fix','fix','ghost','ghost','ghost','ghost','ghost','ghost']],
+    ['Renting',   ['rent','rent','ghost','ghost','ghost','rent','rent','rent','rent','rent','rent','rent','rent']],
+    ['Woods Dr',  ['ghost','new','ghost','new','new','ghost','ghost','ghost','ghost','ghost','ghost','ghost','ghost']]
+  ];
+  const WS={pack:'Packing',fix:'Repairs',rent:'Renting',new:'Woods Dr',decide:'Decision'};
+  const T=[
+    // Week 1
+    {id:'r1',w:'w1',ws:'fix',due:'2026-09-16',t:'Tile contractor walks the downstairs bathroom and gives a written bid',s:'Ask: earliest start, days on site, and can they start while you still live there. Bid in writing with a materials list and a finish date.'},
+    {id:'d3',w:'w1',ws:'rent',due:'2026-09-18',t:'Pull rent comps for 3–4 bedroom houses in 80232',s:'Zillow and Apartments.com, filtered to houses with a basement and a garage listed in the last 60 days. Note asking rent and days on market. This is the $3,000 sanity check.'},
+    {id:'d1',w:'w1',ws:'fix',due:'2026-09-18',t:'Studio: lift one panel and one vinyl edge, count fasteners, check the ceiling',s:'Multiply fasteners on a 4-foot stretch by wall length for the hole count, then buy patching supplies to match. Ceiling vinyl would reopen the drywall-over option; see the vinyl section.'},
+    {id:'p1',w:'w1',ws:'pack',due:'2026-09-15',t:'Buy packing supplies',s:'Roughly 90–130 boxes across sizes, 6–8 wardrobe boxes, dish packs, 8+ rolls of tape, markers, colored labels per destination room, bubble wrap and paper.'},
+    {id:'p2',w:'w1',ws:'pack',due:'2026-09-19',t:'Purge pass through every room',s:'Sell, donate, trash. Book a donation pickup or junk haul for the week of Sep 21 so it\'s gone before the hard packing.'},
+    {id:'p3',w:'w1',ws:'pack',due:'2026-09-19',t:'Pack garage, storage, closets, books, art, off-season clothes',s:'The rooms you won\'t miss for three weeks.'},
+    {id:'p4',w:'w1',ws:'pack',due:'2026-09-19',t:'Pack studio gear and the gym',s:'Instruments cased, cables labeled, desk and monitors photographed before unplugging. Break down the cable machine and bag its hardware. Decide what the movers take and what rides in your car.'},
+    {id:'p5',w:'w1',ws:'pack',due:'2026-09-18',t:'Confirm the moving company details, including the piano',s:'Arrival window, crew size, valuation coverage, that they move upright pianos and what it costs, what they refuse (fuel, propane, paint, plants), whether full drawers are OK, payment and tip.'},
+    // Week 2
+    {id:'r2',w:'w1',ws:'fix',due:'2026-09-18',t:'Sign the tile contract and pay the deposit',s:'Earliest available start, ideally Oct 5 or sooner. Start and finish dates in the contract. Give them a lockbox code.'},
+    {id:'r3',w:'w2',ws:'fix',due:'2026-09-25',t:'Pick tile, grout, and fixtures from stock',s:'Nothing special-order. Neutral, durable, easy to clean. Buy 10% overage.'},
+    {id:'r5',w:'w2',ws:'fix',due:'2026-09-25',t:'Buy mural and patching supplies in one trip',s:'Stain-blocking primer (shellac or oil based), finish paint matching the house, rollers, drop cloths, tape. For the studio: spackle, mesh patches, joint compound, a 12-inch knife, torn-paper sealer, PVA primer.'},
+    {id:'r6a',w:'w2',ws:'fix',due:'2026-09-24',t:'Optional: two primer coats on the mural, Wed–Thu evenings',s:'Only if the family room is empty. Shellac primer recoats in under an hour, so both coats fit in one evening. Ventilate. Saves you half of Saturday Oct 3.'},
+    {id:'d6',w:'w2',ws:'decide',due:'2026-09-25',t:'Set pet policy, lease term, and what stays with the house',s:'Dogs with $300 deposit and $35 pet rent is the recommendation. 19-month first lease to May 31, 2028. Decide on the washer, dryer, and kitchenette appliances.'},
+    {id:'d3b',w:'w1',ws:'rent',due:'2026-09-18',t:'Pick the self-management tool and create the account',s:'Avail, TurboTenant, or Zillow Rental Manager. One tool for listing syndication, applications, screening, the Colorado lease, and rent collection. Start the listing draft in it now.'},
+    {id:'d4',w:'w2',ws:'decide',due:'2026-09-25',t:'Confirm $3,000 against the comps and lock the Nov 1 availability date',s:'If the comps put $3,000 at the top of the range, start at $2,950. Price to rent in three weeks, not to win an argument.'},
+    {id:'l1',w:'w2',ws:'rent',due:'2026-09-25',t:'Insurance: landlord policy on Allison from Oct 2, homeowners on Woods Dr',s:'A DP-3 landlord policy replaces the homeowners policy once you move out. Ask about loss-of-rent coverage.'},
+    {id:'l2',w:'w2',ws:'rent',due:'2026-09-25',t:'Notify the mortgage servicer and any HOA',s:'Check the occupancy clause on the Allison loan and whether the HOA restricts rentals.'},
+    {id:'l3',w:'w2',ws:'rent',due:'2026-09-25',t:'Check Lakewood rental license and inspection requirements',s:'And read the Colorado rules list below. Order a radon test if you don\'t have a recent one; it\'s a required disclosure.'},
+    {id:'p6',w:'w2',ws:'pack',due:'2026-09-25',t:'Pack mural room, office, dining, living, guest bedrooms',s:'Keep one laptop and the paperwork folder out.'},
+    {id:'p7',w:'w2',ws:'pack',due:'2026-09-25',t:'Pack kitchen non-daily and linen surplus',s:'Eat down the pantry and freezer. One set of towels and sheets per person stays out.'},
+    {id:'n1',w:'w2',ws:'new',due:'2026-09-25',t:'Utilities: start Woods Dr on Oct 1, keep Allison on in your name',s:'Allison stays powered and heated for the contractor, showings, and Colorado freezes. Transfer to the tenant on move-in.'},
+    {id:'n2',w:'w2',ws:'new',due:'2026-09-25',t:'Internet install at Woods Dr scheduled for Oct 1–3',s:'Install slots fill up; book now.'},
+    {id:'n3',w:'w2',ws:'new',due:'2026-09-25',t:'USPS change of address and the big address updates',s:'Banks, insurance, employer, DMV (30 days in Colorado), voter registration, subscriptions.'},
+    {id:'n4',w:'w2',ws:'new',due:'2026-09-25',t:'Woods Dr: keys, garage codes, locks rekeyed, cleaned before Oct 2',s:'If it\'s on well, septic, or propane, get a service check now.'},
+    // Week 3
+    {id:'p10',w:'w3',ws:'pack',due:'2026-09-30',t:'Pack primary bedroom, closets, remaining bathrooms, electronics',s:'Photograph every cable setup before unplugging.'},
+    {id:'p12',w:'w3',ws:'pack',due:'2026-09-30',t:'Set aside documents, valuables, and jewelry to ride with you',s:'Passports, titles, the lease folder, hard drives.'},
+    {id:'p14',w:'w3',ws:'pack',due:'2026-10-01',t:'Label every box by destination room at Woods Dr',s:'Two sides, contents note, priority 1–3. Tape room names to the doors at Woods Dr.'},
+    {id:'p9',w:'w3',ws:'pack',due:'2026-10-01',t:'Empty the downstairs bathroom completely',s:'Including the vanity, so the tile crew can start the Monday after you leave.'},
+    {id:'p11',w:'w3',ws:'pack',due:'2026-10-01',t:'Pack first-night bags and kitchen essentials last',s:'Bedding, towels, toiletries, meds, chargers, TP, box cutter, tools, coffee setup, snacks, pet supplies.'},
+    {id:'p13',w:'w3',ws:'pack',due:'2026-10-01',t:'Disassemble beds and desks the evening of Oct 1',s:'Hardware in labeled bags taped to the furniture. Fridge emptied and defrosted 24–48 hours ahead if it\'s moving.'},
+    {id:'p15',w:'w3',ws:'pack',due:'2026-10-01',t:'Move-day logistics',s:'Kids and pets plan, truck parking at both houses, paths clear, cash for tips, water and snacks for the crew.'},
+    {id:'r8',w:'w3',ws:'fix',due:'2026-10-01',t:'Confirm the tile start date with the contractor',s:'Give them a key or lockbox code and your cell.'},
+    // Move day
+    {id:'m1',w:'mv',ws:'pack',due:'2026-10-02',t:'Walk the movers through Allison, then do a final sweep',s:'Every closet, cabinet, the garage rafters. Photograph meter readings. Lock up; you\'re coming back Saturday.'},
+    {id:'m2',w:'mv',ws:'new',due:'2026-10-02',t:'At Woods Dr: direct boxes by room, beds assembled first',s:'Check big items for damage before signing the inventory.'},
+    // Week 4
+    {id:'r6',w:'w4',ws:'fix',due:'2026-10-04',t:'Mural: primer Saturday afternoon, two finish coats Sunday',s:'Two coats of stain-blocking primer (skip if done Sep 23–24), then two coats of the house color, four hours apart.'},
+    {id:'r6b',w:'w4',ws:'fix',due:'2026-10-04',t:'Punch list at Allison',s:'Nail holes, touch-ups, blinds, bulbs, detectors, furnace filter, guitar hangers off the blue wall and patched. Fit around the mural and studio coats while they dry.'},
+    {id:'r7',w:'w4',ws:'fix',due:'2026-10-04',t:'Studio room: vinyl, panels, and hooks down; patch',s:'Saturday morning: two people, drill driver, roll and label the vinyl, pull the guitar hooks. Seal torn paper, first coat of compound. Sunday: second coat and sand. Skim-coat instead if holes run denser than one per square foot.'},
+    {id:'r7b',w:'w4',ws:'fix',due:'2026-10-06',t:'Studio room: prime and paint',s:'PVA primer over every patch Monday evening, two coats of the house white Tuesday. Covers back on, blinds open, ready for the Oct 9 photo.'},
+    {id:'r4',w:'w4',ws:'fix',due:'2026-10-05',t:'Tile work begins',s:'Check in mid-week. Ask the crew to seal the door and run a fan so dust stays downstairs.'},
+    {id:'r9',w:'w4',ws:'fix',due:'2026-10-09',t:'Deep clean and carpet clean, upstairs and main level',s:'Book the cleaner for Oct 8. Photos the next morning.'},
+    {id:'l5',w:'w4',ws:'rent',due:'2026-10-09',t:'Listing photos, following the shot list',s:'Morning light, every light on, blinds open, landscape, from doorway corners. Front exterior first. Downstairs bathroom added Oct 16.'},
+    {id:'l4b',w:'w4',ws:'rent',due:'2026-10-09',t:'Finish the listing copy and post the screening criteria in it',s:'Start from the draft in the playbook. Fill in beds, baths, square footage from the county record.'},
+    {id:'l4',w:'w4',ws:'rent',due:'2026-10-09',t:'Lease template, application, and written screening criteria ready',s:'Colorado-compliant lease, radon and bed-bug attachments, criteria you apply the same way to everyone.'},
+    {id:'n5',w:'w4',ws:'new',due:'2026-10-09',t:'Unpack kitchen and bedrooms at Woods Dr; trash and recycling service set up',s:'Everything else can wait for the renter.'},
+    // Week 5
+    {id:'l6',w:'w5',ws:'rent',due:'2026-10-10',t:'Listing live at $3,000, available Nov 1',s:'Zillow Rental Manager, Apartments.com, Facebook Marketplace, Craigslist, a yard sign, one email each to the Federal Center, St. Anthony, Jeffco Schools, and CCU housing contacts.'},
+    {id:'l6b',w:'w5',ws:'rent',due:'2026-10-10',t:'Set up the inquiry reply template and the showing calendar',s:'Three pre-screen questions, showing slots, application link as a QR code. One tracking sheet for every inquiry.'},
+    {id:'l7',w:'w5',ws:'rent',due:'2026-10-16',t:'First showings and open-house Saturday Oct 17',s:'Respond to every inquiry the same day. Track inquiries, showings, and applications in one sheet.'},
+    {id:'r4b',w:'w5',ws:'fix',due:'2026-10-16',t:'Tile complete and inspected',s:'Check grout lines, caulk, and that the drain runs clean. Final clean of the bathroom, then add its photo to the listing.'},
+    {id:'l11',w:'w5',ws:'rent',due:'2026-10-16',t:'Set up rent collection and the tenant onboarding packet',s:'Online rent through your listing tool. Packet: utilities to transfer, trash day, appliance manuals, emergency contacts.'},
+    // Week 6
+    {id:'l8',w:'w6',ws:'rent',due:'2026-10-23',t:'Screen applications as they come in',s:'Credit, background, income at up to 2x rent, prior landlord call. Same criteria for everyone, in the order received.'},
+    {id:'l7b',w:'w6',ws:'rent',due:'2026-10-23',t:'Second open-house Saturday Oct 24 plus weekday showings',s:''},
+    {id:'l7c',w:'w6',ws:'rent',due:'2026-10-17',t:'Day-7 price check',s:'Under 10 inquiries or 4 showings: fix the photo order first, then $2,900 on Oct 20 and $2,800 on Oct 27.'},
+    {id:'l12',w:'w6',ws:'decide',due:'2026-10-23',t:'Plan B gate: fewer than two qualified applications by tonight?',s:'Yes: change availability to Dec 1 and drop the price 3–5% if showings have been under five a week. No: proceed to lease.'},
+    // Week 7
+    {id:'l9',w:'w7',ws:'rent',due:'2026-10-27',t:'Sign the lease; collect deposit and first month',s:'Deposit into its own account. Send the tenant the utilities transfer instructions. Lease starts Nov 1, possession Oct 29 at no charge.'},
+    {id:'l10a',w:'w7',ws:'rent',due:'2026-10-28',t:'Final clean and pre-move-in photos',s:'Dated photos of every room, appliance, and any existing wear. This is your deposit evidence.'},
+    {id:'l10',w:'w7',ws:'rent',due:'2026-10-29',t:'Move-in walkthrough, condition report, keys',s:'Before you leave Oct 30. Both sides sign the report with the photos attached. Utilities switch to the tenant Nov 1.'},
+    {id:'l13',w:'w7',ws:'rent',due:'2026-10-28',t:'Plan B setup, only if no lease by Oct 27',s:'A self-showing smart lockbox (Rently or Tenant Turner) or a leasing-only agent to run showings Nov 2–22. E-sign lease in your tool. Availability changed to Dec 1.'},
+    {id:'l14',w:'w7',ws:'rent',due:'2026-10-29',t:'Winterize and cover the vacancy if there\'s no tenant',s:'Heat at 55°F, hose bibs off and drained, water heater on vacation mode, a neighbor checking weekly and clearing sidewalk snow within 24 hours. Tell your insurer the house is vacant Oct 2 until move-in; many landlord policies limit vacancy to 30–60 days.'},
+    // Nov 1
+    {id:'l10b',w:'a',ws:'rent',due:'2026-11-01',t:'From the road: confirm rent landed and utilities switched',s:'Landlord policy active, first month in the account, tenant has your number and the vendor list.'},
+    // Plan B
+    {id:'b1',w:'aw2',ws:'rent',due:'2026-11-14',t:'Plan B: remote showings, two slots a week, and same-day replies',s:'Lockbox or agent runs the showings; you screen and e-sign from wherever you are. Refresh the photos if the bathroom shot wasn\'t in the first listing.'},
+    {id:'b2',w:'aw2',ws:'rent',due:'2026-11-20',t:'Plan B: lease e-signed by Nov 20',s:'Same screening, deposit and first month collected online.'},
+    {id:'b2b',w:'bk',ws:'rent',due:'2026-11-30',t:'Plan B: walkthrough, condition report, keys',s:'Any day Nov 23–30, once you\'re back. Turn the heat back up two days before.'},
+    {id:'b3',w:'b',ws:'rent',due:'2026-12-01',t:'Plan B tenant move-in',s:''}
+  ];
+
+  const $=s=>document.querySelector(s);
+  const pad=n=>String(n).padStart(2,'0');
+  const parse=s=>{const [y,m,d]=s.split('-').map(Number);return new Date(y,m-1,d);};
+  const DOW=['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+  const MON=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  const fmt=s=>{const d=parse(s);return `${DOW[d.getDay()]} ${MON[d.getMonth()]} ${d.getDate()}`;};
+  const fmtShort=s=>{const d=parse(s);return `${MON[d.getMonth()]} ${d.getDate()}`;};
+  const now=new Date();const today=new Date(now.getFullYear(),now.getMonth(),now.getDate());
+  const days=(a,b)=>Math.round((b-a)/86400000);
+  const HARD=new Set(['2026-10-02','2026-11-01','2026-12-01','2026-10-23']);
+
+  // status strip
+  $('#todayLbl').textContent=`${MON[today.getMonth()]} ${today.getDate()}`;
+  $('#todayDow').textContent=`${DOW[today.getDay()]}, ${today.getFullYear()}`;
+  const dm=days(today,parse('2026-10-02')), dr=days(today,parse('2026-11-01'));
+  $('#dMove').textContent=dm<0?'done':dm; $('#dRent').textContent=dr<0?'past':dr;
+
+  // timeline grid
+  const grid=$('#tlGrid');
+  WEEKS.forEach(w=>{
+    const s=parse(w.start),e=parse(w.end);
+    const isNow=today>=s&&today<=e;
+    const div=document.createElement('div');div.className='tl-wk'+(isNow?' today':'')+(w.away?' away':'');
+    const rg=w.start===w.end?fmt(w.start):`${fmtShort(w.start)}–${fmtShort(w.end)}`;
+    div.innerHTML=`<span class="wl">${w.label}</span><span class="wd">${rg}</span><span class="ph" ${w.hard?'style="color:var(--deadline)"':(w.planb?'style="color:var(--muted)"':'')}>${w.ph}</span>`;
+    grid.appendChild(div);
+  });
+
+  const lanesEl=$('#tlLanes');
+  LANES.forEach(([name,segs])=>{const l=document.createElement('div');l.className='lane';l.innerHTML=`<span class="ln">${name}</span><div class="tl-bar">${segs.map(c=>`<div class="seg ${c}"></div>`).join('')}</div>`;lanesEl.appendChild(l);});
+
+  // weeks + tasks
+  const weeksEl=$('#weeks');
+  const inputs={};
+  WEEKS.forEach(w=>{
+    const list=T.filter(t=>t.w===w.k).map((t,i)=>({t,i})).sort((a,b)=>a.t.due<b.t.due?-1:a.t.due>b.t.due?1:a.i-b.i).map(x=>x.t);
+    if(!list.length)return;
+    const sec=document.createElement('div');sec.className='week';sec.dataset.week=w.k;
+    if(parse(w.end)<today)sec.classList.add('past');
+    if(w.away)sec.classList.add('away');
+    const rg=w.start===w.end?fmt(w.start):`${fmt(w.start)} – ${fmt(w.end)}`;
+    sec.innerHTML=`<div class="wh"><span class="wk" ${w.hard?'style="color:var(--deadline)"':''}>${w.label}</span><span class="rg">${rg}</span><span class="goal">${w.goal}</span><span class="cnt" data-cnt="${w.k}"></span></div><div class="tasks"></div>`;
+    const tasks=sec.querySelector('.tasks');
+    list.forEach(t=>{
+      const el=document.createElement('div');el.className='task '+t.ws;el.dataset.ws=t.ws;el.dataset.id=t.id;
+      const hard=HARD.has(t.due);
+      el.innerHTML=`<input type="checkbox" id="chk-${t.id}"><label for="chk-${t.id}"><span class="tt">${t.t}</span>${t.s?`<span class="ts">${t.s}</span>`:''}<span class="meta"><span>${WS[t.ws]}</span><span class="due${hard?' hard':''}">Due ${fmt(t.due)}</span></span></label>`;
+      tasks.appendChild(el);
+      inputs[t.id]=el.querySelector('input');
+    });
+    weeksEl.appendChild(sec);
+  });
+
+  // state
+  let state={};let mode='connecting';let dbRef=null;let docExists=false;
+  const syncEl=$('#sync');
+  function setSync(m,txt){mode=m;syncEl.className='sync '+(m==='db'?'on':m==='local'?'local':'');syncEl.querySelector('span').textContent=txt;}
+  function render(){
+    let done=0;
+    T.forEach(t=>{const v=!!state[t.id];inputs[t.id].checked=v;inputs[t.id].closest('.task').classList.toggle('done',v);if(v)done++;});
+    $('#progress').textContent=`${done} / ${T.length}`;
+    WEEKS.forEach(w=>{const c=document.querySelector(`[data-cnt="${w.k}"]`);if(!c)return;const l=T.filter(t=>t.w===w.k);const d=l.filter(t=>state[t.id]).length;c.textContent=`${d} of ${l.length} done`;});
+  }
+  function loadLocal(){try{state=JSON.parse(localStorage.getItem('a2w-state')||'{}')||{};}catch(e){state={};}}
+  function saveLocal(){try{localStorage.setItem('a2w-state',JSON.stringify(state));}catch(e){}}
+
+  loadLocal();render();
+
+  async function persist(id,val){
+    state[id]=val;render();
+    if(mode==='db'&&dbRef){
+      try{
+        if(docExists){await dbRef.update({done:{[id]:val}});}
+        else{await dbRef.set({done:{[id]:val}});docExists=true;}
+      }catch(e){setSync('local','Saved on this device only');saveLocal();}
+    }else{saveLocal();}
+  }
+  Object.keys(inputs).forEach(id=>{inputs[id].addEventListener('change',e=>persist(id,e.target.checked));});
+
+  $('#resetBtn').addEventListener('click',async()=>{
+    const cleared={};T.forEach(t=>cleared[t.id]=false);
+    state={};render();
+    if(mode==='db'&&dbRef){try{await dbRef.set({done:{}});docExists=true;}catch(e){}}
+    else saveLocal();
+  });
+
+  // filters
+  document.querySelectorAll('.chip').forEach(ch=>{
+    ch.addEventListener('click',()=>{
+      const ws=ch.dataset.ws;
+      document.querySelectorAll('.chip').forEach(c=>c.setAttribute('aria-pressed',c===ch?'true':'false'));
+      document.querySelectorAll('.task').forEach(t=>t.classList.toggle('hidden',ws!=='all'&&t.dataset.ws!==ws));
+      document.querySelectorAll('.week').forEach(w=>{const any=[...w.querySelectorAll('.task')].some(t=>!t.classList.contains('hidden'));w.style.display=any?'':'none';});
+    });
+  });
+
+  // shared db
+  (async()=>{
+    let db=null;
+    try{db=await window.claude?.use?.('db');}catch(e){db=null;}
+    if(!db){setSync('local','Saved in this browser');return;}
+    dbRef=db.doc('plan/state');
+    dbRef.onSnapshot(snap=>{
+      docExists=snap.exists;
+      const d=snap.exists?(snap.data()||{}):{};
+      state=Object.assign({},d.done||{});
+      setSync('db',snap.metadata.hasPendingWrites?'Saving…':'Shared with everyone who opens this page');
+      render();
+    },err=>{setSync('local','Saved on this device only');loadLocal();render();});
+  })();
+})();
+</script>
+
+</body>
+</html>
