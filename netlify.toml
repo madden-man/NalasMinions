@@ -42,6 +42,13 @@
   to = "/japan.html"
   status = 200
 
+# Standalone moving plan — same pattern as /japan: a self-contained static page
+# (public/moving.html) served at the clean /moving URL, ahead of the SPA fallback.
+[[redirects]]
+  from = "/moving"
+  to = "/moving.html"
+  status = 200
+
 # SPA fallback: serve index.html for any non-file, non-API path.
 [[redirects]]
   from = "/*"
