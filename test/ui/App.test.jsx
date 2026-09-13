@@ -108,3 +108,29 @@ describe('overdue chores on the Today list', () => {
     expect(screen.queryByText('Return the cable box')).not.toBeInTheDocument()
   })
 })
+
+describe('chores linked to a public page', () => {
+  it('shows a chip that opens the linked section in a new tab', async () => {
+    loadTasks.mockResolvedValue([
+      {
+        id: '1', text: 'Get three tile bids', done: false, recurrence: 'once',
+        link: { href: '/moving#bids', label: 'Moving plan · Tile bids' },
+      },
+    ])
+    renderAt('/')
+    const chip = await screen.findByRole('link', { name: 'Moving plan · Tile bids' })
+    expect(chip).toHaveAttribute('href', `${window.location.origin}/moving#bids`)
+    expect(chip).toHaveAttribute('target', '_blank')
+  })
+
+  it('clicking the chip does not open the edit dialog', async () => {
+    loadTasks.mockResolvedValue([
+      { id: '1', text: 'Get three tile bids', done: false, recurrence: 'once', link: { href: '/moving#bids', label: 'Tile bids' } },
+    ])
+    renderAt('/')
+    const chip = await screen.findByRole('link', { name: 'Tile bids' })
+    chip.addEventListener('click', (e) => e.preventDefault()) // jsdom can't navigate
+    await userEvent.click(chip)
+    expect(screen.queryByRole('dialog')).not.toBeInTheDocument()
+  })
+})

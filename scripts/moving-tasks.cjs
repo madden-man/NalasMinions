@@ -74,4 +74,21 @@ const MOVING_TASKS = [
   { id: "b3", due: "2026-12-01", workstream: "Renting", text: "Plan B tenant move-in", notes: "" },
 ]
 
-module.exports = { MOVING_TASKS }
+// Which section of /moving holds each task's context (the bid sheet, the
+// listing playbook, …), keyed by task id. Mirrors LINK in public/moving.html.
+// The seed turns it into the chore's link; tasks not listed here link to
+// their own row in the week-by-week plan instead.
+const MOVING_SECTIONS = {
+  r1: 'bids', r2: 'bids', r3: 'bids', r4: 'bids', r4b: 'bids',
+  d1: 'mlv', r7: 'mlv', r7b: 'mlv', r5: 'mlv',
+  r6a: 'rental', r6: 'rental', r6b: 'rental', r9: 'listing',
+  d3: 'listing', d3b: 'listing', d4: 'listing', d6: 'listing',
+  l1: 'rental', l2: 'rental', l3: 'listing', l4: 'listing', l4b: 'listing', l5: 'listing',
+  l6: 'listing', l6b: 'listing', l7: 'listing', l7b: 'listing', l7c: 'listing', l8: 'listing',
+  l9: 'listing', l10: 'rental', l10a: 'listing', l10b: 'rental', l11: 'listing', l12: 'rental',
+  p1: 'rooms', p2: 'budget', p3: 'rooms', p4: 'rooms', p6: 'rooms', p7: 'rooms', p9: 'rooms',
+  p10: 'rooms', p11: 'rooms', p13: 'rooms', p14: 'rooms', p16: 'rooms', p17: 'rooms',
+  p5: 'budget', n4: 'budget',
+}
+
+module.exports = { MOVING_TASKS, MOVING_SECTIONS }

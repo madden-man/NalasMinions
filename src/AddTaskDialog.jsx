@@ -1,8 +1,10 @@
 import { useEffect, useState } from 'react'
 import {
   Dialog, DialogTitle, DialogContent, DialogActions, Button, TextField,
-  ToggleButton, ToggleButtonGroup, Typography, Stack, Box,
+  ToggleButton, ToggleButtonGroup, Typography, Stack, Box, Autocomplete,
 } from '@mui/material'
+
+import { PAGE_SECTIONS, linkFromInput } from './links'
 
 // Recurrence options offered in the dialog. `value` is what we persist on the
 // task; `label` is what the minion sees.
@@ -28,6 +30,10 @@ export default function AddTaskDialog({ open, onClose, onSubmit, task = null }) 
   // Local "YYYY-MM-DDTHH:mm" string from the datetime-local input, or '' for no
   // due date. Stored on the task as `dueAt`.
   const [due, setDue] = useState('')
+  // Where the chore points on a public page: a picked section (or the task's
+  // existing link) plus whatever is typed in the box. Stored as `link`.
+  const [linkOption, setLinkOption] = useState(null)
+  const [linkText, setLinkText] = useState('')
 
   // Seed the form each time the dialog opens: from the edited task, or blank
   // defaults for a new chore. Never shows stale input.
@@ -37,6 +43,8 @@ export default function AddTaskDialog({ open, onClose, onSubmit, task = null }) 
     setRecurrence(task?.recurrence ?? 'once')
     setAssignee(task?.assignee ?? ASSIGNEES[0])
     setDue(task?.dueAt ?? '')
+    setLinkOption(task?.link ?? null)
+    setLinkText(task?.link?.label ?? '')
   }, [open, task])
 
   const trimmed = name.trim()
@@ -44,7 +52,13 @@ export default function AddTaskDialog({ open, onClose, onSubmit, task = null }) 
   const submit = (e) => {
     e.preventDefault()
     if (!trimmed) return
-    onSubmit({ text: trimmed, recurrence, assignee, dueAt: due || null })
+    onSubmit({
+      text: trimmed,
+      recurrence,
+      assignee,
+      dueAt: due || null,
+      link: linkFromInput(linkOption, linkText),
+    })
     onClose()
   }
 
@@ -84,6 +98,25 @@ export default function AddTaskDialog({ open, onClose, onSubmit, task = null }) 
                 </Button>
               ) : null,
             }}
+          />
+
+          <Autocomplete
+            freeSolo
+            options={PAGE_SECTIONS}
+            value={linkOption}
+            inputValue={linkText}
+            onChange={(_, v) => setLinkOption(typeof v === 'string' ? null : v)}
+            onInputChange={(_, v) => setLinkText(v)}
+            getOptionLabel={(o) => (typeof o === 'string' ? o : o.label)}
+            isOptionEqualToValue={(o, v) => o.href === v.href}
+            renderInput={(params) => (
+              <TextField
+                {...params}
+                label="Link to a page"
+                placeholder="Pick a section, or paste a URL"
+                helperText="Optional — opens that part of /moving or /japan from the chore"
+              />
+            )}
           />
 
           <Box>
