@@ -161,7 +161,7 @@ td.room{font-weight:600}
 #budTable tr.grp td{font-family:"Barlow Condensed",sans-serif;font-weight:700;font-size:15px;letter-spacing:.06em;text-transform:uppercase;padding-top:16px;border-bottom:2px solid var(--line-strong)}
 #budTable tr.grp td span{margin-left:10px;color:var(--muted);font-weight:600}
 #budTable tr.sub td{font-weight:600;background:var(--surface-2)}
-#budTable tr.grp.pack td{color:var(--pack)}#budTable tr.grp.fix td{color:var(--fix)}#budTable tr.grp.rent td{color:var(--rent)}#budTable tr.grp.new td{color:var(--new)}#budTable tr.grp.vac td{color:var(--deadline)}
+#budTable tr.grp.pack td{color:var(--pack)}#budTable tr.grp.fix td{color:var(--fix)}#budTable tr.grp.rent td{color:var(--rent)}#budTable tr.grp.new td{color:var(--new)}#budTable tr.grp.sell td{color:var(--rent)}#budTable tr.grp.vac td{color:var(--deadline)}
 #budTable tr.grp td span{color:var(--muted)}
 .bud-sum{display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:var(--line);border:1px solid var(--line);margin-top:14px}
 .bud-sum>div{background:var(--surface);padding:12px 16px;display:grid;gap:2px}
@@ -258,7 +258,7 @@ body{margin:0}
       <tr><td class="wkc">Wk 1<br><span class="muted small num">Sep 13–19</span></td><td class="room">Detached garage</td><td class="num">2:08–2:20</td><td>Unfinished framing, bikes, garden tools, shovels, a window unit or fan, lumber. Sell or donate the lumber. Drain fuel from anything with an engine; movers refuse fuel and propane.</td><td class="num">6–10</td></tr>
       <tr><td class="wkc">Wk 1</td><td class="room">Basement storage &amp; laundry</td><td class="num">2:48–3:04</td><td>Wire shelving, bins, backpacks, boxes already stacked. Washer and dryer stay if they're renting with the house (a real selling point; decide). Purge hardest here.</td><td class="num">10–14</td></tr>
       <tr><td class="wkc">Wk 1</td><td class="room">Basement library nook</td><td class="num">2:40</td><td>Two tall bookcases, desk, lamp. Books in small boxes only, spines down. Cull a third.</td><td class="num">10–14</td></tr>
-      <tr><td class="wkc">Wk 1</td><td class="room">Gym room (basement)</td><td class="num">3:44</td><td>Cable machine, bench, bar, plates. Disassemble the machine yourself and bag the hardware; plates in small boxes, six to eight per box max.</td><td class="num">4–6 + equipment</td></tr>
+      <tr><td class="wkc">Wk 1</td><td class="room">Gym room (basement)</td><td class="num">3:44</td><td>TuffStuff cable machine, bench, bar, plates: <b>selling, not moving</b>. List it assembled by Sep 15 with "buyer disassembles and hauls, basement stairs, bring two people and tools." Bench, bar, and plates as a separate listing. Pull the plates and stack pin before any pickup. Unsold Sep 25: take it apart yourself Sep 28 and relist as free or parts.</td><td class="num">0–2</td></tr>
       <tr><td class="wkc">Wk 1</td><td class="room">Music studio (basement) <span class="tag decide">decision</span></td><td class="num">3:12–3:32</td><td>Black hung acoustic panels on walls and ceiling, wall-hung guitars, keyboard, desk with two monitors, futon, window with blinds. Pack instruments, cables, and desk gear this week; the panels come down in Week 2 once the decision is made (see memo). They're yours and reusable at Woods Dr.</td><td class="num">6–10 + cases</td></tr>
       <tr><td class="wkc">Wk 1</td><td class="room">Basement kitchenette</td><td class="num">3:40</td><td>Wood cabinets, sink, toaster oven. Empty it; leave the appliances that stay with the house.</td><td class="num">2–3</td></tr>
       <tr><td class="wkc">Wk 1</td><td class="room">Front porch &amp; backyard</td><td class="num">0:08 · 1:40–1:52</td><td>Green porch chairs, cooler, patio table and chairs, planters. Decide what stays for the listing (the patio set photographs well). Dead plants and pots go.</td><td class="num">2–4</td></tr>
@@ -276,7 +276,7 @@ body{margin:0}
     </tbody>
   </table>
   </div>
-  <p class="small muted" style="margin-top:10px">Total: roughly 95–135 boxes plus the gym machine, keyboard stand, and instrument cases. Label every box on two sides with the <b>destination room at Woods Dr</b>, a one-line contents note, and a 1–3 priority. Tape a room name to each door at Woods Dr before the truck arrives.</p>
+  <p class="small muted" style="margin-top:10px">Total: roughly 95–135 boxes plus the keyboard stand and instrument cases. Label every box on two sides with the <b>destination room at Woods Dr</b>, a one-line contents note, and a 1–3 priority. Tape a room name to each door at Woods Dr before the truck arrives.</p>
 </section>
 
 <section id="studio">
@@ -632,7 +632,8 @@ body{margin:0}
     {id:'p1',w:'w1',ws:'pack',due:'2026-09-15',t:'Buy packing supplies',s:'Roughly 90–130 boxes across sizes, 6–8 wardrobe boxes, dish packs, 8+ rolls of tape, markers, colored labels per destination room, bubble wrap and paper.'},
     {id:'p2',w:'w1',ws:'pack',due:'2026-09-19',t:'Purge pass through every room',s:'Sell, donate, trash. Book a donation pickup or junk haul for the week of Sep 21 so it\'s gone before the hard packing.'},
     {id:'p3',w:'w1',ws:'pack',due:'2026-09-19',t:'Pack garage, storage, closets, books, art, off-season clothes',s:'The rooms you won\'t miss for three weeks.'},
-    {id:'p4',w:'w1',ws:'pack',due:'2026-09-19',t:'Pack studio gear and the gym',s:'Instruments cased, cables labeled, desk and monitors photographed before unplugging. Break down the cable machine and bag its hardware. Decide what the movers take and what rides in your car.'},
+    {id:'p4',w:'w1',ws:'pack',due:'2026-09-19',t:'Pack studio gear',s:'Instruments cased, cables labeled, desk and monitors photographed before unplugging. Decide what the movers take and what rides in your car.'},
+    {id:'p16',w:'w1',ws:'pack',due:'2026-09-15',t:'List the gym equipment for sale, assembled',s:'Cable machine as one listing, bench + bar + plates as another. Photos standing, cable pulled. "Buyer disassembles and hauls, basement stairs, two people and tools." Deposit to hold. Note you\'re away Sep 26–27.'},
     {id:'p5',w:'w1',ws:'pack',due:'2026-09-18',t:'Confirm the moving company details',s:'Arrival window, crew size, valuation coverage, what they refuse (fuel, propane, paint, plants), whether full drawers are OK, payment and tip.'},
     // Week 2
     {id:'r2',w:'w2',ws:'fix',due:'2026-09-23',t:'Pick the tile bid, sign, and pay the deposit',s:'Score the three bids on the sheet in the bids section. Earliest start, ideally Oct 5 or sooner; start and finish dates in the contract; deposit no more than a third. Give them a lockbox code.'},
@@ -652,6 +653,7 @@ body{margin:0}
     {id:'n3',w:'w2',ws:'new',due:'2026-09-25',t:'USPS change of address and the big address updates',s:'Banks, insurance, employer, DMV (30 days in Colorado), voter registration, subscriptions.'},
     {id:'n4',w:'w2',ws:'new',due:'2026-09-25',t:'Woods Dr: keys, garage codes, locks rekeyed, cleaned before Oct 2',s:'If it\'s on well, septic, or propane, get a service check now.'},
     // Week 3
+    {id:'p17',w:'w3',ws:'pack',due:'2026-09-28',t:'Gym equipment still here? Take it apart yourself today',s:'Relist as free-you-haul or as parts. Anything left Oct 1 goes on the truck or to the donation pickup. Plates and stack pin come off before anyone moves the frame either way.'},
     {id:'p10',w:'w3',ws:'pack',due:'2026-09-30',t:'Pack primary bedroom, closets, remaining bathrooms, electronics',s:'Photograph every cable setup before unplugging.'},
     {id:'p12',w:'w3',ws:'pack',due:'2026-09-30',t:'Set aside documents, valuables, and jewelry to ride with you',s:'Passports, titles, the lease folder, hard drives.'},
     {id:'p14',w:'w3',ws:'pack',due:'2026-10-01',t:'Label every box by destination room at Woods Dr',s:'Two sides, contents note, priority 1–3. Tape room names to the doors at Woods Dr.'},
@@ -821,6 +823,10 @@ body{margin:0}
       ['Keys, lockbox for the contractor and Plan B showings',40,250,'Two key copies and a code lockbox at the low end; a smart self-showing lockbox at the high end.'],
       ['Leasing-only agent (Plan B only)',0,1500,'About half a month\'s rent if you hand off showings while away Oct 30–Nov 22.'],
     ]],
+    ['sell','Resale offsets (money back)',[
+      ['Gym equipment sold: cable machine, bench, bar, plates',-400,-1200,'A used TuffStuff functional trainer goes for a third to half of retail; plates about $1–1.50 a pound. Check sold listings for the exact model.'],
+      ['Purge sales: furniture and gear you\'d otherwise move',-100,-600,'Whatever the movers don\'t have to carry.'],
+    ]],
     ['new','Woods Dr',[
       ['Utility connections, deposits, internet install',100,250,''],
       ['Rekey or replace locks',100,250,'Locksmith rekey is the low end; smart lock the high end.'],
@@ -830,7 +836,7 @@ body{margin:0}
   ];
   const carryEl=$('#carry');
   try{const savedCarry=localStorage.getItem('a2w-carry');if(savedCarry)carryEl.value=savedCarry;}catch(e){}
-  const money=n=>'$'+Math.round(n).toLocaleString('en-US');
+  const money=n=>(n<0?'−':'')+'$'+Math.abs(Math.round(n)).toLocaleString('en-US');
   function renderBudget(){
     const tb=$('#budTable tbody');tb.innerHTML='';
     let lo=0,hi=0;
@@ -845,7 +851,7 @@ body{margin:0}
     const vac=[['Oct 2 – Oct 31: empty either way',1],['November, Plan B only',1]];
     vac.forEach(([t,m])=>{const r=document.createElement('tr');r.innerHTML=`<td>${t}</td><td class="num">${carry?money(carry*m):'—'}</td><td class="num">${carry?money(carry*m):'—'}</td><td class="small muted">${m} month of carrying cost</td>`;tb.appendChild(r);});
     const a=[lo+carry,hi+carry];
-    $('#budSum').innerHTML=`<div><span class="eyebrow">One-time costs</span><span class="big">${money(lo)} – ${money(hi)}</span><span class="small muted">Everything above, both plans, before vacancy</span></div>
+    $('#budSum').innerHTML=`<div><span class="eyebrow">One-time costs</span><span class="big">${money(lo)} – ${money(hi)}</span><span class="small muted">Everything above net of resale, both plans, before vacancy</span></div>
       <div><span class="eyebrow">Plan A · tenant Nov 1</span><span class="big">${carry?money(a[0])+' – '+money(a[1]):money(lo)+' – '+money(hi)+' + 1 mo'}</span><span class="small muted">One-time costs plus October vacancy</span></div>
       <div><span class="eyebrow">Plan B · tenant Dec 1</span><span class="big b">${carry?money(lo+carry*2)+' – '+money(hi+carry*2):money(lo)+' – '+money(hi)+' + 2 mo'}</span><span class="small muted">Plus November vacancy; the agent line is already in the high end</span></div>`;
   }
