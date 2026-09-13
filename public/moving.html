@@ -604,10 +604,12 @@ body{margin:0}
 </section>
 
 <section id="budget">
-  <div class="sec-head"><h2>Budget</h2><p>Estimates for every step, low to high, Denver-area prices for fall 2026. Replace a range with the real number as bids and receipts come in. The Allison mortgage is counted for every month the house is yours to carry without rent: October in both plans, November too in Plan B.</p><a class="up" href="#contents">Contents ↑</a></div>
+  <div class="sec-head"><h2>Budget</h2><p>Estimates for every step, low to high, Denver-area prices for fall 2026. Replace a range with the real number as bids and receipts come in. The Allison mortgage and utilities are counted for every month the house is yours to carry without rent: October in both plans, November too in Plan B.</p><a class="up" href="#contents">Contents ↑</a></div>
   <div class="bud-ctl">
-    <label for="carry"><span class="eyebrow">Allison mortgage, per month</span><span class="small muted">$2,750. Add utilities while it sits empty if you want them counted too.</span></label>
+    <label for="carry"><span class="eyebrow">Allison mortgage, per month</span><span class="small muted">Paid every month the house is empty.</span></label>
     <div class="bud-in"><span>$</span><input id="carry" type="number" min="0" step="50" inputmode="numeric" value="2750"></div>
+    <label for="util"><span class="eyebrow">Utilities while empty, per month</span><span class="small muted">Gas, electric, water kept on for the contractor, showings, and freeze protection.</span></label>
+    <div class="bud-in"><span>$</span><input id="util" type="number" min="0" step="25" inputmode="numeric" value="500"></div>
   </div>
   <div class="tblwrap">
   <table id="budTable">
@@ -616,7 +618,7 @@ body{margin:0}
   </table>
   </div>
   <div class="bud-sum" id="budSum"></div>
-  <p class="small muted" style="margin-top:10px">Not counted: the security deposit (it's the tenant's money), your own hours, and the Woods Dr mortgage, which you pay either way. The difference between the two plans is one month of Allison mortgage plus one month of rent, about $5,750, which is what the Oct 23 gate is protecting.</p>
+  <p class="small muted" style="margin-top:10px">Not counted: the security deposit (it's the tenant's money), your own hours, and the Woods Dr mortgage, which you pay either way. Plan B costs more than Plan A by November's rent you don't collect plus November's utilities; the mortgage is paid in both. The Plan B tile shows the gap at the figures entered, and that gap is what the Oct 23 gate is protecting.</p>
 </section>
 
 <div class="foot" id="notes">
@@ -875,7 +877,8 @@ body{margin:0}
     ]],
   ];
   const carryEl=$('#carry');
-  try{const savedCarry=localStorage.getItem('a2w-carry');if(savedCarry)carryEl.value=savedCarry;}catch(e){}
+  const utilEl=$('#util');
+  try{const savedCarry=localStorage.getItem('a2w-carry');if(savedCarry)carryEl.value=savedCarry;const savedUtil=localStorage.getItem('a2w-util');if(savedUtil!==null&&savedUtil!=='')utilEl.value=savedUtil;}catch(e){}
   const money=n=>(n<0?'−':'')+'$'+Math.abs(Math.round(n)).toLocaleString('en-US');
   function renderBudget(){
     const tb=$('#budTable tbody');tb.innerHTML='';
@@ -886,22 +889,29 @@ body{margin:0}
       items.forEach(([t,l,h,b])=>{const r=document.createElement('tr');r.innerHTML=`<td>${t}</td><td class="num">${money(l)}</td><td class="num">${money(h)}</td><td class="small muted">${b}</td>`;tb.appendChild(r);});
       lo+=glo;hi+=ghi;
     });
-    const carry=Number(carryEl.value)||0;
+    const carry=Number(carryEl.value)||0, util=Number(utilEl.value)||0, month=carry+util;
     const RENT=3000;
-    const g=document.createElement('tr');g.className='grp vac';g.innerHTML=`<td colspan="4">Allison mortgage while you carry it<span>${carry?money(carry)+' / month':'enter the mortgage above'}</span></td>`;tb.appendChild(g);
+    const g=document.createElement('tr');g.className='grp vac';g.innerHTML=`<td colspan="4">Carrying Allison while it's empty<span>${money(month)} / month = ${money(carry)} mortgage + ${money(util)} utilities</span></td>`;tb.appendChild(g);
     const rows=[
       ['October mortgage',carry,carry,'House empty from Oct 2 either way. September is your housing, not a move cost.'],
+      ['October utilities',util,util,'Heat stays on for the tile crew, the paint, and the photos.'],
       ['November mortgage',carry,carry,'Plan A: covered by the rent below. Plan B: no rent until Dec 1, so you carry it.'],
+      ['November utilities',util,util,'Plan A: the tenant takes over Nov 1, so this drops out. Plan B: you carry it, with the heat at 55°F.'],
       ['Rent in, Nov 1 (Plan A only)',-RENT,-RENT,'$3,000 first month. Offsets November in Plan A; absent in Plan B.'],
       ['December onward',0,0,'Rent covers the mortgage in both plans, so nothing is counted here.'],
     ];
-    rows.forEach(([t,l,h,b])=>{const r=document.createElement('tr');r.innerHTML=`<td>${t}</td><td class="num">${carry||l<0?money(l):'—'}</td><td class="num">${carry||h<0?money(h):'—'}</td><td class="small muted">${b}</td>`;tb.appendChild(r);});
-    const aLo=lo+carry*2-RENT, aHi=hi+carry*2-RENT, bLo=lo+carry*2, bHi=hi+carry*2;
-    $('#budSum').innerHTML=`<div><span class="eyebrow">One-time costs</span><span class="big">${money(lo)} – ${money(hi)}</span><span class="small muted">Everything above net of resale, before the mortgage</span></div>
-      <div><span class="eyebrow">Plan A · tenant Nov 1</span><span class="big">${carry?money(aLo)+' – '+money(aHi):'enter the mortgage'}</span><span class="small muted">One-time costs + October and November mortgage − November rent</span></div>
-      <div><span class="eyebrow">Plan B · tenant Dec 1</span><span class="big b">${carry?money(bLo)+' – '+money(bHi):'enter the mortgage'}</span><span class="small muted">One-time costs + October and November mortgage, no rent until December; the agent line is in the high end</span></div>`;
+    rows.forEach(([t,l,h,b])=>{const r=document.createElement('tr');r.innerHTML=`<td>${t}</td><td class="num">${money(l)}</td><td class="num">${money(h)}</td><td class="small muted">${b}</td>`;tb.appendChild(r);});
+    // Plan A: October fully carried, November mortgage carried but rent comes in and the tenant pays utilities.
+    const aLo=lo+month+carry-RENT, aHi=hi+month+carry-RENT;
+    // Plan B: October and November fully carried, no rent until December.
+    const bLo=lo+month*2, bHi=hi+month*2;
+    const gap=bLo-aLo;
+    $('#budSum').innerHTML=`<div><span class="eyebrow">One-time costs</span><span class="big">${money(lo)} – ${money(hi)}</span><span class="small muted">Everything above net of resale, before carrying the house</span></div>
+      <div><span class="eyebrow">Plan A · tenant Nov 1</span><span class="big">${money(aLo)} – ${money(aHi)}</span><span class="small muted">+ October (${money(month)}) + November mortgage (${money(carry)}) − November rent (${money(RENT)})</span></div>
+      <div><span class="eyebrow">Plan B · tenant Dec 1</span><span class="big b">${money(bLo)} – ${money(bHi)}</span><span class="small muted">+ October and November in full (${money(month*2)}), no rent until December. Plan B costs ${money(gap)} more than Plan A.</span></div>`;
   }
   carryEl.addEventListener('input',()=>{try{localStorage.setItem('a2w-carry',carryEl.value);}catch(e){}renderBudget();});
+  utilEl.addEventListener('input',()=>{try{localStorage.setItem('a2w-util',utilEl.value);}catch(e){}renderBudget();});
   renderBudget();
 
   // shared db
