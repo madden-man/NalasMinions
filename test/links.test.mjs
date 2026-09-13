@@ -22,8 +22,9 @@ test('unknown URLs label by host, anything else by itself', () => {
 
 test('linkFromInput: a picked section wins while its label is in the box', () => {
   const bids = sectionFor('/moving#bids')
-  assert.deepEqual(linkFromInput(bids, bids.label), bids)
-  assert.deepEqual(linkFromInput(bids, ''), bids)
+  const stored = { href: bids.href, label: bids.label } // stored links carry just these two
+  assert.deepEqual(linkFromInput(bids, bids.label), stored)
+  assert.deepEqual(linkFromInput(bids, ''), stored)
 })
 
 test('linkFromInput: typed text overrides a stale pick', () => {
@@ -35,8 +36,8 @@ test('linkFromInput: typed text overrides a stale pick', () => {
 })
 
 test('linkFromInput: typing a section name selects it; bare paths get a slash', () => {
-  assert.deepEqual(linkFromInput(null, 'japan · flights'), sectionFor('/japan#flights'))
-  assert.deepEqual(linkFromInput(null, 'moving#rooms'), sectionFor('/moving#rooms'))
+  assert.deepEqual(linkFromInput(null, 'japan · flights'), { href: '/japan#flights', label: 'Japan · Flights' })
+  assert.deepEqual(linkFromInput(null, 'moving#rooms'), { href: '/moving#rooms', label: 'Moving plan · Room packing order' })
 })
 
 test('linkFromInput: nothing in, null out', () => {
