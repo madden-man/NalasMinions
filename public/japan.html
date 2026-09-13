@@ -24,6 +24,8 @@
   }
   *{box-sizing:border-box;}
   html{scroll-behavior:smooth;}
+  /* Anchored jumps (from the nav, and from linked chores in Nala's Minions) land below the sticky nav. */
+  [id]{scroll-margin-top:64px;}
   body{
     margin:0;
     font-family:'Zen Kaku Gothic New',system-ui,-apple-system,'Segoe UI','Hiragino Sans',sans-serif;
@@ -693,45 +695,45 @@
 
     <div class="chk-group">
       <h3>⏰ Do now — time-sensitive</h3>
-      <label class="chk"><input type="checkbox" data-checklist-id="ghibli-tickets" data-category="time-sensitive"><span class="txt"><strong>Ghibli Museum tickets</strong> — released Oct 10, 10 am JST (Lawson); sell out fast. <span class="tag">Oct 10</span></span></label>
-      <label class="chk"><input type="checkbox" data-checklist-id="teamlab-planets" data-category="time-sensitive"><span class="txt"><strong>teamLab Planets (Tokyo)</strong> — timed tickets sell out 1–2 wks ahead; book for Nov 20.</span></label>
-      <label class="chk"><input type="checkbox" data-checklist-id="shibuya-sky" data-category="time-sensitive"><span class="txt"><strong>Shibuya Sky</strong> — reserve a timed sunset slot for Nov 20.</span></label>
-      <label class="chk"><input type="checkbox" data-checklist-id="teamlab-osaka" data-category="time-sensitive"><span class="txt"><strong>teamLab Botanical Garden (Osaka)</strong> — timed tickets for Nov 8/9.</span></label>
-      <label class="chk"><input type="checkbox" data-checklist-id="restaurant-reservations" data-category="time-sensitive"><span class="txt"><strong>Restaurant reservations</strong> — Kyoto kaiseki / Tokyo omakase / invite-only, open 1–3 mo out.</span></label>
-      <label class="chk"><input type="checkbox" data-checklist-id="kyoto-tea-ceremony" data-category="time-sensitive"><span class="txt"><strong>Kyoto tea ceremony</strong> — reserve a session.</span></label>
-      <label class="chk"><input type="checkbox" data-checklist-id="cup-noodles-workshop" data-category="time-sensitive"><span class="txt"><strong>Cup Noodles Museum</strong> — reserve Chicken Ramen Factory workshop (Nov 6) if wanted.</span></label>
-      <label class="chk"><input type="checkbox" data-checklist-id="verify-kyoto-lightups" data-category="time-sensitive"><span class="txt"><strong>Verify Kyoto light-up dates</strong> (Kōdai-ji / Eikandō) cover Nov 15–19.</span></label>
-      <label class="chk"><input type="checkbox" data-checklist-id="transport-passes-seats" data-category="time-sensitive"><span class="txt"><strong>Transport</strong> — decide passes &amp; reserve seats: Shinkansen (Nov 8, 19) + Kuroshio (Nov 10, 15) + Kintetsu to Ise (Nov 18).</span></label>
-      <label class="chk"><input type="checkbox" data-checklist-id="print-kumano-voucher" data-category="time-sensitive"><span class="txt"><strong>Print Kumano Travel voucher</strong> from MyPage.</span></label>
+      <label class="chk" id="item-ghibli-tickets"><input type="checkbox" data-checklist-id="ghibli-tickets" data-category="time-sensitive"><span class="txt"><strong>Ghibli Museum tickets</strong> — released Oct 10, 10 am JST (Lawson); sell out fast. <span class="tag">Oct 10</span></span></label>
+      <label class="chk" id="item-teamlab-planets"><input type="checkbox" data-checklist-id="teamlab-planets" data-category="time-sensitive"><span class="txt"><strong>teamLab Planets (Tokyo)</strong> — timed tickets sell out 1–2 wks ahead; book for Nov 20.</span></label>
+      <label class="chk" id="item-shibuya-sky"><input type="checkbox" data-checklist-id="shibuya-sky" data-category="time-sensitive"><span class="txt"><strong>Shibuya Sky</strong> — reserve a timed sunset slot for Nov 20.</span></label>
+      <label class="chk" id="item-teamlab-osaka"><input type="checkbox" data-checklist-id="teamlab-osaka" data-category="time-sensitive"><span class="txt"><strong>teamLab Botanical Garden (Osaka)</strong> — timed tickets for Nov 8/9.</span></label>
+      <label class="chk" id="item-restaurant-reservations"><input type="checkbox" data-checklist-id="restaurant-reservations" data-category="time-sensitive"><span class="txt"><strong>Restaurant reservations</strong> — Kyoto kaiseki / Tokyo omakase / invite-only, open 1–3 mo out.</span></label>
+      <label class="chk" id="item-kyoto-tea-ceremony"><input type="checkbox" data-checklist-id="kyoto-tea-ceremony" data-category="time-sensitive"><span class="txt"><strong>Kyoto tea ceremony</strong> — reserve a session.</span></label>
+      <label class="chk" id="item-cup-noodles-workshop"><input type="checkbox" data-checklist-id="cup-noodles-workshop" data-category="time-sensitive"><span class="txt"><strong>Cup Noodles Museum</strong> — reserve Chicken Ramen Factory workshop (Nov 6) if wanted.</span></label>
+      <label class="chk" id="item-verify-kyoto-lightups"><input type="checkbox" data-checklist-id="verify-kyoto-lightups" data-category="time-sensitive"><span class="txt"><strong>Verify Kyoto light-up dates</strong> (Kōdai-ji / Eikandō) cover Nov 15–19.</span></label>
+      <label class="chk" id="item-transport-passes-seats"><input type="checkbox" data-checklist-id="transport-passes-seats" data-category="time-sensitive"><span class="txt"><strong>Transport</strong> — decide passes &amp; reserve seats: Shinkansen (Nov 8, 19) + Kuroshio (Nov 10, 15) + Kintetsu to Ise (Nov 18).</span></label>
+      <label class="chk" id="item-print-kumano-voucher"><input type="checkbox" data-checklist-id="print-kumano-voucher" data-category="time-sensitive"><span class="txt"><strong>Print Kumano Travel voucher</strong> from MyPage.</span></label>
     </div>
 
     <div class="chk-group">
       <h3>🛂 Documents &amp; health</h3>
-      <label class="chk"><input type="checkbox" data-checklist-id="passport-validity" data-category="documents"><span class="txt">Passports valid <strong>6 months past Nov 22</strong> (both travelers).</span></label>
-      <label class="chk"><input type="checkbox" data-checklist-id="visit-japan-web" data-category="documents"><span class="txt"><strong>Visit Japan Web</strong> — pre-register both for immigration/customs QR.</span></label>
-      <label class="chk"><input type="checkbox" data-checklist-id="medication-check" data-category="documents"><span class="txt"><strong>Medication check</strong> — Adderall/Vyvanse &amp; pseudoephedrine restricted; may need a <strong>Yakkan Shōmei</strong>. Bring 23 days of prescriptions + motion-sickness pills.</span></label>
-      <label class="chk"><input type="checkbox" data-checklist-id="travel-insurance" data-category="documents"><span class="txt"><strong>Travel medical/evacuation insurance</strong> — confirm purchased &amp; covers hiking.</span></label>
+      <label class="chk" id="item-passport-validity"><input type="checkbox" data-checklist-id="passport-validity" data-category="documents"><span class="txt">Passports valid <strong>6 months past Nov 22</strong> (both travelers).</span></label>
+      <label class="chk" id="item-visit-japan-web"><input type="checkbox" data-checklist-id="visit-japan-web" data-category="documents"><span class="txt"><strong>Visit Japan Web</strong> — pre-register both for immigration/customs QR.</span></label>
+      <label class="chk" id="item-medication-check"><input type="checkbox" data-checklist-id="medication-check" data-category="documents"><span class="txt"><strong>Medication check</strong> — Adderall/Vyvanse &amp; pseudoephedrine restricted; may need a <strong>Yakkan Shōmei</strong>. Bring 23 days of prescriptions + motion-sickness pills.</span></label>
+      <label class="chk" id="item-travel-insurance"><input type="checkbox" data-checklist-id="travel-insurance" data-category="documents"><span class="txt"><strong>Travel medical/evacuation insurance</strong> — confirm purchased &amp; covers hiking.</span></label>
     </div>
 
     <div class="chk-group">
       <h3>💴 Money &amp; connectivity</h3>
-      <label class="chk"><input type="checkbox" data-checklist-id="esim-wifi" data-category="money"><span class="txt"><strong>eSIM / pocket Wi-Fi</strong> + download offline maps (trail signal is patchy).</span></label>
-      <label class="chk"><input type="checkbox" data-checklist-id="trail-cash" data-category="money"><span class="txt"><strong>Cash for the trail</strong> — withdraw before leaving Tanabe (7-Eleven / Japan Post ATMs).</span></label>
-      <label class="chk"><input type="checkbox" data-checklist-id="no-fx-cards" data-category="money"><span class="txt">Confirm cards have <strong>no foreign-transaction fees</strong>; notify banks.</span></label>
-      <label class="chk"><input type="checkbox" data-checklist-id="ito-credit-check" data-category="money"><span class="txt">Confirm <strong>Itō Ryokuyu (¥492,500 pay-at-hotel)</strong> takes credit at checkout.</span></label>
-      <label class="chk"><input type="checkbox" data-checklist-id="park-hyatt-cancel-date" data-category="money"><span class="txt">Note: <strong>Park Hyatt free-cancellation ends ~Oct 16</strong> (then forfeit 1 night).</span></label>
+      <label class="chk" id="item-esim-wifi"><input type="checkbox" data-checklist-id="esim-wifi" data-category="money"><span class="txt"><strong>eSIM / pocket Wi-Fi</strong> + download offline maps (trail signal is patchy).</span></label>
+      <label class="chk" id="item-trail-cash"><input type="checkbox" data-checklist-id="trail-cash" data-category="money"><span class="txt"><strong>Cash for the trail</strong> — withdraw before leaving Tanabe (7-Eleven / Japan Post ATMs).</span></label>
+      <label class="chk" id="item-no-fx-cards"><input type="checkbox" data-checklist-id="no-fx-cards" data-category="money"><span class="txt">Confirm cards have <strong>no foreign-transaction fees</strong>; notify banks.</span></label>
+      <label class="chk" id="item-ito-credit-check"><input type="checkbox" data-checklist-id="ito-credit-check" data-category="money"><span class="txt">Confirm <strong>Itō Ryokuyu (¥492,500 pay-at-hotel)</strong> takes credit at checkout.</span></label>
+      <label class="chk" id="item-park-hyatt-cancel-date"><input type="checkbox" data-checklist-id="park-hyatt-cancel-date" data-category="money"><span class="txt">Note: <strong>Park Hyatt free-cancellation ends ~Oct 16</strong> (then forfeit 1 night).</span></label>
     </div>
 
     <div class="chk-group">
       <h3>🎒 Packing (beyond the basics)</h3>
-      <label class="chk"><input type="checkbox" data-checklist-id="packing-hiking-gear" data-category="packing"><span class="txt">Broken-in <strong>hiking boots</strong>, <strong>headlamp</strong> (short daylight), poles, rain shell, quick-dry layers, blister kit.</span></label>
-      <label class="chk"><input type="checkbox" data-checklist-id="packing-battery-adapter" data-category="packing"><span class="txt">Portable battery + chargers (Japan = Type-A, 100V — US plugs fit).</span></label>
-      <label class="chk"><input type="checkbox" data-checklist-id="packing-copies" data-category="packing"><span class="txt">Printed/offline copies of all reservations + passport photocopies.</span></label>
+      <label class="chk" id="item-packing-hiking-gear"><input type="checkbox" data-checklist-id="packing-hiking-gear" data-category="packing"><span class="txt">Broken-in <strong>hiking boots</strong>, <strong>headlamp</strong> (short daylight), poles, rain shell, quick-dry layers, blister kit.</span></label>
+      <label class="chk" id="item-packing-battery-adapter"><input type="checkbox" data-checklist-id="packing-battery-adapter" data-category="packing"><span class="txt">Portable battery + chargers (Japan = Type-A, 100V — US plugs fit).</span></label>
+      <label class="chk" id="item-packing-copies"><input type="checkbox" data-checklist-id="packing-copies" data-category="packing"><span class="txt">Printed/offline copies of all reservations + passport photocopies.</span></label>
     </div>
 
     <div class="chk-group">
       <h3>🏠 Home (23 days away)</h3>
-      <label class="chk"><input type="checkbox" data-checklist-id="home-logistics" data-category="home"><span class="txt">Mail hold, home/pet/plant care, autopay/bills, thermostat.</span></label>
+      <label class="chk" id="item-home-logistics"><input type="checkbox" data-checklist-id="home-logistics" data-category="home"><span class="txt">Mail hold, home/pet/plant care, autopay/bills, thermostat.</span></label>
     </div>
   </section>
 

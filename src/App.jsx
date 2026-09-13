@@ -13,6 +13,7 @@ import PersonIcon from '@mui/icons-material/Person'
 import ScheduleIcon from '@mui/icons-material/Schedule'
 import TodayIcon from '@mui/icons-material/Today'
 import WarningAmberIcon from '@mui/icons-material/WarningAmber'
+import OpenInNewIcon from '@mui/icons-material/OpenInNew'
 import ViewListIcon from '@mui/icons-material/ViewList'
 import CalendarMonthIcon from '@mui/icons-material/CalendarMonth'
 import CleaningServicesIcon from '@mui/icons-material/CleaningServices'
@@ -33,6 +34,7 @@ import useRoute from './useRoute'
 // top bar doubles as the OS drag handle there.
 import { isElectron } from './platform'
 import { taskAnchor, isDueOn, isOverdue, isListedOn, sameDay } from './due'
+import { resolveLink, linkLabel } from './links'
 
 // Local calendar day, e.g. "2026-06-12". Used to detect a midnight rollover.
 function todayKey(d = new Date()) {
@@ -131,6 +133,24 @@ function TaskRow({ task, onToggle, onRemove, onEdit }) {
                   they're there, since their due day (if any) isn't today. */}
               {isOverdue(task) && (
                 <Chip size="small" color="error" icon={<WarningAmberIcon />} label="Overdue" />
+              )}
+              {/* Jump to the part of a public page (/moving, /japan) this chore
+                  came from. A real link, so it opens in a new tab; the click
+                  must not bubble up and open the edit dialog too. */}
+              {task.link?.href && (
+                <Chip
+                  size="small"
+                  variant="outlined"
+                  color="primary"
+                  clickable
+                  component="a"
+                  href={resolveLink(task.link.href)}
+                  target="_blank"
+                  rel="noopener"
+                  icon={<OpenInNewIcon />}
+                  label={task.link.label || linkLabel(task.link.href)}
+                  onClick={(e) => e.stopPropagation()}
+                />
               )}
             </Stack>
           }
@@ -308,8 +328,8 @@ function ChoresPage({ navigate }) {
     )
   const remove = (id) => setTasks((prev) => prev.filter((t) => t.id !== id))
 
-  const addTask = ({ text, recurrence, assignee, dueAt }) => {
-    const task = { id: `${Date.now()}`, text, done: false, recurrence, assignee, dueAt }
+  const addTask = ({ text, recurrence, assignee, dueAt, link = null }) => {
+    const task = { id: `${Date.now()}`, text, done: false, recurrence, assignee, dueAt, link }
     // Persist just this new task (insert into tommy-data.nalas-minions), and
     // tell the bulk-sync effect to skip the resulting state change so the same
     // chore isn't written a second time.
@@ -321,7 +341,7 @@ function ChoresPage({ navigate }) {
   }
 
   // Apply edits from the dialog to an existing chore (name/recurrence/assignee/
-  // due). done/completedAt are left untouched — completion is only ever changed
+  // due/link). done/completedAt are left untouched — completion is only ever changed
   // via the checkbox. The bulk-sync effect persists the change (and reschedules
   // its reminder if the due time or recurrence moved).
   const updateTask = (id, fields) =>

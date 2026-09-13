@@ -16,7 +16,7 @@ const path = require('path')
 require('dotenv').config({ path: path.join(__dirname, '..', '.env') })
 
 const mongo = require('../electron/mongo.cjs')
-const { MOVING_TASKS } = require('./moving-tasks.cjs')
+const { MOVING_TASKS, MOVING_SECTIONS } = require('./moving-tasks.cjs')
 
 const DUE_TIME = '09:00'
 const ASSIGNEE = process.env.MOVING_ASSIGNEE || 'Tommy'
@@ -26,6 +26,14 @@ async function main() {
     console.error('MONGODB_URI is not set — see .env.example')
     process.exitCode = 1
     return
+  }
+  // src/links.js is an ES module (the app shares it), hence the dynamic import.
+  const { sectionFor } = await import('../src/links.js')
+  // Each chore links back to its context on /moving: the section that holds
+  // its details when it has one, else its own row in the week-by-week plan.
+  const linkFor = (t) => {
+    const section = MOVING_SECTIONS[t.id] && sectionFor(`/moving#${MOVING_SECTIONS[t.id]}`)
+    return section ? { ...section } : { ...sectionFor('/moving#plan'), href: `/moving#chk-${t.id}` }
   }
   const existing = new Map((await mongo.loadTasks()).map((t) => [t.id, t]))
   let added = 0
@@ -46,6 +54,7 @@ async function main() {
       project: 'moving',
       workstream: t.workstream,
       notes: t.notes,
+      link: linkFor(t),
     })
     if (prior) updated++
     else added++
