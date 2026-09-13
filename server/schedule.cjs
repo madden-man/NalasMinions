@@ -9,6 +9,11 @@
 // dueAt is stored as a local wall-clock string ("YYYY-MM-DDTHH:mm") with no
 // timezone, so we interpret it in REMINDER_TZ (defaults to the household zone)
 // and convert to an absolute instant for ntfy.
+//
+// A chore may also carry `remindDaysBefore` (a whole number of days, default 0).
+// Its reminder then fires that many days ahead of the due time, at the same
+// wall-clock hour — "tomorrow" wording in the push — and if that early slot has
+// already passed, at the due time itself, so a late-added chore still gets one.
 
 const REMINDER_TZ = process.env.REMINDER_TZ || 'America/Denver'
 // How far ahead we're willing to queue a reminder. Kept under ntfy.sh's 3-day
@@ -77,39 +82,74 @@ function dueOnDate(recurrence, anchor, date) {
   }
 }
 
-// The absolute time (epoch ms) of the next reminder for `task` that falls within
-// the horizon, or null if there's nothing to schedule (no due time, a finished
-// one-off, or the next occurrence is beyond the horizon).
-function nextReminderEpoch(task, nowMs, tz = REMINDER_TZ) {
+// How many whole days ahead of the due time a chore wants its reminder.
+function leadDays(task) {
+  const n = Number(task && task.remindDaysBefore)
+  return Number.isFinite(n) && n > 0 ? Math.floor(n) : 0
+}
+
+// Given an occurrence (its calendar date + the chore's wall-clock time), the
+// reminder slots for it in firing order: the early one (lead days ahead, same
+// hour) when the chore asks for it, then the due time itself. Each slot carries
+// the occurrence it's for so the push can say "tomorrow" vs "now".
+function slotsFor(date, anchor, lead, tz) {
+  const dueEpoch = zonedWallToEpoch({ ...date, hh: anchor.hh, mi: anchor.mi }, tz)
+  const slots = []
+  if (lead > 0) {
+    const early = addDays(date, -lead)
+    slots.push({ epoch: zonedWallToEpoch({ ...early, hh: anchor.hh, mi: anchor.mi }, tz), dueEpoch, early: true })
+  }
+  slots.push({ epoch: dueEpoch, dueEpoch, early: false })
+  return slots
+}
+
+// The next reminder for `task` within the horizon as { epoch, dueEpoch, early },
+// or null if there's nothing to schedule (no due time, a finished one-off, or
+// the next slot is beyond the horizon). `early` is true when the slot is the
+// lead-time reminder rather than the due time.
+function nextReminder(task, nowMs, tz = REMINDER_TZ) {
   if (!task || !task.dueAt) return null
   const m = /^(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2})/.exec(task.dueAt)
   if (!m) return null
   const anchor = { y: +m[1], mo: +m[2], d: +m[3], hh: +m[4], mi: +m[5] }
   const anchorEpoch = zonedWallToEpoch(anchor, tz)
   const recurrence = task.recurrence || 'once'
+  const lead = leadDays(task)
+  const inWindow = (slot) => slot.epoch > nowMs && slot.epoch <= nowMs + HORIZON_MS
 
   if (recurrence === 'once') {
     if (task.done) return null
-    return anchorEpoch > nowMs && anchorEpoch <= nowMs + HORIZON_MS ? anchorEpoch : null
+    const slot = slotsFor(anchor, anchor, lead, tz).find((sl) => sl.epoch > nowMs)
+    return slot && inWindow(slot) ? slot : null
   }
 
   // Recurring: walk forward from today until we find the next occurrence that is
   // in the future and on/after the chore's anchor, giving up past the horizon.
+  // With a lead time the reminder for an occurrence lands before the occurrence,
+  // so the walk looks `lead` days further ahead than the horizon.
   const today = localDateParts(nowMs, tz)
   const completedDay =
     task.done && task.completedAt ? localDateParts(Date.parse(task.completedAt), tz) : null
-  const maxOffset = Math.ceil(HORIZON_MS / DAY_MS) + 1
+  const maxOffset = Math.ceil(HORIZON_MS / DAY_MS) + 1 + lead
   for (let offset = 0; offset <= maxOffset; offset++) {
     const date = addDays(today, offset)
     const epoch = zonedWallToEpoch({ ...date, hh: anchor.hh, mi: anchor.mi }, tz)
     if (epoch <= nowMs || epoch < anchorEpoch) continue
-    if (epoch > nowMs + HORIZON_MS) return null
     if (!dueOnDate(recurrence, anchor, date)) continue
     // Don't remind about an occurrence already completed on its day.
     if (completedDay && sameYMD(completedDay, date)) continue
-    return epoch
+    const slot = slotsFor(date, anchor, lead, tz).find((sl) => sl.epoch > nowMs)
+    if (!slot) continue
+    return inWindow(slot) ? slot : null
   }
   return null
+}
+
+// The absolute time (epoch ms) of the next reminder for `task` that falls within
+// the horizon, or null. See nextReminder.
+function nextReminderEpoch(task, nowMs, tz = REMINDER_TZ) {
+  const slot = nextReminder(task, nowMs, tz)
+  return slot ? slot.epoch : null
 }
 
 // --- orchestration ------------------------------------------------------------
@@ -124,7 +164,8 @@ async function ensureReminderScheduled(
   task,
   { nowMs = Date.now(), tz, notify, cancelScheduled, getMarker, setMarker },
 ) {
-  const epoch = nextReminderEpoch(task, nowMs, tz)
+  const slot = nextReminder(task, nowMs, tz)
+  const epoch = slot ? slot.epoch : null
   const marker = await getMarker(task.id)
   // A queued push is still cancelable while its time is in the future.
   const pendingId = marker && marker.id && Date.parse(marker.at) > nowMs ? marker.id : null
@@ -150,11 +191,13 @@ async function ensureReminderScheduled(
   // immediately instead of scheduled.
   const at = epoch - nowMs >= 10000 ? Math.floor(epoch / 1000) : undefined
   const who = task.assignee ? `${task.assignee}: ` : ''
+  const lead = slot.early ? Math.round((slot.dueEpoch - slot.epoch) / DAY_MS) : 0
+  const when = lead === 1 ? 'tomorrow' : lead > 1 ? `in ${lead} days` : null
   const id = await notify({
     source: "Nala's Minions",
     event: 'reminder',
-    title: `Chore due: ${task.text}`,
-    message: `${who}"${task.text}" is due.`,
+    title: when ? `Due ${when}: ${task.text}` : `Chore due: ${task.text}`,
+    message: when ? `${who}"${task.text}" is due ${when}.` : `${who}"${task.text}" is due.`,
     at,
   })
 
@@ -165,6 +208,7 @@ async function ensureReminderScheduled(
 module.exports = {
   REMINDER_TZ,
   HORIZON_MS,
+  nextReminder,
   nextReminderEpoch,
   ensureReminderScheduled,
   // exported for tests

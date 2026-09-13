@@ -7,7 +7,7 @@
 const test = require('node:test')
 const assert = require('node:assert/strict')
 
-const { nextReminderEpoch, zonedWallToEpoch } = require('../server/schedule.cjs')
+const { nextReminder, nextReminderEpoch, zonedWallToEpoch } = require('../server/schedule.cjs')
 
 const TZ = 'America/Denver'
 // "now" = 2026-07-02 08:00 in Denver (MDT, UTC-6) → 14:00 UTC. 2026-07-02 is a Thursday.
@@ -93,4 +93,50 @@ test('monthly: due on the anchor day-of-month later today', () => {
     nextReminderEpoch(task({ recurrence: 'monthly', dueAt: '2026-06-02T12:00' }), NOW, TZ),
     utc('2026-07-02T18:00:00Z'),
   )
+})
+
+// --- remindDaysBefore: a lead-time reminder ahead of the due time ------------
+
+test('lead: once, due the day after tomorrow → reminds tomorrow at the same hour', () => {
+  const slot = nextReminder(task({ recurrence: 'once', dueAt: '2026-07-04T09:00', remindDaysBefore: 1 }), NOW, TZ)
+  assert.deepEqual(slot, {
+    epoch: utc('2026-07-03T15:00:00Z'),
+    dueEpoch: utc('2026-07-04T15:00:00Z'),
+    early: true,
+  })
+})
+
+test('lead: early slot already passed → falls back to the due time itself', () => {
+  // Due tomorrow 07:00; the day-before slot was 07:00 today, an hour ago.
+  const slot = nextReminder(task({ recurrence: 'once', dueAt: '2026-07-03T07:00', remindDaysBefore: 1 }), NOW, TZ)
+  assert.deepEqual(slot, { epoch: utc('2026-07-03T13:00:00Z'), dueEpoch: utc('2026-07-03T13:00:00Z'), early: false })
+})
+
+test('lead: early slot beyond the horizon → null', () => {
+  assert.equal(
+    nextReminderEpoch(task({ recurrence: 'once', dueAt: '2026-07-10T09:00', remindDaysBefore: 1 }), NOW, TZ),
+    null,
+  )
+})
+
+test('lead: zero, missing, or junk means no early reminder', () => {
+  for (const remindDaysBefore of [0, undefined, null, 'soon', -2]) {
+    assert.equal(
+      nextReminder(task({ recurrence: 'once', dueAt: '2026-07-02T09:00', remindDaysBefore }), NOW, TZ).early,
+      false,
+    )
+  }
+})
+
+test('lead: weekly occurrence next Thursday → reminded Wednesday, inside the horizon', () => {
+  // Thursday 06:00 already passed today; next Thursday (Jul 9) is 7 days out,
+  // but its day-before slot (Jul 8) is still beyond 2 days → null now…
+  assert.equal(
+    nextReminderEpoch(task({ recurrence: 'weekly', dueAt: '2026-06-25T06:00', remindDaysBefore: 1 }), NOW, TZ),
+    null,
+  )
+  // …and once "now" is Tuesday Jul 7 08:00, Wednesday 06:00 is queued.
+  const tue = Date.parse('2026-07-07T14:00:00Z')
+  const slot = nextReminder(task({ recurrence: 'weekly', dueAt: '2026-06-25T06:00', remindDaysBefore: 1 }), tue, TZ)
+  assert.deepEqual(slot, { epoch: utc('2026-07-08T12:00:00Z'), dueEpoch: utc('2026-07-09T12:00:00Z'), early: true })
 })

@@ -77,3 +77,16 @@ test('immediate: due within 10s → sends now (no At header)', async () => {
   assert.equal(h.events.notified.length, 1)
   assert.equal(h.events.notified[0].at, undefined)
 })
+
+test('lead-time reminder says "tomorrow" and is queued a day ahead of the due time', async () => {
+  const h = harness()
+  const task = {
+    id: 'm', text: 'Sign the tile contract', assignee: 'Tommy',
+    recurrence: 'once', dueAt: '2026-07-04T09:00', remindDaysBefore: 1,
+  }
+  const at = await ensureReminderScheduled(task, h.deps)
+  assert.equal(at, '2026-07-03T15:00:00.000Z')
+  assert.equal(h.events.notified[0].title, 'Due tomorrow: Sign the tile contract')
+  assert.equal(h.events.notified[0].message, 'Tommy: "Sign the tile contract" is due tomorrow.')
+  assert.deepEqual(h.markers.m, { at: '2026-07-03T15:00:00.000Z', id: 'id-1' })
+})
