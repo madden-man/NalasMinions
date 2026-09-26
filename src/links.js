@@ -33,6 +33,7 @@ export const PAGES = [
       { id: 'mlv', label: 'Vinyl repair' },
       { id: 'listing', label: 'Listing playbook' },
       { id: 'rental', label: 'Renter critical path' },
+      { id: 'insure', label: 'Insurance, lender, and license' },
       { id: 'bids', label: 'Tile bids' },
       { id: 'budget', label: 'Budget' },
     ],
