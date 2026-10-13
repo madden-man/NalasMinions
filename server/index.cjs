@@ -153,6 +153,14 @@ async function handler(req, res) {
         if (Array.isArray(tasks)) for (const t of tasks) await scheduleReminder(t)
         return sendJson(res, 200, { ok: true })
       }
+      // Remove one chore: the only path that deletes (the PUT never does).
+      if (p.startsWith('/api/tasks/') && method === 'DELETE') {
+        const id = decodeURIComponent(p.slice('/api/tasks/'.length))
+        if (!id) return sendJson(res, 400, { error: 'Which task?' })
+        await mongo.deleteTask(id)
+        await scheduleReminder({ id, dueAt: null })
+        return sendJson(res, 200, { ok: true })
+      }
       // The weekly menu's meal catalog.
       if (p === '/api/meals' && method === 'GET') {
         return sendJson(res, 200, { meals: await mongo.loadMeals() })

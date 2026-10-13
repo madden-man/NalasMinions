@@ -83,6 +83,16 @@ exports.handler = async (event) => {
       if (Array.isArray(tasks)) for (const t of tasks) await scheduleReminder(t)
       return json(200, { ok: true })
     }
+    // Remove one chore. The bulk PUT above never deletes, so this is the only
+    // way a task leaves the collection. Clearing its reminder: a task with no
+    // due time schedules nothing, which cancels any pending push.
+    if (sub.startsWith('/tasks/') && method === 'DELETE') {
+      const id = decodeURIComponent(sub.slice('/tasks/'.length))
+      if (!id) return json(400, { error: 'Which task?' })
+      await mongo.deleteTask(id)
+      await scheduleReminder({ id, dueAt: null })
+      return json(200, { ok: true })
+    }
 
     // The weekly menu's meal catalog.
     if (sub === '/meals' && method === 'GET') return json(200, { meals: await mongo.loadMeals() })

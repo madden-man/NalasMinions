@@ -3,7 +3,7 @@ import {
   AppBar, Toolbar, Typography, Container, Box, Paper, List, ListItem,
   ListItemButton, ListItemIcon, ListItemText, Checkbox, IconButton,
   Button, LinearProgress, Chip, Stack, Tooltip, ToggleButton, ToggleButtonGroup,
-  useMediaQuery,
+  useMediaQuery, Alert,
 } from '@mui/material'
 import { useTheme } from '@mui/material/styles'
 import DeleteOutlineIcon from '@mui/icons-material/DeleteOutline'
@@ -23,7 +23,9 @@ import CampaignIcon from '@mui/icons-material/Campaign'
 import LooksOneIcon from '@mui/icons-material/LooksOne'
 import ShoppingCartOutlinedIcon from '@mui/icons-material/ShoppingCartOutlined'
 import RestaurantMenuIcon from '@mui/icons-material/RestaurantMenu'
-import { loadTasks, addTask as addStoredTask, saveTasks, bump } from './storage'
+import {
+  loadTasks, addTask as addStoredTask, saveTasks, deleteTask as deleteStoredTask, bump,
+} from './storage'
 import { renewTasks } from './renew'
 import { isGroceryTask } from './grocery'
 import AddTaskDialog, { RECURRENCE_OPTIONS } from './AddTaskDialog'
@@ -189,6 +191,8 @@ function ChoresPage({ navigate }) {
   const wide = useMediaQuery(theme.breakpoints.up('md'))
   const [tasks, setTasks] = useState([])
   const [loaded, setLoaded] = useState(false)
+  // Why the list could not be loaded, or null. While set, nothing is saved.
+  const [loadError, setLoadError] = useState(null)
   const [dialogOpen, setDialogOpen] = useState(false)
   // The chore currently being edited in the dialog, or null when adding a new one.
   const [editingTask, setEditingTask] = useState(null)
@@ -243,13 +247,18 @@ function ChoresPage({ navigate }) {
     ;(async () => {
       try {
         const initial = renewTasks((await loadTasks()) ?? [])
-        if (!cancelled) setTasks(initial)
+        if (cancelled) return
+        setTasks(initial)
+        // Only a successful load arms the save effect. A failed one used to
+        // flip `loaded` too, and the empty list it left behind was then saved
+        // over the household's chores (2026-10). Now the page stays read-only
+        // and says so until a reload succeeds.
+        setLoaded(true)
       } catch (err) {
         // No localStorage fallback by design: show an empty list and make the
         // failure visible rather than silently diverging from the database.
         console.error('Failed to load tasks from MongoDB:', err)
-      } finally {
-        if (!cancelled) setLoaded(true)
+        if (!cancelled) setLoadError(err.message || String(err))
       }
     })()
     return () => {
@@ -371,7 +380,21 @@ function ChoresPage({ navigate }) {
           : t,
       ),
     )
-  const remove = (id) => setTasks((prev) => prev.filter((t) => t.id !== id))
+  // Removing is the one change that deletes from MongoDB, and it names the
+  // task explicitly: the bulk save below only upserts, so nothing else can
+  // make a chore disappear.
+  const remove = (id) => {
+    setTasks((prev) => prev.filter((t) => t.id !== id))
+    deleteStoredTask(id).catch((err) => console.error('Failed to delete task from MongoDB:', err))
+  }
+  const clearCompleted = () => {
+    const gone = tasks.filter((t) => t.done && inScope(t)).map((t) => t.id)
+    if (!gone.length) return
+    setTasks((prev) => prev.filter((t) => !gone.includes(t.id)))
+    for (const id of gone) {
+      deleteStoredTask(id).catch((err) => console.error('Failed to delete task from MongoDB:', err))
+    }
+  }
 
   const addTask = ({ text, recurrence, assignee, dueAt, link = null }) => {
     const task = { id: `${Date.now()}`, text, done: false, recurrence, assignee, dueAt, link }
@@ -540,6 +563,13 @@ function ChoresPage({ navigate }) {
           Chores to keep the house running for Nala. Tap a checkbox when a minion finishes a task.
         </Typography>
 
+        {loadError && (
+          <Alert severity="error" sx={{ mb: 2 }}>
+            Couldn't load the chores ({loadError}). Nothing will be saved until a reload
+            brings the list back.
+          </Alert>
+        )}
+
         <Stack direction="row" spacing={1} useFlexGap flexWrap="wrap" sx={{ mb: 2 }}>
           <ToggleButtonGroup
             exclusive
@@ -654,7 +684,7 @@ function ChoresPage({ navigate }) {
           <Button
             size="small"
             color="inherit"
-            onClick={() => setTasks((prev) => prev.filter((t) => !(t.done && inScope(t))))}
+            onClick={clearCompleted}
             disabled={!scopedTasks.some((t) => t.done)}
           >
             Clear completed

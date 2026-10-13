@@ -91,15 +91,17 @@ async function addTask(task) {
 }
 
 // Mirror the renderer's task array into the collection: upsert every current
-// task (preserving order) and drop any documents that no longer exist. Whole-
-// array semantics match how the UI thinks about its state, and the dataset is
-// tiny, so this stays simple and correct.
+// task, preserving order. This never deletes. It used to drop every document
+// not in the array, and one client that failed to load (a cold-start timeout,
+// say) then saved its empty list and wiped the whole household's chores
+// (2026-10). Removing a chore is now its own explicit call, deleteTask, so a
+// save can only ever add or update.
 async function saveTasks(tasks) {
+  if (!Array.isArray(tasks) || !tasks.length) return
   const db = await getDb()
   const col = db.collection(TASKS)
-  const ids = tasks.map((t) => t.id)
 
-  if (tasks.length) {
+  {
     await col.bulkWrite(
       tasks.map(({ id, ...rest }, i) => ({
         replaceOne: {
@@ -112,7 +114,14 @@ async function saveTasks(tasks) {
       })),
     )
   }
-  await col.deleteMany({ _id: { $nin: ids } })
+}
+
+// Remove one task by id. The only path that deletes from the collection, and
+// it only runs when the user removes that chore (or clears completed ones).
+async function deleteTask(id) {
+  if (!id) return
+  const db = await getDb()
+  await db.collection(TASKS).deleteOne({ _id: id })
 }
 
 // The weekly menu, in the order it should be shown: this app's own meals from
@@ -317,6 +326,7 @@ module.exports = {
   loadTasks,
   addTask,
   saveTasks,
+  deleteTask,
   loadMeals,
   addMeal,
   saveMeals,

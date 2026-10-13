@@ -58,9 +58,16 @@ export async function addTask(task) {
   await api('/tasks', { method: 'POST', body: JSON.stringify(task) })
 }
 
-// Sync the whole task array (used for toggle / delete / clear / daily reset).
+// Sync the whole task array (toggle / edit / daily reset). Upsert only: the
+// server never deletes on a save, so a client holding a stale or empty list
+// can't wipe the household's chores. Removal goes through deleteTask.
 export async function saveTasks(tasks) {
   await api('/tasks', { method: 'PUT', body: JSON.stringify(tasks) })
+}
+
+// Remove one chore from tommy-data.nalas-minions.
+export async function deleteTask(id) {
+  await api(`/tasks/${encodeURIComponent(id)}`, { method: 'DELETE' })
 }
 
 // The weekly menu's meal catalog, straight from tommy-data.nalas-menu (in the
