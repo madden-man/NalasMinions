@@ -10,13 +10,14 @@ import userEvent from '@testing-library/user-event'
 
 import App from '../../src/App'
 import { MEALS } from '../../scripts/meals-data.cjs'
-import { loadTasks, loadMeals } from '../../src/storage'
+import { loadTasks, loadMeals, saveTasks, deleteTask } from '../../src/storage'
 
 vi.mock('../../src/storage', () => ({
   loadTasks: vi.fn(),
   loadMeals: vi.fn(),
   addTask: vi.fn().mockResolvedValue(undefined),
   saveTasks: vi.fn().mockResolvedValue(undefined),
+  deleteTask: vi.fn().mockResolvedValue(undefined),
   getMeta: vi.fn().mockResolvedValue(null),
   setMeta: vi.fn().mockResolvedValue(undefined),
   bump: vi.fn().mockResolvedValue(undefined),
@@ -30,6 +31,8 @@ function renderAt(path) {
 
 beforeEach(() => {
   vi.clearAllMocks()
+  // The chores page remembers its view and filters here; start each test fresh.
+  window.localStorage.clear()
   loadTasks.mockResolvedValue([])
   loadMeals.mockResolvedValue([MEALS.find((m) => m.id === 'meal-pad-thai')])
 })
@@ -212,5 +215,40 @@ describe('filter by connected page', () => {
     renderAt('/')
     expect(await screen.findByText('No Japan chores')).toBeInTheDocument()
     expect(screen.getByRole('button', { name: /japan chores only/i })).toHaveAttribute('aria-pressed', 'true')
+  })
+})
+
+// The chores list is only ever written back after it was read. A load that
+// fails (cold-start timeout, offline) used to arm the save effect anyway, and
+// the empty list it left behind was saved over the household's chores.
+describe('a failed load never saves', () => {
+  it('shows the error and leaves MongoDB untouched', async () => {
+    loadTasks.mockRejectedValue(new Error('API GET /tasks -> 502'))
+    renderAt('/')
+    expect(await screen.findByRole('alert')).toHaveTextContent(/couldn't load the chores/i)
+    // Give any (wrong) save effect a chance to fire before asserting it did not.
+    await new Promise((r) => setTimeout(r, 50))
+    expect(saveTasks).not.toHaveBeenCalled()
+    expect(deleteTask).not.toHaveBeenCalled()
+  })
+
+  it('a successful load saves normally and shows no error', async () => {
+    renderAt('/')
+    await screen.findByRole('heading', { name: /nala's minion todo list/i })
+    await vi.waitFor(() => expect(saveTasks).toHaveBeenCalled())
+    expect(screen.queryByRole('alert')).not.toBeInTheDocument()
+  })
+})
+
+describe('removing a chore', () => {
+  it('deletes that one task by id instead of relying on the bulk save', async () => {
+    loadTasks.mockResolvedValue([
+      { id: 'walk-nala', text: 'Walk Nala', done: false, recurrence: 'once', assignee: 'Tommy' },
+    ])
+    renderAt('/')
+    await screen.findByText('Walk Nala')
+    await userEvent.click(screen.getByRole('button', { name: 'delete' }))
+    expect(deleteTask).toHaveBeenCalledWith('walk-nala')
+    expect(screen.queryByText('Walk Nala')).not.toBeInTheDocument()
   })
 })
