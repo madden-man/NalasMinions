@@ -101,8 +101,8 @@ function guides({ esc, md, taskLink }) {
   <div class="sec-head"><h2 class="sign">🚰 Frost-proof faucets</h2><p>The inspection found the rear faucets with no shutoff, easy to freeze (item 35). A burst line in a cold snap floods the inside, so this goes before the first hard freeze.</p><a class="up" href="#top">Top ↑</a></div>
   <div class="guide">
     <div class="steps3">
-      <div class="step s1"><span class="n">1</span><h3>This week, before the plumber</h3><ul><li>Hoses off both rear faucets.</li><li>Foam faucet covers, sealed tight to the siding.</li><li>Foam insulation on any pipe you can see inside behind them.</li><li>Gaps where the pipes go through the wall caulked or foamed.</li></ul></div>
-      <div class="step s2"><span class="n">2</span><h3>The fix: frost-free sillcocks</h3><ul><li>The valve sits 4 to 24 inches inside the wall, in the heat; pick one a little longer than the wall is thick, measured to the supply pipe.</li><li>Pitched 5 to 10 degrees down to the outside so it drains every time it shuts.</li><li>An anti-siphon model (most codes require it now).</li><li>A shutoff with a drain on each supply line inside.</li><li>Book it with ${taskLink('house-1', 'the gas line visit')}: one plumber trip.</li></ul></div>
+      <div class="step s1"><span class="n">1</span><h3>Now: the stopgap</h3><ul><li>Hose off the reel and off both rear faucets.</li><li>Foam faucet covers, sealed tight to the siding.</li><li>Foam insulation on any pipe you can see inside behind them.</li><li>Gaps where the pipes go through the wall caulked or foamed.</li></ul></div>
+      <div class="step s2"><span class="n">2</span><h3>The fix: frost-free sillcocks</h3><ul><li>The valve sits 4 to 24 inches inside the wall, in the heat; pick one a little longer than the wall is thick, measured to the supply pipe.</li><li>Pitched 5 to 10 degrees down to the outside so it drains every time it shuts.</li><li>An anti-siphon model (most codes require it now).</li><li>A shutoff with a drain on each supply line inside.</li><li>Booked with ${taskLink('house-1', 'the spring plumber visit')} (gas line and heater pipe too), or sooner if a slot opens before the deep cold.</li></ul></div>
       <div class="step s3"><span class="n">3</span><h3>Every October</h3><ul><li>Hoses off: a hose left on traps water, and that is the most common way a frost-free faucet still bursts.</li><li>Close the inside shutoff, open the faucet, let it drain.</li><li>Still trickling with the shutoff closed? The valve leaks: plumber.</li><li>It is on ${taskLink('home-5', 'the October checklist')}.</li></ul></div>
     </div>
     <div class="cutwrap">${faucetArt}</div>
@@ -115,7 +115,7 @@ function guides({ esc, md, taskLink }) {
       <li>Screw the flange to the wall and caulk around it with exterior silicone.</li>
       <li>Main back on; check both ends for leaks. Never insulate over the inside connection.</li>
     </ol></details>
-    <div class="doit">Tasks: ${taskLink('house-2', '🏠 Frost-proof the rear faucets', true)} ${taskLink('home-5', '🛠️ October: faucets drained', true)}</div>
+    <div class="doit">Tasks: ${taskLink('house-2', '🏠 Faucet stopgap', true)} ${taskLink('house-1', '🏠 Spring plumber visit', true)} ${taskLink('home-5', '🛠️ October: faucets drained', true)}</div>
   </div>
 </section>
 
