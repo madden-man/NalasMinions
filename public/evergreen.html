@@ -135,6 +135,8 @@ section{margin-top:64px}
 .hzgrid{display:grid;gap:22px}
 .hzcard{background:var(--paper);border:1px solid var(--line);border-radius:14px;padding:20px;box-shadow:var(--shadow);position:relative}
 .hzcard:target,.area:target{animation:glow 2.2s ease}
+.flash{animation:glow 2.2s ease}
+.task.flash{background:var(--clay-soft)}
 @keyframes glow{0%,40%{box-shadow:0 0 0 4px var(--clay),var(--shadow)}100%{box-shadow:var(--shadow)}}
 .hzcard header{display:flex;gap:14px;align-items:center}
 .hzcard .badge{width:56px;height:56px;flex:none;display:grid;place-items:center;font-size:28px;border-radius:50%;background:var(--moss-soft);border:3px solid var(--pine);
@@ -540,10 +542,35 @@ footer .hand{font-size:26px;display:block;margin-bottom:6px}
 
   $('#printBtn').addEventListener('click', () => window.print())
 
+  // In-page jumps (tiles, chips, nav, year rows): scroll the target into view
+  // ourselves, centred, and flash it. A bare #hash jump can land nowhere: the
+  // row may be hidden by a filter, and anchors inside the two-column task
+  // layout don't scroll reliably in every browser.
+  function jump(id, smooth) {
+    const el = document.getElementById(id)
+    if (!el) return false
+    if (el.closest('.task.hidden, .area.empty')) $$('.filters button')[0].click()
+    const r = el.getBoundingClientRect()
+    const small = el.classList.contains('task') || el.classList.contains('hzcard') || el.classList.contains('area')
+    const top = r.top + scrollY - (small ? Math.max(80, (innerHeight - Math.min(r.height, innerHeight * 0.6)) / 2) : 72)
+    window.scrollTo({ top, behavior: smooth ? 'smooth' : 'auto' })
+    el.classList.remove('flash'); void el.offsetWidth; el.classList.add('flash')
+    return true
+  }
+  document.addEventListener('click', (e) => {
+    const a = e.target.closest('a[href^="#"]')
+    if (!a || e.metaKey || e.ctrlKey || e.shiftKey) return
+    const id = decodeURIComponent(a.getAttribute('href').slice(1))
+    if (!id) return
+    if (jump(id, true)) { e.preventDefault(); history.pushState(null, '', '#' + id) }
+  })
+  window.addEventListener('popstate', () => location.hash && jump(location.hash.slice(1), true))
+
   // Live done-state from the chores list (read-only: ticking happens in the app).
   const sync = $('#sync')
   const setSync = (on, txt) => { sync.classList.toggle('on', on); sync.querySelector('span').textContent = txt }
   render()
+  if (location.hash) setTimeout(() => jump(location.hash.slice(1), false), 50)
   fetch('/api/tasks', { cache: 'no-store' })
     .then((r) => (r.ok ? r.json() : Promise.reject(r.status)))
     .then(({ tasks }) => {
@@ -551,6 +578,7 @@ footer .hand{font-size:26px;display:block;margin-bottom:6px}
       for (const t of tasks || []) if (String(t.id).startsWith('evergreen-')) done[t.id.slice(10)] = !!t.done
       setSync(true, 'Live from Nala\'s Minions')
       render()
+      if (location.hash) jump(location.hash.slice(1), false)
     })
     .catch(() => setSync(false, 'Offline: open Nala\'s Minions for ticks'))
 })()
