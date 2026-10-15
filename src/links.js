@@ -53,6 +53,30 @@ export const PAGES = [
       { id: 'checklist', label: 'Pre-trip checklist' },
     ],
   },
+  {
+    key: 'evergreen',
+    name: 'Evergreen prep',
+    file: 'public/evergreen.html',
+    sections: [
+      { id: 'now', label: 'This month' },
+      { id: 'year', label: 'The year' },
+      { id: 'hazards', label: 'Hazards' },
+      { id: 'tasks', label: 'Tasks' },
+      { id: 'area-house', label: 'House tasks' },
+      { id: 'area-alerts', label: 'Alerts tasks' },
+      { id: 'area-wildfire', label: 'Wildfire tasks' },
+      { id: 'area-power', label: 'Power tasks' },
+      { id: 'area-winter', label: 'Winter tasks' },
+      { id: 'area-home', label: 'Home hazards tasks' },
+      { id: 'area-supplies', label: 'Supplies tasks' },
+      { id: 'area-plan', label: 'Plan tasks' },
+      { id: 'area-nala', label: 'Nala tasks' },
+      { id: 'area-hiking', label: 'Hiking tasks' },
+      { id: 'area-wildlife', label: 'Wildlife tasks' },
+      { id: 'grab', label: 'Grab sheet' },
+      { id: 'sources', label: 'Sources' },
+    ],
+  },
 ]
 
 export const pagePath = (page) => `/${page.key}`

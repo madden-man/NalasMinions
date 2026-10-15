@@ -28,6 +28,10 @@ all of these are done:
    (a section, or an item id like `/japan#item-ghibli-tickets`); label with the section's
    label from `sectionFor(...)`.
 
+`/evergreen` (Evergreen emergency prep) is generated: edit `scripts/evergreen-tasks.cjs`
+(tasks) or `scripts/build-evergreen-page.cjs` (layout, hazards, grab sheet), then
+`npm run build:evergreen` and commit both; `npm run seed:evergreen` publishes the dated tasks.
+
 Push-up rule for this repo: each requested change is committed on a branch from
 `origin/main`, opened as a PR, and merged so Netlify deploys it. Run `npm test` and
 `npm run test:ui` first.
