@@ -8,7 +8,8 @@
 // on the page only and is never seeded. `recurrence` is passed to the chore
 // when the app supports the cadence (monthly); yearly tasks are seeded at
 // their next occurrence and say so in their notes. Text may hold [label](url)
-// links: the page renders them, the chore keeps just the label.
+// links: the page renders them, the chore keeps just the label. `guide` names a
+// how-to section on the page; the chore links there instead of to its row.
 
 const AREAS = [
   { key: 'house', emoji: '🏠', name: 'House', hazards: ['wildfire', 'winter', 'floods', 'home'],
@@ -38,7 +39,7 @@ const AREAS = [
 const EVERGREEN_TASKS = [
   // House
   { id: 'house-1', area: 'house', when: 'Oct 2026', due: '2026-10-19', short: 'Fix the gas line + water heater pipe', text: 'Plumber: replace the corroded exterior gas lines on the right side and fix the moisture source; correct the water heater TPR discharge pipe in the same visit (inspection items 33 and 34)' },
-  { id: 'house-2', area: 'house', when: 'Oct 2026', due: '2026-10-20', short: 'Frost-proof the rear faucets', text: 'Frost-protected exterior faucets with shutoff valves at the rear, before the first hard freeze (item 35)' },
+  { id: 'house-2', guide: 'faucets', area: 'house', when: 'Oct 2026', due: '2026-10-20', short: 'Frost-proof the rear faucets', text: 'Frost-protected exterior faucets with shutoff valves at the rear, before the first hard freeze (item 35)' },
   { id: 'house-3', area: 'house', when: 'Oct 2026', due: '2026-10-25', short: 'Tag the shutoffs', text: 'Tag the shutoffs: water main, gas meter valve with a wrench hung on it, boiler gas and water valves, breaker panel; label the panel (item 27)' },
   { id: 'house-4', area: 'house', when: 'Oct 2026', due: '2026-10-22', short: 'Look up WUI class and flood zone', text: 'Look up the Jeffco WUI class and the FEMA flood zone; confirm Evergreen Metro District serves water and sewer' },
   { id: 'house-5', area: 'house', when: 'Nov 2026', due: '2026-11-09', short: 'Roof repair', text: 'Roofer: repair the 3-tab asphalt roof and exposed nails, straighten the chimney crown, five-year certification; Class A assembly when it is replaced (items 15 and 17)' },
@@ -72,15 +73,15 @@ const EVERGREEN_TASKS = [
   { id: 'home-2', area: 'home', when: 'Oct 2026', due: '2026-10-27', short: 'Service the gas fireplace', text: 'Gas fireplace serviced and its damper kept open whenever it runs (item 13); confirm it lights with the power out, since it is the backup heat' },
   { id: 'home-3', area: 'home', when: 'Nov 2026', due: '2026-11-21', short: 'Radon test', text: 'Radon test kit on the lowest lived-in floor; mitigate if over 4 pCi/L ([Jeffco radon](https://www.jeffco.us/2551/Radon))' },
   { id: 'home-4', area: 'home', when: 'Every Sep', due: '2027-09-11', repeats: 'every September', short: 'Boiler and fireplace service', text: 'Boiler and gas fireplace service; winter car kits back in' },
-  { id: 'home-5', area: 'home', when: 'Every Oct', due: '2026-10-29', repeats: 'every October', short: 'Batteries, radio, faucets drained', text: 'Alarm batteries replaced; weather radio and power station charged; exterior faucets shut off and drained' },
+  { id: 'home-5', guide: 'faucets', area: 'home', when: 'Every Oct', due: '2026-10-29', repeats: 'every October', short: 'Batteries, radio, faucets drained', text: 'Alarm batteries replaced; weather radio and power station charged; exterior faucets shut off and drained' },
   { id: 'home-6', area: 'home', when: 'Monthly', due: '2026-11-01', recurrence: 'monthly', short: 'Test the alarms', text: 'Test the CO and smoke alarms' },
   { id: 'home-7', area: 'home', when: 'Every 2 to 3 years', due: '2028-11-04', repeats: 'every 2 to 3 years', short: 'Radon retest, CO alarm expiry', text: 'Radon retest; replace CO alarms at their expiry date' },
   // Supplies
-  { id: 'supplies-1', area: 'supplies', when: 'Oct 2026', due: '2026-10-26', short: "Pack go-bags and Nala's bag", text: "Build the two go-bags and Nala's bag; print the contact sheet and the plan into each; papers on a USB and in the cloud" },
-  { id: 'supplies-2', area: 'supplies', when: 'Oct 2026', due: '2026-10-28', short: 'Stock 7 days water, 14 days food', text: 'Stock 7 days of water (for boil-water orders) and 14 days of food for two plus Nala; can opener, lantern, headlamps, batteries; NOAA radio tested at the house' },
-  { id: 'supplies-3', area: 'supplies', when: 'Apr and Oct', due: '2027-04-10', repeats: 'every April and October', short: 'Swap go-bag food, meds, batteries', text: "Swap go-bag food, meds and batteries; refresh Nala's bag" },
+  { id: 'supplies-1', guide: 'gobags', area: 'supplies', when: 'Oct 2026', due: '2026-10-26', short: "Pack go-bags and Nala's bag", text: "Build the two go-bags and Nala's bag; print the contact sheet and the plan into each; papers on a USB and in the cloud" },
+  { id: 'supplies-2', guide: 'stock', area: 'supplies', when: 'Oct 2026', due: '2026-10-28', short: 'Stock 7 days water, 14 days food', text: 'Stock 7 days of water (for boil-water orders) and 14 days of food for two plus Nala; can opener, lantern, headlamps, batteries; NOAA radio tested at the house' },
+  { id: 'supplies-3', guide: 'gobags', area: 'supplies', when: 'Apr and Oct', due: '2027-04-10', repeats: 'every April and October', short: 'Swap go-bag food, meds, batteries', text: "Swap go-bag food, meds and batteries; refresh Nala's bag" },
   { id: 'supplies-4', area: 'supplies', when: 'Apr and Oct', due: '2027-04-11', repeats: 'every April and October', short: 'Swap the car kits', text: 'Swap car kits: winter out in April, back in October' },
-  { id: 'supplies-5', area: 'supplies', when: 'Apr and Oct', due: '2027-04-12', repeats: 'every April and October', short: 'Rotate water and food', text: 'Rotate stored water and food; re-read this page and fix what changed' },
+  { id: 'supplies-5', guide: 'stock', area: 'supplies', when: 'Apr and Oct', due: '2027-04-12', repeats: 'every April and October', short: 'Rotate water and food', text: 'Rotate stored water and food; re-read this page and fix what changed' },
   // Plan
   { id: 'plan-1', area: 'plan', when: 'Oct 2026', due: '2026-10-31', short: 'Drive both evacuation routes', text: 'Drive both evacuation routes in daylight and after dark; write them, the meeting points and the out-of-state contact on the fridge sheet' },
   { id: 'plan-2', area: 'plan', when: 'Dec 2026', due: '2026-12-13', short: 'Emergency sheet on both phones', text: "Put the emergency sheet on the Nala's Minions page so it is on both phones offline" },

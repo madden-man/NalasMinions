@@ -55,8 +55,11 @@ async function main() {
       project: 'evergreen',
       workstream: area.name,
       notes,
-      // The task's own row on the page; labelled with its area's section.
-      link: { href: `/evergreen#task-${t.id}`, label: section.label },
+      // The how-to for it when there is one, else its own row on the page
+      // (labelled with its area's section).
+      link: t.guide
+        ? { href: `/evergreen#${t.guide}`, label: sectionFor(`/evergreen#${t.guide}`).label }
+        : { href: `/evergreen#task-${t.id}`, label: section.label },
     })
     if (prior) updated++
     else added++

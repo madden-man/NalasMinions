@@ -9,6 +9,7 @@
 const fs = require('fs')
 const path = require('path')
 const { AREAS, EVERGREEN_TASKS } = require('./evergreen-tasks.cjs')
+const { guides, GUIDE_SOURCES } = require('./evergreen-guides.cjs')
 
 const OUT = path.join(__dirname, '..', 'public', 'evergreen.html')
 
@@ -123,6 +124,7 @@ const CALLS = [
   ['Wildlife at the house', 'Parks and Wildlife 303-291-7227'],
   ['Smoke', '[fire.airnow.gov](https://fire.airnow.gov)'],
 ]
+const KIT_GUIDE = { 'Go-bag, one each': 'gobags', "Nala's bag": 'gobags', 'Stay-home stock': 'stock' }
 // Phone numbers become tap-to-call links on a phone.
 const tel = (html) => html.replace(/\b(1-)?(\d{3})-(\d{3})-(\d{4})\b/g, (m) => `<a href="tel:${m.replace(/-/g, '')}">${m}</a>`)
 
@@ -210,6 +212,7 @@ const SOURCES = [
     ['Mount Blue Sky timed entry', 'https://www.recreation.gov/timed-entry/10087438'],
     ['Vets of the Rockies: hiking with dogs', 'https://vetsoftherockies.com/education/hiking-with-a-dog/'],
   ]],
+  ['How-tos', GUIDE_SOURCES],
   ['Ready.gov baselines', [
     ['Build a kit', 'https://www.ready.gov/kit'],
     ['Make a plan', 'https://www.ready.gov/plan'],
@@ -257,12 +260,21 @@ const heroArt = `<svg class="scene" viewBox="0 0 1200 380" preserveAspectRatio="
 const today = new Date().toISOString().slice(0, 10)
 const dated = EVERGREEN_TASKS.filter((t) => t.due)
 
+const GUIDE_NAMES = { faucets: 'How to frost-proof them', gobags: 'What goes in the bags', stock: 'The food and water list' }
+const byId = new Map(EVERGREEN_TASKS.map((t) => [t.id, t]))
+const taskLink = (id, label, chip) => {
+  if (!byId.has(id)) throw new Error(`guide links to unknown task ${id}`)
+  return `<a${chip ? ' class="chip"' : ''} href="#task-${id}">${esc(label)}</a>`
+}
+const G = guides({ esc, md, taskLink })
+
 const taskRow = (t) => {
   const habit = !t.due
   const badge = habit
     ? `<span class="when habit" title="A habit: lives here, not in the chores list">↻ ${esc(t.when)}</span>`
     : `<span class="when" title="${esc(t.when)}${t.repeats ? ` · repeats ${esc(t.repeats)}` : ''}">${dayLabel(t.due)}${t.due.slice(0, 4) !== '2026' ? ` ’${t.due.slice(2, 4)}` : ''}${t.repeats ? ' ↻' : ''}</span>`
-  return `<li class="task${habit ? ' is-habit' : ''}" id="task-${t.id}" data-id="${t.id}" data-due="${t.due || ''}"><span class="mark" aria-hidden="true"></span><span class="txt">${md(t.text)}</span>${badge}</li>`
+  const how = t.guide ? `<a class="chip guide-chip" href="#${t.guide}">📖 ${GUIDE_NAMES[t.guide]}</a>` : ''
+  return `<li class="task${habit ? ' is-habit' : ''}" id="task-${t.id}" data-id="${t.id}" data-due="${t.due || ''}"><span class="mark" aria-hidden="true"></span><span class="txt">${md(t.text)}</span>${badge}${how}</li>`
 }
 
 const areaBlock = (a) => {
@@ -533,6 +545,8 @@ footer .hand{font-size:26px;display:block;margin-bottom:6px}
 :root[data-theme="dark"] footer, :root:not([data-theme="light"]) footer{}
 @media (prefers-color-scheme: dark){:root:not([data-theme="light"]) footer{background:#0E140D;color:var(--ink)} :root:not([data-theme="light"]) footer a{color:var(--forest)}}
 
+${G.css}
+.kit .more{display:inline-block;margin-top:6px;font-size:13px;font-weight:700}
 @media print{
   body{background:#fff}
   .hero,nav,section:not(#grab),footer,.no-print{display:none !important}
@@ -561,7 +575,7 @@ footer .hand{font-size:26px;display:block;margin-bottom:6px}
 </header>
 
 <nav class="posts" aria-label="Sections"><div class="wrap">
-  <a href="#now">🍂 Next up</a><a href="#year">🗓️ The year</a><a href="#hazards">⚠️ Hazards</a><a href="#tasks">✅ Tasks</a><a href="#grab">📋 Grab sheet</a><a href="#sources">📚 Sources</a><a href="/">🐕 Minions</a>
+  <a href="#now">🍂 Next up</a><a href="#year">🗓️ The year</a><a href="#hazards">⚠️ Hazards</a><a href="#tasks">✅ Tasks</a><a href="#faucets">🚰 Faucets</a><a href="#gobags">🎒 Go-bags</a><a href="#stock">🥫 Pantry</a><a href="#grab">📋 Grab sheet</a><a href="#sources">📚 Sources</a><a href="/">🐕 Minions</a>
 </div></nav>
 
 <main class="wrap">
@@ -605,13 +619,14 @@ ${AREAS.map(areaBlock).join('\n')}
   </div>
 </section>
 
+${G.html}
 <section id="grab">
   <div class="sec-head"><h2 class="sign">📋 Grab sheet</h2><p>The page for the fridge and the go-bags: what we do, what we carry, who we call.</p><button class="btn no-print" id="printBtn" type="button">🖨️ Print just this</button></div>
   <div class="clip">
     <h3>🗺️ What we do</h3>
     <ul class="dos">${DO.map(([b, t]) => `<li><b>${esc(b)}</b>${esc(t)}</li>`).join('')}</ul>
     <h3>🎒 What we carry</h3>
-    <div class="kits">${KITS.map(([e, k, w, t]) => `<div class="kit"><div class="k"><span>${e}</span>${esc(k)}</div><div class="w">📍 ${esc(w)}</div><p>${esc(t)}</p></div>`).join('')}</div>
+    <div class="kits">${KITS.map(([e, k, w, t]) => `<div class="kit"><div class="k"><span>${e}</span>${esc(k)}</div><div class="w">📍 ${esc(w)}</div><p>${esc(t)}</p>${KIT_GUIDE[k] ? `<a class="more no-print" href="#${KIT_GUIDE[k]}">${KIT_GUIDE[k] === 'gobags' ? 'Packing list' : 'Food and water list'} →</a>` : ''}</div>`).join('')}</div>
     <h3>📞 Who we call</h3>
     <table class="calls"><tbody>${CALLS.map(([n, c]) => `<tr><td>${esc(n)}</td><td>${tel(md(c).replace(/&lt;b&gt;/g, '<b>').replace(/&lt;\/b&gt;/g, '</b>'))}</td></tr>`).join('')}</tbody></table>
     <p class="no-print" style="margin-top:14px;font-size:14px;color:var(--muted)">Built from ${areaChip('plan')} ${areaChip('supplies')} ${areaChip('nala')}; the why behind each line is under <a href="#hazards">Hazards</a>.</p>
@@ -731,6 +746,7 @@ ${SOURCES.map(([g, list]) => `  <details class="src"><summary>${esc(g)} (${list.
   })
   window.addEventListener('popstate', () => location.hash && jump(location.hash.slice(1), true))
 
+${G.js}
   // Live done-state from the chores list (read-only: ticking happens in the app).
   const sync = $('#sync')
   const setSync = (on, txt) => { sync.classList.toggle('on', on); sync.querySelector('span').textContent = txt }
