@@ -240,7 +240,7 @@ details.diy ol{margin-top:8px}
 .shelf li b{white-space:nowrap;color:var(--forest)}
 .rules{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(240px,100%),1fr));gap:10px;margin-top:14px;font-size:15px}
 .rules div{border-left:5px solid var(--moss);padding:6px 12px}
-.task .guide-chip{grid-column:2/-1;justify-self:start;margin-top:-2px}
+
 `
 
   const js = `

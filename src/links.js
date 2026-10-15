@@ -76,6 +76,7 @@ export const PAGES = [
       { id: 'faucets', label: 'Frost-proof faucets' },
       { id: 'gobags', label: 'Go-bag packing' },
       { id: 'stock', label: '14 days of food, 7 of water' },
+      { id: 'budget', label: 'Budget' },
       { id: 'grab', label: 'Grab sheet' },
       { id: 'sources', label: 'Sources' },
     ],

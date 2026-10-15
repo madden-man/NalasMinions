@@ -10,6 +10,7 @@ const fs = require('fs')
 const path = require('path')
 const { AREAS, EVERGREEN_TASKS } = require('./evergreen-tasks.cjs')
 const { guides, GUIDE_SOURCES } = require('./evergreen-guides.cjs')
+const { BUDGET, BUDGET_SOURCES, CREDIT } = require('./evergreen-budget.cjs')
 
 const OUT = path.join(__dirname, '..', 'public', 'evergreen.html')
 
@@ -213,6 +214,7 @@ const SOURCES = [
     ['Vets of the Rockies: hiking with dogs', 'https://vetsoftherockies.com/education/hiking-with-a-dog/'],
   ]],
   ['How-tos', GUIDE_SOURCES],
+  ['Costs', Object.values(BUDGET_SOURCES)],
   ['Ready.gov baselines', [
     ['Build a kit', 'https://www.ready.gov/kit'],
     ['Make a plan', 'https://www.ready.gov/plan'],
@@ -268,13 +270,84 @@ const taskLink = (id, label, chip) => {
 }
 const G = guides({ esc, md, taskLink })
 
+// --- budget ----------------------------------------------------------------------
+
+const usd = (n) => '$' + Math.round(n).toLocaleString('en-US')
+const range = (lo, hi) => (lo === hi ? usd(lo) : `${usd(lo)}–${usd(hi).slice(1)}`)
+for (const b of BUDGET) if (!byId.has(b.task)) throw new Error(`budget row for unknown task ${b.task}`)
+// Per task: the counted cost (once + yearly) and whether "only if" extras exist.
+const costOf = new Map()
+for (const b of BUDGET) {
+  const c = costOf.get(b.task) || { lo: 0, hi: 0, ifs: false }
+  if (b.kind === 'if') c.ifs = true
+  else { c.lo += b.lo; c.hi += b.hi }
+  costOf.set(b.task, c)
+}
+for (const [k, c] of costOf) if (!c.lo && !c.hi) costOf.set(k, { ...c, lo: 0, hi: 0 })
+const counted = BUDGET.filter((b) => b.kind !== 'if')
+const sum = (rows) => rows.reduce((a, b) => [a[0] + b.lo, a[1] + b.hi], [0, 0])
+const yearOf = (b) => (byId.get(b.task).due || '2026').slice(0, 4)
+const now = sum(counted.filter((b) => yearOf(b) === '2026'))
+const later = sum(counted.filter((b) => yearOf(b) !== '2026'))
+const total = sum(counted)
+const yearly = sum(BUDGET.filter((b) => b.kind === 'yearly'))
+const ifs = sum(BUDGET.filter((b) => b.kind === 'if'))
+const creditable = sum(BUDGET.filter((b) => b.credit))
+const creditBack = [Math.min(CREDIT.max, creditable[0]), Math.min(CREDIT.max, creditable[1])]
+const areaSums = AREAS.map((a) => ({ a, s: sum(counted.filter((b) => byId.get(b.task).area === a.key)) })).filter((x) => x.s[1] > 0)
+const mid = (s) => (s[0] + s[1]) / 2
+const free = EVERGREEN_TASKS.filter((t) => t.due && !costOf.has(t.id))
+const AREA_COLOR = { house: 'var(--bark)', home: 'var(--bark-deep)', wildfire: 'var(--clay)', alerts: 'var(--clay)', power: '#6E8FA6', winter: '#8FA9BC', supplies: 'var(--moss)', plan: 'var(--pine)', nala: 'var(--forest)', hiking: 'var(--pine)', wildlife: 'var(--forest)' }
+
+const budgetHtml = () => {
+  const kindBadge = (b) => (b.kind === 'yearly' ? '<span class="kb y">every year</span>' : b.kind === 'if' ? '<span class="kb i">only if</span>' : '') + (b.credit ? '<span class="kb c">tax credit</span>' : '')
+  const seen = new Set()
+  const row = (b) => {
+    const t = byId.get(b.task)
+    const id = seen.has(b.task) ? '' : ` id="bud-${b.task}"`
+    seen.add(b.task)
+    const src = b.src ? ` <a class="src" href="${BUDGET_SOURCES[b.src][1]}" target="_blank" rel="noopener" title="${esc(BUDGET_SOURCES[b.src][0])}">source</a>` : ''
+    return `<li class="brow${b.kind === 'if' ? ' if' : ''}"${id}><div class="bi"><span class="bt">${esc(b.item)}</span>${kindBadge(b)}<a class="bk" href="#task-${t.id}">${esc(t.short)}${t.due ? ' · ' + dayLabel(t.due) + (t.due.slice(0, 4) !== '2026' ? ' ’' + t.due.slice(2, 4) : '') : ''}</a>${b.note ? `<span class="bn">${esc(b.note)}</span>` : ''}</div><div class="ba">${range(b.lo, b.hi)}${src}</div></li>`
+  }
+  const groups = AREAS.map((a) => {
+    const rows = BUDGET.filter((b) => byId.get(b.task).area === a.key)
+    if (!rows.length) return ''
+    const s = sum(rows.filter((b) => b.kind !== 'if'))
+    return `<div class="bgroup" id="bg-${a.key}"><h3><span>${a.emoji}</span>${esc(a.name)}<em>${range(s[0], s[1])}</em></h3><ul>${rows.map(row).join('')}</ul></div>`
+  }).join('')
+  const totalMid = areaSums.reduce((n, x) => n + mid(x.s), 0)
+  return `
+<section id="budget">
+  <div class="sec-head"><h2 class="sign">💵 Budget</h2><p>Every task that costs money, low to high, with supplies. Our own estimates where there's no source; quotes beat all of it.</p><a class="up" href="#top">Top ↑</a></div>
+  <div class="guide">
+    <div class="bstats">
+      <div class="bs big"><b>${range(total[0], total[1])}</b><span>everything, start to finish</span></div>
+      <div class="bs"><b>${range(now[0], now[1])}</b><span>now through December</span></div>
+      <div class="bs"><b>${range(later[0], later[1])}</b><span>2027 and later</span></div>
+      <div class="bs"><b>${range(yearly[0], yearly[1])}</b><span>every year after that</span></div>
+      <div class="bs good"><b>up to ${usd(creditBack[1])}</b><span>back from the state for the ${CREDIT.year} wildfire clearing</span></div>
+      <div class="bs muted"><b>+${range(ifs[0], ifs[1])}</b><span>only if: generator, radon, tires, inReach, avalanche gear</span></div>
+    </div>
+    <div class="bbar" role="img" aria-label="Where the money goes, by area">${areaSums.map((x) => `<a href="#bg-${x.a.key}" style="flex:${mid(x.s).toFixed(0)};background:${AREA_COLOR[x.a.key]}" title="${esc(x.a.name)}: ${range(x.s[0], x.s[1])}">${mid(x.s) / totalMid > 0.07 ? `${x.a.emoji} ${Math.round((mid(x.s) / totalMid) * 100)}%` : x.a.emoji}</a>`).join('')}</div>
+    <p class="bbar-l">Where it goes: the house repairs and the wildfire clearing are most of it.</p>
+    <div class="bgroups">${groups}</div>
+    <div class="credit"><b>🧾 Colorado's wildfire mitigation credit.</b> From tax year ${CREDIT.year} it pays back 100% of vegetation clearing costs up to ${usd(CREDIT.max)}, refundable, for federal AGI up to $300,000. Zone 1, Zone 2 and the slash count; the roof and vent mesh don't. Keep the receipts and the EFR letter. <a href="${BUDGET_SOURCES.csfs[1]}" target="_blank" rel="noopener">State Auditor report</a></div>
+    <p class="free">Costs nothing: ${free.map((t) => `<a class="chip" href="#task-${t.id}">${areaOf.get(t.area).emoji} ${esc(t.short)}</a>`).join(' ')}</p>
+  </div>
+</section>
+`
+}
+
 const taskRow = (t) => {
   const habit = !t.due
   const badge = habit
     ? `<span class="when habit" title="A habit: lives here, not in the chores list">↻ ${esc(t.when)}</span>`
     : `<span class="when" title="${esc(t.when)}${t.repeats ? ` · repeats ${esc(t.repeats)}` : ''}">${dayLabel(t.due)}${t.due.slice(0, 4) !== '2026' ? ` ’${t.due.slice(2, 4)}` : ''}${t.repeats ? ' ↻' : ''}</span>`
-  const how = t.guide ? `<a class="chip guide-chip" href="#${t.guide}">📖 ${GUIDE_NAMES[t.guide]}</a>` : ''
-  return `<li class="task${habit ? ' is-habit' : ''}" id="task-${t.id}" data-id="${t.id}" data-due="${t.due || ''}"><span class="mark" aria-hidden="true"></span><span class="txt">${md(t.text)}</span>${badge}${how}</li>`
+  const how = t.guide ? `<a class="chip" href="#${t.guide}">📖 ${GUIDE_NAMES[t.guide]}</a>` : ''
+  const cost = costOf.get(t.id)
+  const money = cost ? `<a class="chip cost-chip" href="#bud-${t.id}">💵 ${range(cost.lo, cost.hi)}${cost.ifs ? ' +' : ''}</a>` : ''
+  const chips = how || money ? `<span class="rowchips">${how}${money}</span>` : ''
+  return `<li class="task${habit ? ' is-habit' : ''}" id="task-${t.id}" data-id="${t.id}" data-due="${t.due || ''}"><span class="mark" aria-hidden="true"></span><span class="txt">${md(t.text)}</span>${badge}${chips}</li>`
 }
 
 const areaBlock = (a) => {
@@ -546,6 +619,38 @@ footer .hand{font-size:26px;display:block;margin-bottom:6px}
 @media (prefers-color-scheme: dark){:root:not([data-theme="light"]) footer{background:#0E140D;color:var(--ink)} :root:not([data-theme="light"]) footer a{color:var(--forest)}}
 
 ${G.css}
+.rowchips{grid-column:2/-1;display:flex;flex-wrap:wrap;gap:6px;margin-top:-2px}
+.cost-chip{background:var(--bark-soft);color:var(--bark-deep)}
+.bstats{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(190px,100%),1fr));gap:10px}
+.bs{background:var(--paper-2);border-radius:12px;padding:12px 14px;display:grid;gap:2px}
+.bs b{font-family:"Alfa Slab One",Georgia,serif;font-weight:400;font-size:22px;color:var(--forest);line-height:1.15}
+.bs span{font-size:13px;color:var(--muted)}
+.bs.big{grid-column:1/-1;background:var(--sign);background-image:repeating-linear-gradient(90deg,rgba(255,255,255,.04) 0 2px,transparent 2px 10px)}
+.bs.big b{font-size:clamp(30px,6vw,44px);color:var(--sign-ink)} .bs.big span{color:var(--sign-ink);opacity:.85}
+.bs.good b{color:var(--pine)} .bs.muted b{color:var(--muted)}
+.bbar{display:flex;height:34px;border-radius:999px;overflow:hidden;margin:18px 0 6px;border:1px solid var(--line)}
+.bbar a{display:flex;align-items:center;justify-content:center;color:#fff;text-decoration:none;font-size:12px;font-weight:700;white-space:nowrap;overflow:hidden;min-width:18px}
+.bbar a:hover{filter:brightness(1.15);color:#fff}
+.bbar-l{font-size:13px;color:var(--muted);margin-bottom:16px}
+.bgroups{columns:2 min(420px,100%);column-gap:16px}
+.bgroup{break-inside:avoid;margin-bottom:16px;border:1px solid var(--line);border-radius:12px;padding:10px 14px}
+.bgroup h3{display:flex;gap:8px;align-items:center;font-size:19px}
+.bgroup h3 em{margin-left:auto;font-style:normal;font-family:Karla,sans-serif;font-weight:700;font-size:14px;color:var(--bark)}
+.bgroup ul{list-style:none;margin:6px 0 0;padding:0}
+.brow{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:10px;padding:7px 0;border-top:1px dashed var(--line);font-size:14px}
+.brow:first-child{border-top:none}
+.brow.if{opacity:.75}
+.brow .bi{display:flex;flex-wrap:wrap;gap:3px 8px;align-items:baseline}
+.brow .bt{font-weight:700;flex-basis:100%}
+.brow .bk{font-size:12.5px}
+.brow .bn{font-size:12.5px;color:var(--muted);flex-basis:100%}
+.brow .ba{font-weight:700;color:var(--forest);white-space:nowrap;text-align:right}
+.brow .src{display:block;font-size:11.5px;font-weight:400}
+.kb{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;padding:1px 7px;border-radius:999px;background:var(--moss-soft);color:var(--forest)}
+.kb.i{background:var(--paper-2);color:var(--muted);border:1px dashed var(--line-strong)} .kb.c{background:var(--clay-soft);color:var(--clay)}
+.brow:target{background:var(--clay-soft);border-radius:8px}
+.credit{margin-top:6px;background:var(--moss-soft);border-radius:12px;padding:12px 14px;font-size:15px}
+.free{margin-top:14px;font-size:14px;color:var(--muted);display:flex;flex-wrap:wrap;gap:6px;align-items:center}
 .kit .more{display:inline-block;margin-top:6px;font-size:13px;font-weight:700}
 @media print{
   body{background:#fff}
@@ -575,7 +680,7 @@ ${G.css}
 </header>
 
 <nav class="posts" aria-label="Sections"><div class="wrap">
-  <a href="#now">🍂 Next up</a><a href="#year">🗓️ The year</a><a href="#hazards">⚠️ Hazards</a><a href="#tasks">✅ Tasks</a><a href="#faucets">🚰 Faucets</a><a href="#gobags">🎒 Go-bags</a><a href="#stock">🥫 Pantry</a><a href="#grab">📋 Grab sheet</a><a href="#sources">📚 Sources</a><a href="/">🐕 Minions</a>
+  <a href="#now">🍂 Next up</a><a href="#year">🗓️ The year</a><a href="#hazards">⚠️ Hazards</a><a href="#tasks">✅ Tasks</a><a href="#faucets">🚰 Faucets</a><a href="#gobags">🎒 Go-bags</a><a href="#stock">🥫 Pantry</a><a href="#budget">💵 Budget</a><a href="#grab">📋 Grab sheet</a><a href="#sources">📚 Sources</a><a href="/">🐕 Minions</a>
 </div></nav>
 
 <main class="wrap">
@@ -620,6 +725,7 @@ ${AREAS.map(areaBlock).join('\n')}
 </section>
 
 ${G.html}
+${budgetHtml()}
 <section id="grab">
   <div class="sec-head"><h2 class="sign">📋 Grab sheet</h2><p>The page for the fridge and the go-bags: what we do, what we carry, who we call.</p><button class="btn no-print" id="printBtn" type="button">🖨️ Print just this</button></div>
   <div class="clip">
@@ -731,7 +837,7 @@ ${SOURCES.map(([g, list]) => `  <details class="src"><summary>${esc(g)} (${list.
     if (!el) return false
     if (el.closest('.task.hidden, .area.empty')) $$('.filters button')[0].click()
     const r = el.getBoundingClientRect()
-    const small = el.classList.contains('task') || el.classList.contains('hzcard') || el.classList.contains('area')
+    const small = ['task', 'hzcard', 'area', 'brow', 'bgroup'].some((c) => el.classList.contains(c))
     const top = r.top + scrollY - (small ? Math.max(80, (innerHeight - Math.min(r.height, innerHeight * 0.6)) / 2) : 72)
     window.scrollTo({ top, behavior: smooth ? 'smooth' : 'auto' })
     el.classList.remove('flash'); void el.offsetWidth; el.classList.add('flash')
