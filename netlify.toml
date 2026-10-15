@@ -36,6 +36,14 @@
 
 # Standalone Japan itinerary — a self-contained static page (public/japan.html),
 # unrelated to the React app. Served at the clean /japan URL. Listed before the
+# Evergreen emergency prep — same pattern as /moving and /japan: a
+# self-contained static page (public/evergreen.html, built from
+# scripts/evergreen-tasks.cjs) at /evergreen, ahead of the SPA fallback.
+[[redirects]]
+  from = "/evergreen"
+  to = "/evergreen.html"
+  status = 200
+
 # SPA fallback so the app doesn't claim the route.
 [[redirects]]
   from = "/japan"

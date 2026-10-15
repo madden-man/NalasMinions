@@ -3,7 +3,7 @@
 import test from 'node:test'
 import assert from 'node:assert/strict'
 
-import { PAGE_SECTIONS, sectionFor, linkLabel, linkFromInput, resolveLink, SITE_ORIGIN } from '../src/links.js'
+import { PAGES, PAGE_SECTIONS, sectionFor, linkLabel, linkFromInput, resolveLink, SITE_ORIGIN } from '../src/links.js'
 
 test('known sections label themselves', () => {
   assert.equal(linkLabel('/moving#bids'), 'Moving plan · Tile bids')
@@ -11,6 +11,7 @@ test('known sections label themselves', () => {
 })
 
 test('a deeper anchor on a known page falls back to the page name', () => {
+  assert.equal(linkLabel('/evergreen#task-house-1'), 'Evergreen prep')
   assert.equal(linkLabel('/japan#item-ghibli-tickets'), 'Japan')
   assert.equal(linkLabel('/moving#chk-r1'), 'Moving plan')
 })
@@ -51,5 +52,9 @@ test('resolveLink: absolute stays, relative goes to the live site outside a brow
 })
 
 test('every section href has a page and an anchor', () => {
-  for (const s of PAGE_SECTIONS) assert.match(s.href, /^\/(moving|japan)#[a-z]+$/)
+  const keys = new Set(PAGES.map((p) => p.key))
+  for (const s of PAGE_SECTIONS) {
+    assert.match(s.href, /^\/[a-z][a-z0-9-]*#[a-z][a-z0-9-]*$/)
+    assert.ok(keys.has(s.href.slice(1).split('#')[0]), `${s.href} points at no registered page`)
+  }
 })
