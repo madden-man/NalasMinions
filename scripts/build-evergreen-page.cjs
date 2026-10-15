@@ -322,7 +322,7 @@ const html = `<!DOCTYPE html>
 <link rel="icon" href="/favicon-32.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Alfa+Slab+One&family=Caveat:wght@600;700&family=Karla:ital,wght@0,400;0,600;0,700;1,400&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Alfa+Slab+One&family=Zilla+Slab:wght@500&family=Caveat:wght@600;700&family=Karla:ital,wght@0,400;0,600;0,700;1,400&display=swap">
 <style>
 :root{
   --bg:#F2EDE0; --paper:#FFFCF4; --paper-2:#F7F1E3; --ink:#24291F; --muted:#6B6A58; --line:#DCD2BC; --line-strong:#C3B79C;
@@ -439,7 +439,7 @@ section{margin-top:64px}
 .c.today{outline:2px solid var(--clay);outline-offset:1px}
 .readout{margin-top:14px;display:grid;grid-template-columns:1fr 1fr;gap:12px;font-size:15px;border-top:1px dashed var(--line-strong);padding-top:12px;min-height:76px}
 .readout b{display:block;font-size:12px;letter-spacing:.12em;text-transform:uppercase;color:var(--bark)}
-.readout .hdr{grid-column:1/-1;font-family:"Alfa Slab One",Georgia,serif;font-size:18px;color:var(--forest)}
+.readout .hdr{grid-column:1/-1;font-family:"Zilla Slab",Georgia,serif;font-weight:500;font-size:20px;color:var(--forest)}
 .legend{display:flex;gap:16px;flex-wrap:wrap;font-size:13px;color:var(--muted);margin-top:10px}
 .legend i{display:inline-block;width:22px;height:10px;border-radius:5px;margin-right:6px;vertical-align:middle}
 @media (max-width:640px){.readout{grid-template-columns:1fr}}
@@ -452,7 +452,7 @@ section{margin-top:64px}
 .hzcard header{display:flex;gap:14px;align-items:center}
 .hzcard .badge{width:56px;height:56px;flex:none;display:grid;place-items:center;font-size:28px;border-radius:50%;background:var(--moss-soft);border:3px solid var(--pine);
   box-shadow:0 0 0 3px var(--paper),0 0 0 5px var(--bark)}
-.hzcard h3{font-family:"Alfa Slab One",Georgia,serif;font-size:24px;color:var(--forest)}
+.hzcard h3{font-family:"Zilla Slab",Georgia,serif;font-weight:500;font-size:27px;color:var(--forest)}
 .hzcard .line{color:var(--bark);font-weight:700}
 .hzcard .intro{margin:12px 0 14px;max-width:80ch}
 .ppr{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
@@ -475,7 +475,7 @@ section{margin-top:64px}
 .areas{columns:2 min(460px,100%);column-gap:22px}
 .area{break-inside:avoid;margin-bottom:22px;background:var(--paper);border:1px solid var(--line);border-radius:14px;padding:16px 18px;box-shadow:var(--shadow)}
 .area header{display:flex;justify-content:space-between;gap:10px;align-items:baseline}
-.area h3{font-family:"Alfa Slab One",Georgia,serif;font-size:21px;color:var(--forest);display:flex;gap:8px;align-items:center}
+.area h3{font-family:"Zilla Slab",Georgia,serif;font-weight:500;font-size:24px;color:var(--forest);display:flex;gap:8px;align-items:center}
 .area .count{font-size:13px;font-weight:700;color:var(--bark);white-space:nowrap}
 .area .intro{color:var(--muted);font-size:15px;margin-top:4px}
 .area .why{margin-top:8px}
@@ -501,7 +501,7 @@ ul.tasks{list-style:none;margin:10px 0 0;padding:0;display:grid;gap:2px}
 /* grab sheet */
 .clip{position:relative;background:var(--paper);border:1px solid var(--line);border-radius:14px;padding:34px 24px 24px;box-shadow:var(--shadow);margin-top:18px}
 .clip::before{content:"";position:absolute;top:-16px;left:50%;width:150px;margin-left:-75px;height:30px;border-radius:8px 8px 4px 4px;background:linear-gradient(var(--bark),var(--bark-deep));box-shadow:0 3px 0 rgba(0,0,0,.2)}
-.clip h3{font-family:"Alfa Slab One",Georgia,serif;font-size:20px;color:var(--forest);margin:20px 0 10px}
+.clip h3{font-family:"Zilla Slab",Georgia,serif;font-weight:500;font-size:23px;color:var(--forest);margin:20px 0 10px}
 .clip h3:first-child{margin-top:0}
 .dos{list-style:none;padding:0;margin:0;display:grid;grid-template-columns:repeat(auto-fit,minmax(min(280px,100%),1fr));gap:10px}
 .dos li{background:var(--paper-2);border-radius:10px;padding:10px 12px;border-left:5px solid var(--clay)}
