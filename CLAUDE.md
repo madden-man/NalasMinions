@@ -29,7 +29,8 @@ all of these are done:
    label from `sectionFor(...)`.
 
 `/evergreen` (Evergreen emergency prep) is generated: edit `scripts/evergreen-tasks.cjs`
-(tasks), `scripts/evergreen-guides.cjs` (the how-to sections) or
+(tasks), `scripts/evergreen-guides.cjs` (the how-to sections),
+`scripts/evergreen-budget.cjs` (costs) or
 `scripts/build-evergreen-page.cjs` (layout, hazards, grab sheet), then
 `npm run build:evergreen` and commit both; `npm run seed:evergreen` publishes the dated tasks.
 
