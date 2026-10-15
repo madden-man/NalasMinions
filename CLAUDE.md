@@ -23,8 +23,8 @@ all of these are done:
    and `pageForTask` all read the registry.
 4. **The chores**: a script in `scripts/` that stamps `project` and `link` on the page's
    chores and is safe to re-run, following `seed-moving-todos.cjs` (chores defined in a
-   data file and upserted by stable id) or `link-japan-todos.cjs` (existing hand-made chores
-   matched by id). Add an npm script for it. Link to the most specific anchor that exists
+   data file and upserted by stable id) or `seed-japan-todos.cjs` (one chore per
+   checklist item, linked to its `#item-<id>`). Add an npm script for it. Link to the most specific anchor that exists
    (a section, or an item id like `/japan#item-ghibli-tickets`); label with the section's
    label from `sectionFor(...)`.
 
