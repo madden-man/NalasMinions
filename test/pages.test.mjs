@@ -9,6 +9,7 @@ import assert from 'node:assert/strict'
 import { readdirSync, readFileSync } from 'node:fs'
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
+import { createRequire } from 'node:module'
 
 import { PAGES, PAGE_SECTIONS, pageForTask } from '../src/links.js'
 
@@ -68,4 +69,15 @@ test('a chore connects to a page by project or by link', () => {
   assert.equal(pageForTask({ link: { href: '/japan#item-ghibli-tickets' } })?.key, 'japan')
   assert.equal(pageForTask({ project: 'household' }), null)
   assert.equal(pageForTask({ text: 'Vacuum' }), null)
+})
+
+test('every Japan chore links to a checklist item on /japan', () => {
+  const { JAPAN_TASKS } = createRequire(import.meta.url)('../scripts/japan-tasks.cjs')
+  const html = read('public/japan.html')
+  const ids = JAPAN_TASKS.map((t) => t.id)
+  assert.equal(new Set(ids).size, ids.length, 'duplicate Japan chore id')
+  for (const t of JAPAN_TASKS) {
+    assert.ok(html.includes(`id="item-${t.item}"`), `public/japan.html has no #item-${t.item}`)
+    assert.match(t.due, /^\d{4}-\d{2}-\d{2}$/)
+  }
 })

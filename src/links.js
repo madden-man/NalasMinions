@@ -48,6 +48,7 @@ export const PAGES = [
       { id: 'transit', label: 'Getting around' },
       { id: 'budget', label: 'Budget' },
       { id: 'itinerary', label: 'Day-by-day' },
+      { id: 'safety', label: 'Kumano safety' },
       { id: 'packing', label: 'Must-pack' },
       { id: 'checklist', label: 'Pre-trip checklist' },
     ],
