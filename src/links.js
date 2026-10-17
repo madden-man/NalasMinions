@@ -81,6 +81,24 @@ export const PAGES = [
       { id: 'sources', label: 'Sources' },
     ],
   },
+  {
+    key: 'yesathon',
+    name: 'Yes-a-thon food',
+    file: 'public/yesathon.html',
+    sections: [
+      { id: 'menu', label: 'Weekend menu' },
+      { id: 'list', label: 'Grocery list' },
+      { id: 'recipe-pizza', label: 'Pepperoni hot-honey pizza' },
+      { id: 'recipe-pancakes', label: 'Blueberry pancakes and bacon' },
+      { id: 'recipe-grilled-cheese', label: 'Grilled cheese and tomato soup' },
+      { id: 'recipe-tacos', label: 'Taco night' },
+      { id: 'recipe-burritos', label: 'Breakfast burritos' },
+      { id: 'recipe-nachos', label: 'Leftover-taco nachos' },
+      { id: 'recipe-steak', label: 'Steak night' },
+      { id: 'pairings', label: 'Snack pairings' },
+      { id: 'leftovers', label: 'Leftovers and cleanup' },
+    ],
+  },
 ]
 
 export const pagePath = (page) => `/${page.key}`
