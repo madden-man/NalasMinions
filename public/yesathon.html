@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="robots" content="noindex">
+<title>Yes-a-thon Food</title>
+<link rel="icon" href="/favicon-32.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Big+Shoulders+Display:wght@700;800&family=Instrument+Sans:wght@400;500;600&family=DM+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: one long column; the grocery list is a receipt tape, recipes are index cards, the menu is a TV-guide strip. */
+:root {
+  --bg: #eef0ea; --paper: #fffdf7; --card: #ffffff; --ink: #1d1f1b; --muted: #61655d; --line: #d6d9cf;
+  --accent: #b5480f; --accent-ink: #ffffff; --gold: #9c6a00; --check: #2f7a4b; --tape: #f3e7c3;
+  --f-display: "Big Shoulders Display", "Arial Narrow", Impact, sans-serif;
+  --f-body: "Instrument Sans", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --f-mono: "DM Mono", ui-monospace, Menlo, monospace;
+}
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
+  --bg: #121411; --paper: #1d1f1a; --card: #1a1c18; --ink: #ecede6; --muted: #a2a69b; --line: #31342d;
+  --accent: #ff8a4c; --accent-ink: #1a0d05; --gold: #f2c14e; --check: #6ccf8f; --tape: #3a3424; color-scheme: dark;
+} }
+:root[data-theme="dark"] {
+  --bg: #121411; --paper: #1d1f1a; --card: #1a1c18; --ink: #ecede6; --muted: #a2a69b; --line: #31342d;
+  --accent: #ff8a4c; --accent-ink: #1a0d05; --gold: #f2c14e; --check: #6ccf8f; --tape: #3a3424; color-scheme: dark;
+}
+*, *::before, *::after { box-sizing: border-box; }
+html { scroll-behavior: smooth; }
+body { margin: 0; background: var(--bg); color: var(--ink); font: 16px/1.55 var(--f-body); }
+[id] { scroll-margin-top: 64px; }
+.wrap { max-width: 860px; margin: 0 auto; padding-block: 28px 64px; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); display: grid; gap: 40px; }
+.hero { display: grid; gap: 10px; }
+.kick { font: 500 12px var(--f-mono); letter-spacing: .12em; text-transform: uppercase; color: var(--accent); }
+h1 { margin: 0; font: 800 clamp(52px, 11vw, 96px)/.88 var(--f-display); text-transform: uppercase; text-wrap: balance; }
+h1 span { color: var(--accent); }
+.lede { margin: 0; max-width: 60ch; color: var(--muted); font-size: 18px; }
+.lede a { color: var(--ink); }
+.stats { display: flex; flex-wrap: wrap; gap: 8px 28px; margin-top: 6px; }
+.stats div { display: grid; }
+.stats b { font: 800 34px/1 var(--f-display); color: var(--gold); }
+.stats span { font: 400 11px var(--f-mono); text-transform: uppercase; letter-spacing: .08em; color: var(--muted); }
+nav.jump { position: sticky; top: env(safe-area-inset-top, 0px); z-index: 5; display: flex; gap: 6px; flex-wrap: wrap; padding-block: 10px; background: var(--bg); border-bottom: 1px solid var(--line); }
+nav.jump a { font: 600 14px var(--f-body); color: var(--ink); text-decoration: none; padding: 5px 12px; border-radius: 999px; border: 1.5px solid var(--line); }
+nav.jump a:hover { border-color: var(--accent); color: var(--accent); }
+h2 { margin: 0 0 4px; font: 800 clamp(32px, 6vw, 46px)/1 var(--f-display); text-transform: uppercase; }
+.sub { margin: 0 0 16px; color: var(--muted); }
+a:focus-visible, input:focus-visible + label { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+.menu { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; }
+.mday { background: var(--card); border: 1px solid var(--line); border-radius: 10px; padding: 12px 14px; }
+.mday h3 { margin: 0 0 8px; font: 800 30px/1 var(--f-display); text-transform: uppercase; color: var(--accent); }
+.mday ol { list-style: none; margin: 0; padding: 0; display: grid; gap: 10px; }
+.mday li { display: grid; grid-template-columns: 56px minmax(0, 1fr); gap: 0 8px; }
+.mt { font: 500 13px var(--f-mono); grid-row: span 2; padding-top: 2px; }
+.mday a { font-weight: 600; color: var(--ink); text-decoration-color: var(--accent); text-underline-offset: 3px; }
+.mn { font-size: 13px; color: var(--muted); }
+
+.receipt { background: var(--paper); border: 1px solid var(--line); padding: 22px 22px 30px; font-family: var(--f-mono); position: relative;
+  -webkit-mask: radial-gradient(circle 7px at 50% 100%, transparent 6.5px, #000 7px) bottom/16px 100% repeat-x, linear-gradient(#000, #000) top/100% calc(100% - 8px) no-repeat;
+          mask: radial-gradient(circle 7px at 50% 100%, transparent 6.5px, #000 7px) bottom/16px 100% repeat-x, linear-gradient(#000, #000) top/100% calc(100% - 8px) no-repeat; }
+.rhead { text-align: center; font-size: 13px; color: var(--muted); border-bottom: 1px dashed var(--line); padding-bottom: 12px; margin-bottom: 4px; }
+.rhead b { display: block; font: 800 28px/1.1 var(--f-display); color: var(--ink); letter-spacing: .04em; }
+.aisle { margin: 16px 0 6px; font: 500 12px var(--f-mono); letter-spacing: .14em; text-transform: uppercase; color: var(--accent); }
+.rcpt { list-style: none; margin: 0; padding: 0; display: grid; gap: 7px; }
+.rcpt li { display: grid; grid-template-columns: 20px minmax(0, 1fr) auto; gap: 10px; align-items: start; }
+.rcpt input { width: 17px; height: 17px; margin: 2px 0 0; accent-color: var(--check); cursor: pointer; }
+.rcpt label { display: flex; flex-wrap: wrap; gap: 0 10px; cursor: pointer; font-size: 14px; }
+.it { font-weight: 500; }
+.qty { color: var(--muted); }
+.use { flex-basis: 100%; font-family: var(--f-body); font-size: 13px; color: var(--muted); font-style: italic; }
+.px { font-size: 14px; font-variant-numeric: tabular-nums; }
+.rcpt input:checked + label .it { text-decoration: line-through; color: var(--muted); }
+.rfoot { margin-top: 16px; border-top: 1px dashed var(--line); padding-top: 12px; display: grid; gap: 4px; font-size: 14px; }
+.rfoot div { display: flex; justify-content: space-between; gap: 12px; }
+.rfoot .tot { font: 800 26px var(--f-display); }
+.rfoot small { color: var(--muted); font-size: 12px; }
+
+.cards { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px; }
+.card { background: var(--card); border: 1px solid var(--line); border-radius: 4px; padding: 16px 18px 14px; background-image: linear-gradient(var(--card) 0 0), repeating-linear-gradient(var(--card) 0 27px, var(--line) 27px 28px); background-size: 100% 92px, 100% 100%; background-repeat: no-repeat, repeat; position: relative; }
+.card::before { content: ""; position: absolute; top: -9px; left: 50%; width: 70px; height: 18px; transform: translateX(-50%) rotate(-2deg); background: var(--tape); opacity: .9; }
+.card header { display: grid; gap: 2px; margin-bottom: 8px; }
+.when { font: 500 12px var(--f-mono); color: var(--accent); text-transform: uppercase; letter-spacing: .08em; }
+.card h3 { margin: 0; font: 800 26px/1.05 var(--f-display); text-transform: uppercase; }
+.tags { display: flex; gap: 6px; flex-wrap: wrap; }
+.tags span { font: 400 11px var(--f-mono); color: var(--muted); border: 1px solid var(--line); border-radius: 3px; padding: 1px 6px; }
+.card ol { margin: 0; padding-left: 20px; display: grid; gap: 6px; font-size: 15px; line-height: 1.5; }
+
+.pairs, .left { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px 20px; }
+.pairs li, .left li { display: grid; gap: 1px; padding-bottom: 8px; border-bottom: 1px solid var(--line); }
+.pairs b, .left b { font-weight: 600; }
+.pairs span, .left span { color: var(--muted); font-size: 15px; }
+.foot { color: var(--muted); font-size: 13px; }
+.foot a { color: var(--ink); }
+
+@media (max-width: 720px) {
+  .menu, .cards, .pairs, .left { grid-template-columns: minmax(0, 1fr); }
+  .receipt { padding: 18px 14px 26px; }
+}
+@media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="hero">
+    <div class="kick">Oct 17–19 · one guy · one grocery run</div>
+    <h1>Yes-a-thon <span>Food</span></h1>
+    <p class="lede">Fuel for 38 hours of movies, timed to the breaks on <a href="https://tommysthoughts.com/fornow">the Yes-a-thon calendar</a>. Nothing harder than a hot skillet, and the leftovers from one meal turn into the next.</p>
+    <div class="stats">
+      <div><b>1</b><span>store trip</span></div>
+      <div><b>42</b><span>items</span></div>
+      <div><b>7</b><span>meals cooked</span></div>
+      <div><b>~$244</b><span>estimated</span></div>
+    </div>
+  </header>
+  <nav class="jump" aria-label="Sections"><a href="#menu">Menu</a><a href="#list">Grocery list</a><a href="#recipes">Recipes</a><a href="#pairings">Snack pairings</a><a href="#leftovers">Leftovers</a></nav>
+
+  <section id="menu">
+    <h2>The weekend menu</h2>
+    <p class="sub">Every meal lands in a break on the calendar.</p>
+    <div class="menu"><div class="mday"><h3>Fri</h3><ol><li><span class="mt">6:30p</span><a href="#recipe-pizza">Pepperoni hot-honey pizza</a><span class="mn">The pizza break after Tetris</span></li></ol></div><div class="mday"><h3>Sat</h3><ol><li><span class="mt">9:00a</span><a href="#recipe-pancakes">Blueberry pancakes and bacon</a><span class="mn">With Ghosts</span></li><li><span class="mt">12:33p</span><a href="#recipe-grilled-cheese">Grilled cheese and tomato soup</a><span class="mn">Before Saving Private Ryan</span></li><li><span class="mt">6:48p</span><a href="#recipe-tacos">Taco night</a><span class="mn">Halfway point</span></li><li><span class="mt">12:19a</span><a href="#pairings">Cherry pie and coffee</a><span class="mn">Twin Peaks</span></li></ol></div><div class="mday"><h3>Sun</h3><ol><li><span class="mt">8:40a</span><a href="#recipe-burritos">Breakfast burritos</a><span class="mn">Wrap one for Pluto</span></li><li><span class="mt">12:28p</span><a href="#recipe-nachos">Leftover-taco nachos</a><span class="mn">After I’m Still Here</span></li><li><span class="mt">6:25p</span><a href="#recipe-steak">Steak night</a><span class="mn">The last real meal</span></li></ol></div></div>
+  </section>
+
+  <section id="list">
+    <h2>The grocery list</h2>
+    <p class="sub">King Soopers, in aisle order. Tap items as they go in the cart; checks stay on this phone.</p>
+    <div class="receipt">
+      <div class="rhead"><b>KING SOOPERS</b>YES-A-THON SUPPLY RUN · FRI OCT 17<br>CASHIER: NALA</div>
+      <h3 class="aisle">Produce</h3><ul class="rcpt"><li><input type="checkbox" id="g1" data-k="g1"><label for="g1"><span class="it">Blueberries</span><span class="qty">1 pint</span><span class="use">Pancakes</span></label><span class="px">$5</span></li><li><input type="checkbox" id="g2" data-k="g2"><label for="g2"><span class="it">Avocados</span><span class="qty">2</span><span class="use">Tacos, nachos</span></label><span class="px">$3</span></li><li><input type="checkbox" id="g3" data-k="g3"><label for="g3"><span class="it">Russet potato</span><span class="qty">1 big one</span><span class="use">Steak night</span></label><span class="px">$1.50</span></li><li><input type="checkbox" id="g4" data-k="g4"><label for="g4"><span class="it">Caesar salad kit</span><span class="qty">1 bag</span><span class="use">Steak night</span></label><span class="px">$5</span></li><li><input type="checkbox" id="g5" data-k="g5"><label for="g5"><span class="it">Lime</span><span class="qty">1</span><span class="use">Tacos</span></label><span class="px">$0.50</span></li><li><input type="checkbox" id="g6" data-k="g6"><label for="g6"><span class="it">Baby carrots</span><span class="qty">1 bag</span><span class="use">Proof you ate a vegetable</span></label><span class="px">$2</span></li><li><input type="checkbox" id="g7" data-k="g7"><label for="g7"><span class="it">Honeycrisp apples</span><span class="qty">2</span><span class="use">Between movies</span></label><span class="px">$3</span></li></ul><h3 class="aisle">Deli</h3><ul class="rcpt"><li><input type="checkbox" id="g8" data-k="g8"><label for="g8"><span class="it">Fresh pico de gallo</span><span class="qty">1 tub</span><span class="use">Tacos, burritos, nachos</span></label><span class="px">$5</span></li></ul><h3 class="aisle">Meat</h3><ul class="rcpt"><li><input type="checkbox" id="g9" data-k="g9"><label for="g9"><span class="it">Ground beef, 85/15</span><span class="qty">1 lb</span><span class="use">Tacos, then nachos</span></label><span class="px">$6.50</span></li><li><input type="checkbox" id="g10" data-k="g10"><label for="g10"><span class="it">Ribeye, about 1 inch thick</span><span class="qty">12–16 oz</span><span class="use">Steak night</span></label><span class="px">$18</span></li><li><input type="checkbox" id="g11" data-k="g11"><label for="g11"><span class="it">Thick-cut bacon</span><span class="qty">1 pack</span><span class="use">Pancakes, then burritos</span></label><span class="px">$7</span></li><li><input type="checkbox" id="g12" data-k="g12"><label for="g12"><span class="it">Sliced pepperoni</span><span class="qty">1 pack</span><span class="use">Pizza</span></label><span class="px">$4</span></li></ul><h3 class="aisle">Dairy and eggs</h3><ul class="rcpt"><li><input type="checkbox" id="g13" data-k="g13"><label for="g13"><span class="it">Eggs</span><span class="qty">1 dozen</span><span class="use">Burritos</span></label><span class="px">$4</span></li><li><input type="checkbox" id="g14" data-k="g14"><label for="g14"><span class="it">Salted butter</span><span class="qty">1 lb</span><span class="use">Pancakes, grilled cheese, steak</span></label><span class="px">$5</span></li><li><input type="checkbox" id="g15" data-k="g15"><label for="g15"><span class="it">Shredded Mexican-blend cheese</span><span class="qty">8 oz</span><span class="use">Tacos, burritos, nachos</span></label><span class="px">$4</span></li><li><input type="checkbox" id="g16" data-k="g16"><label for="g16"><span class="it">Sliced sharp cheddar</span><span class="qty">8 slices</span><span class="use">Grilled cheese</span></label><span class="px">$4</span></li><li><input type="checkbox" id="g17" data-k="g17"><label for="g17"><span class="it">Sour cream</span><span class="qty">small tub</span><span class="use">Tacos, nachos, potato</span></label><span class="px">$2</span></li><li><input type="checkbox" id="g18" data-k="g18"><label for="g18"><span class="it">Fairlife chocolate protein shakes</span><span class="qty">4-pack</span><span class="use">Kingdom, in solidarity</span></label><span class="px">$10</span></li></ul><h3 class="aisle">Bakery</h3><ul class="rcpt"><li><input type="checkbox" id="g19" data-k="g19"><label for="g19"><span class="it">Sourdough loaf</span><span class="qty">1</span><span class="use">Grilled cheese</span></label><span class="px">$5</span></li><li><input type="checkbox" id="g20" data-k="g20"><label for="g20"><span class="it">Cherry pie</span><span class="qty">1</span><span class="use">Twin Peaks</span></label><span class="px">$10</span></li><li><input type="checkbox" id="g21" data-k="g21"><label for="g21"><span class="it">Lemon meringue pie</span><span class="qty">1, or two slices</span><span class="use">Million Dollar Baby</span></label><span class="px">$10</span></li></ul><h3 class="aisle">Pantry</h3><ul class="rcpt"><li><input type="checkbox" id="g22" data-k="g22"><label for="g22"><span class="it">Just-add-water pancake mix</span><span class="qty">1 box</span><span class="use">Pancakes</span></label><span class="px">$4</span></li><li><input type="checkbox" id="g23" data-k="g23"><label for="g23"><span class="it">Real maple syrup</span><span class="qty">1 small bottle</span><span class="use">Pancakes</span></label><span class="px">$8</span></li><li><input type="checkbox" id="g24" data-k="g24"><label for="g24"><span class="it">Tomato soup</span><span class="qty">32 oz carton</span><span class="use">Grilled cheese</span></label><span class="px">$3.50</span></li><li><input type="checkbox" id="g25" data-k="g25"><label for="g25"><span class="it">Taco seasoning</span><span class="qty">1 packet</span><span class="use">Tacos</span></label><span class="px">$1.50</span></li><li><input type="checkbox" id="g26" data-k="g26"><label for="g26"><span class="it">Flour tortillas, 8 inch</span><span class="qty">10-pack</span><span class="use">Tacos, burritos</span></label><span class="px">$4</span></li><li><input type="checkbox" id="g27" data-k="g27"><label for="g27"><span class="it">Tortilla chips</span><span class="qty">1 big bag</span><span class="use">Nachos, salsa</span></label><span class="px">$4.50</span></li><li><input type="checkbox" id="g28" data-k="g28"><label for="g28"><span class="it">Salsa</span><span class="qty">1 jar</span><span class="use">Burritos, chips</span></label><span class="px">$4</span></li><li><input type="checkbox" id="g29" data-k="g29"><label for="g29"><span class="it">Hot honey</span><span class="qty">1 bottle</span><span class="use">Pizza</span></label><span class="px">$7</span></li><li><input type="checkbox" id="g30" data-k="g30"><label for="g30"><span class="it">Coffee</span><span class="qty">12 oz</span><span class="use">All weekend</span></label><span class="px">$10</span></li></ul><h3 class="aisle">Snacks</h3><ul class="rcpt"><li><input type="checkbox" id="g31" data-k="g31"><label for="g31"><span class="it">Pringles</span><span class="qty">1 can</span><span class="use">Tetris (they stack)</span></label><span class="px">$3</span></li><li><input type="checkbox" id="g32" data-k="g32"><label for="g32"><span class="it">Red Vines</span><span class="qty">1 tub</span><span class="use">Fringe (Walter’s favorite)</span></label><span class="px">$3.50</span></li><li><input type="checkbox" id="g33" data-k="g33"><label for="g33"><span class="it">Graham crackers, marshmallows, Hershey’s bars</span><span class="qty">1 each</span><span class="use">Microwave s’mores for Dances with Wolves</span></label><span class="px">$9</span></li><li><input type="checkbox" id="g34" data-k="g34"><label for="g34"><span class="it">Microwave popcorn</span><span class="qty">1 box</span><span class="use">Titanic</span></label><span class="px">$4</span></li></ul><h3 class="aisle">Frozen</h3><ul class="rcpt"><li><input type="checkbox" id="g35" data-k="g35"><label for="g35"><span class="it">A good frozen pizza, 12 inch</span><span class="qty">1</span><span class="use">Friday dinner</span></label><span class="px">$9</span></li><li><input type="checkbox" id="g36" data-k="g36"><label for="g36"><span class="it">Brazi Bites (Brazilian cheese bread)</span><span class="qty">1 bag, if they have it</span><span class="use">I’m Still Here</span></label><span class="px">$7</span></li><li><input type="checkbox" id="g37" data-k="g37"><label for="g37"><span class="it">Ice cream</span><span class="qty">1 pint</span><span class="use">Titanic, first-class dessert</span></label><span class="px">$6</span></li></ul><h3 class="aisle">Drinks</h3><ul class="rcpt"><li><input type="checkbox" id="g38" data-k="g38"><label for="g38"><span class="it">Labatt Blue</span><span class="qty">6-pack</span><span class="use">Letterkenny (closest thing to Puppers)</span></label><span class="px">$11</span></li><li><input type="checkbox" id="g39" data-k="g39"><label for="g39"><span class="it">Topo Chico or other sparkling water</span><span class="qty">12-pack</span><span class="use">Everything else</span></label><span class="px">$13</span></li><li><input type="checkbox" id="g40" data-k="g40"><label for="g40"><span class="it">Electrolyte packets</span><span class="qty">1 box</span><span class="use">Sunday morning</span></label><span class="px">$8</span></li></ul><h3 class="aisle">Household</h3><ul class="rcpt"><li><input type="checkbox" id="g41" data-k="g41"><label for="g41"><span class="it">Tissues</span><span class="qty">2 boxes</span><span class="use">Spoiler Alert, Violet Evergarden, Titanic</span></label><span class="px">$5</span></li><li><input type="checkbox" id="g42" data-k="g42"><label for="g42"><span class="it">Aluminum foil</span><span class="qty">1 roll</span><span class="use">Bacon and nacho sheet pans</span></label><span class="px">$5</span></li></ul>
+      <div class="rfoot">
+        <div><span>Items in cart</span><span><span id="got">0</span> / 42</span></div>
+        <div class="tot"><span>About</span><span>$244</span></div>
+        <small>Rough Denver-area prices, not a quote. Pies and steak swing it the most.</small>
+      </div>
+    </div>
+  </section>
+
+  <section id="recipes">
+    <h2>Recipes</h2>
+    <p class="sub">Seven meals, about two hours of cooking across the whole weekend.</p>
+    <div class="cards"><article class="card" id="recipe-pizza"><header><span class="when">Fri 6:30p</span><h3>Pepperoni hot-honey pizza</h3>
+<div class="tags"><span>20 min</span><span>Oven</span></div></header><ol><li>Heat the oven to 425°F, or whatever the box says.</li><li>Cover the frozen pizza with pepperoni, right to the edges.</li><li>Bake it straight on the rack for 13–16 minutes, until the cheese bubbles and the pepperoni curls into little cups.</li><li>Drizzle hot honey over the top, wait 2 minutes, and slice.</li></ol></article><article class="card" id="recipe-pancakes"><header><span class="when">Sat 9:00a</span><h3>Blueberry pancakes and bacon</h3>
+<div class="tags"><span>25 min</span><span>Sheet pan, skillet</span></div></header><ol><li>Heat the oven to 400°F. Line a sheet pan with foil, lay out the whole pack of bacon, and bake 18–22 minutes until crisp.</li><li>Stir the pancake mix with water per the box and fold in half the blueberries. Lumps are fine.</li><li>Melt a little butter in a skillet over medium. Pour quarter-cup scoops; flip when bubbles pop on top, about 2 minutes a side.</li><li>Butter, syrup, the rest of the blueberries. Put half the bacon in the fridge for Sunday.</li></ol></article><article class="card" id="recipe-grilled-cheese"><header><span class="when">Sat 12:33p</span><h3>Grilled cheese and tomato soup</h3>
+<div class="tags"><span>12 min</span><span>Skillet, microwave</span></div></header><ol><li>Butter the outside of two slices of sourdough and put two slices of cheddar between them.</li><li>Cook in a skillet over medium-low with a lid on, 3–4 minutes, until golden. Flip and do the other side without the lid.</li><li>Microwave half the carton of soup in a big mug for 2–3 minutes, stirring once.</li><li>Cut the sandwich corner to corner and dunk.</li></ol></article><article class="card" id="recipe-tacos"><header><span class="when">Sat 6:48p</span><h3>Taco night</h3>
+<div class="tags"><span>20 min</span><span>Skillet</span></div></header><ol><li>Brown the whole pound of beef in a skillet over medium-high for 6–8 minutes, breaking it up. Pour off extra fat.</li><li>Stir in the taco seasoning and 2/3 cup water. Simmer 5 minutes until thick.</li><li>Warm tortillas for 20 seconds in the microwave under a damp paper towel.</li><li>Beef, cheese, pico, sour cream, avocado, a squeeze of lime. Put half the beef in a container for Sunday.</li></ol></article><article class="card" id="recipe-burritos"><header><span class="when">Sun 8:40a</span><h3>Breakfast burritos</h3>
+<div class="tags"><span>12 min</span><span>Skillet</span></div></header><ol><li>Whisk 3 eggs with a pinch of salt. Melt butter in the skillet over medium-low and stir slowly until just set.</li><li>Microwave Saturday’s bacon for 30 seconds.</li><li>Fill a tortilla with eggs, bacon, a handful of cheese, and salsa. Roll it up.</li><li>Toast it seam-side down in the skillet for a minute so it holds together. Make a second one for Pluto.</li></ol></article><article class="card" id="recipe-nachos"><header><span class="when">Sun 12:28p</span><h3>Leftover-taco nachos</h3>
+<div class="tags"><span>12 min</span><span>Sheet pan</span></div></header><ol><li>Heat the oven to 400°F and line a sheet pan with foil.</li><li>Spread chips in one layer. Top with the leftover taco beef and a lot of cheese.</li><li>Bake 6–8 minutes until the cheese melts.</li><li>Finish with pico, sour cream, and the second avocado.</li></ol></article><article class="card" id="recipe-steak"><header><span class="when">Sun 6:25p</span><h3>Steak night</h3>
+<div class="tags"><span>30 min</span><span>Skillet, microwave</span></div></header><ol><li>Take the steak out 30–45 minutes early. Pat it dry and salt both sides well.</li><li>Poke the potato with a fork. Microwave 5 minutes, flip, then 3–5 more until soft.</li><li>Get the skillet very hot with a little oil. Steak 4 minutes, flip, 3–4 more for medium-rare on a 1-inch steak (130°F if you have a thermometer). Add a tablespoon of butter for the last minute and spoon it over.</li><li>Rest the steak 5 minutes while you toss the Caesar kit. Butter, salt, and sour cream on the potato.</li></ol></article></div>
+  </section>
+
+  <section id="pairings">
+    <h2>Snack pairings</h2>
+    <p class="sub">What to have in hand when each one starts.</p>
+    <ul class="pairs"><li><b>Tetris</b><span>Pringles. They stack.</span></li><li><b>Kingdom</b><span>A chocolate protein shake.</span></li><li><b>Rocky</b><span>Raw eggs. Please don’t.</span></li><li><b>Letterkenny</b><span>A Labatt Blue. Puppers isn’t real.</span></li><li><b>Fringe</b><span>Red Vines, Walter’s favorite.</span></li><li><b>Dances with Wolves</b><span>Microwave s’mores: graham, chocolate, marshmallow, 12–15 seconds, top graham.</span></li><li><b>Million Dollar Baby</b><span>Lemon meringue pie, like the diner in the film.</span></li><li><b>Boyhood</b><span>A Topo Chico. Twelve years in Texas.</span></li><li><b>Twin Peaks</b><span>Cherry pie and a damn fine cup of coffee. Decaf at midnight.</span></li><li><b>I’m Still Here</b><span>Brazi Bites, the Brazilian cheese bread, 10 minutes in the oven.</span></li><li><b>Dopesick</b><span>Just water.</span></li><li><b>Titanic</b><span>Popcorn, then the pint of ice cream. First-class dessert.</span></li><li><b>Spoiler Alert, Violet Evergarden</b><span>Tissues. Two boxes is not overkill.</span></li></ul>
+  </section>
+
+  <section id="leftovers">
+    <h2>Monday</h2>
+    <p class="sub">What's left, and what to do with it.</p>
+    <ul class="left"><li><b>Pies</b><span>Breakfast all week. Nobody is checking.</span></li><li><b>Tortillas, eggs, cheese, salsa</b><span>Breakfast burritos Monday and Tuesday.</span></li><li><b>Sourdough</b><span>Toast with butter, or one more grilled cheese.</span></li><li><b>Chips and salsa</b><span>Desk snack.</span></li><li><b>Steak drippings in the skillet</b><span>Wipe it while it’s warm, then a little oil if it’s cast iron.</span></li></ul>
+  </section>
+
+  <p class="foot">Each meal has a chore in Nala's Minions with a reminder at cooking time. The movies are on <a href="https://tommysthoughts.com/fornow">tommysthoughts.com/fornow</a>.</p>
+</div>
+<script>
+(() => {
+  const KEY = 'yesathon-groceries';
+  let got = {};
+  try { got = JSON.parse(localStorage.getItem(KEY) || '{}'); } catch (e) {}
+  const boxes = [...document.querySelectorAll('.rcpt input')];
+  const count = () => { document.getElementById('got').textContent = boxes.filter(b => b.checked).length; };
+  boxes.forEach(b => {
+    b.checked = !!got[b.dataset.k];
+    b.addEventListener('change', () => {
+      got[b.dataset.k] = b.checked;
+      try { localStorage.setItem(KEY, JSON.stringify(got)); } catch (e) {}
+      count();
+    });
+  });
+  count();
+})();
+</script>
+</body>
+</html>

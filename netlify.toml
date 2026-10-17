@@ -57,6 +57,13 @@
   to = "/moving.html"
   status = 200
 
+# Yes-a-thon food plan — same pattern as /moving and /japan: a self-contained
+# static page (public/yesathon.html) at /yesathon, ahead of the SPA fallback.
+[[redirects]]
+  from = "/yesathon"
+  to = "/yesathon.html"
+  status = 200
+
 # SPA fallback: serve index.html for any non-file, non-API path.
 [[redirects]]
   from = "/*"
