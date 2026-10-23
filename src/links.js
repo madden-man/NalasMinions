@@ -45,6 +45,7 @@ export const PAGES = [
     sections: [
       { id: 'flights', label: 'Flights' },
       { id: 'stay', label: 'Accommodations' },
+      { id: 'bookings', label: 'Bookings' },
       { id: 'transit', label: 'Getting around' },
       { id: 'budget', label: 'Budget' },
       { id: 'itinerary', label: 'Day-by-day' },
