@@ -10,12 +10,14 @@
 
 const JAPAN_TASKS = [
   // Do now — time-sensitive
+  { id: 'japan-hirai-workshop-fix', item: 'hirai-workshop-fix', due: '2026-10-23', text: 'Japan: move the Hirai knife workshop to Nov 16 or 17', notes: 'WS-260930-005 was booked for Oct 17 16:00 (¥50,000 paid via Square). The shop emailed Oct 17 asking where you were; reply to hamonoya.hirai.stf@gmail.com and ask for Nov 16 or 17, 4 pm. 244 Shikibuchō, Nakagyō-ku, Kyoto.' },
   { id: '1788481127023', item: 'ghibli-tickets', due: '2026-10-10', text: 'Japan: Ghibli Museum tickets', notes: 'Released Oct 10, 10 am JST on Lawson; sell out fast.' },
-  { id: '1788481299463', item: 'teamlab-planets', due: '2026-10-20', text: 'Japan: teamLab Planets tickets for Nov 20', notes: 'Timed tickets sell out 1–2 weeks ahead.' },
+  { id: '1788481299463', item: 'teamlab-planets', due: '2026-10-20', text: 'Japan: teamLab Planets tickets for Nov 20', notes: 'Booked Oct 22: Nov 20, 9:00–9:30 am entry, 2 adults, ¥10,400. QR on My Tickets from midnight; changeable up to 3× until 2 h before.' },
   { id: '1788481347599', item: 'shibuya-sky', due: '2026-10-20', text: 'Japan: reserve a Shibuya Sky sunset slot for Nov 20' },
-  { id: '1788481374598', item: 'teamlab-osaka', due: '2026-10-20', text: 'Japan: teamLab Botanical Garden (Osaka) tickets for Nov 8/9' },
-  { id: '1788481377599', item: 'restaurant-reservations', due: '2026-10-20', text: 'Japan: restaurant reservations', notes: 'Kyoto kaiseki, Tokyo omakase, invite-only spots open 1–3 months out.' },
-  { id: '1788481434598', item: 'kyoto-tea-ceremony', due: '2026-10-20', text: 'Japan: reserve a Kyoto tea ceremony' },
+  { id: '1788481374598', item: 'teamlab-osaka', due: '2026-10-20', text: 'Japan: teamLab Botanical Garden (Osaka) tickets for Nov 8/9', notes: 'Booked Oct 22: Sun Nov 8, 8:30–9:30 pm, 2 adults, ¥4,400, inquiry no. NNF77F7NPXAH-0001.' },
+  { id: '1788481377599', item: 'restaurant-reservations', due: '2026-10-20', text: 'Japan: restaurant reservations', notes: 'Kyoto done via the Park Hyatt concierge: Kikunoi Honten Nov 15 18:00 for two (¥55,000/person course + service), Mishima-tei Honten Nov 16 for four (sukiyaki). Tokyo still open; see the Tokyo dinners chore.' },
+  { id: 'japan-tokyo-dinners', item: 'tokyo-dinners', due: '2026-10-28', text: 'Japan: book Tokyo dinners for Nov 19–21', notes: 'Blossom Shinjuku will not book for guests. Their picks: Yurakucho Kakida 050-5600-7301, Sushi Ju 050-5872-5877 (sushi); Sagano Sakaba 03-6258-5221, Ika no Sumi 050-5593-0432 (yakitori); Teppanyaki 10 Shibuya 050-5868-7263 (Scramble Square 12F, by Shibuya Sky for Nov 20). Phone or TableCheck.' },
+  { id: '1788481434598', item: 'kyoto-tea-ceremony', due: '2026-10-20', text: 'Japan: reserve a Kyoto tea ceremony', notes: 'The Aug 1 email to phkyoto.reservations@hyatt.com bounced (address not found). Resend to kyoto.park.concierge@hyatt.com: private, Higashiyama, honeymoon.' },
   { id: '1788481465609', item: 'cup-noodles-workshop', due: '2026-10-20', text: 'Japan: Cup Noodles Museum workshop (Nov 6), if wanted', notes: 'Chicken Ramen Factory workshop needs a reservation.' },
   { id: '1788481564612', item: 'verify-kyoto-lightups', due: '2026-10-25', text: 'Japan: verify Kyoto light-up dates cover Nov 15–19', notes: 'Kōdai-ji and Eikandō.' },
   { id: '1788481567612', item: 'transport-passes-seats', due: '2026-10-25', text: 'Japan: decide passes and reserve seats', notes: 'Shinkansen (Nov 8, 19), Kuroshio (Nov 10, 15), Kintetsu to Ise (Nov 18).' },
