@@ -10,17 +10,16 @@
 
 const JAPAN_TASKS = [
   // Do now — time-sensitive
-  { id: 'japan-hirai-workshop-fix', item: 'hirai-workshop-fix', due: '2026-10-23', text: 'Japan: move the Hirai knife workshop to Nov 16 or 17', notes: 'WS-260930-005 was booked for Oct 17 16:00 (¥50,000 paid via Square). The shop emailed Oct 17 asking where you were; reply to hamonoya.hirai.stf@gmail.com and ask for Nov 16 or 17, 4 pm. 244 Shikibuchō, Nakagyō-ku, Kyoto.' },
   { id: '1788481127023', item: 'ghibli-tickets', due: '2026-10-10', text: 'Japan: Ghibli Museum tickets', notes: 'Released Oct 10, 10 am JST on Lawson; sell out fast.' },
   { id: '1788481299463', item: 'teamlab-planets', due: '2026-10-20', text: 'Japan: teamLab Planets tickets for Nov 20', notes: 'Booked Oct 22: Nov 20, 9:00–9:30 am entry, 2 adults, ¥10,400. QR on My Tickets from midnight; changeable up to 3× until 2 h before.' },
-  { id: '1788481347599', item: 'shibuya-sky', due: '2026-10-20', text: 'Japan: reserve a Shibuya Sky sunset slot for Nov 20' },
+  { id: '1788481347599', item: 'shibuya-sky', due: '2026-10-20', text: 'Japan: reserve a Shibuya Sky slot for Nov 20', notes: 'Pick a 3:30 to 4 pm entry for the 4:30 sunset.' },
   { id: '1788481374598', item: 'teamlab-osaka', due: '2026-10-20', text: 'Japan: teamLab Botanical Garden (Osaka) tickets for Nov 8/9', notes: 'Booked Oct 22: Sun Nov 8, 8:30–9:30 pm, 2 adults, ¥4,400, inquiry no. NNF77F7NPXAH-0001.' },
   { id: '1788481377599', item: 'restaurant-reservations', due: '2026-10-20', text: 'Japan: restaurant reservations', notes: 'Kyoto done via the Park Hyatt concierge: Kikunoi Honten Nov 15 18:00 for two (¥55,000/person course + service), Mishima-tei Honten Nov 16 for four (sukiyaki). Tokyo still open; see the Tokyo dinners chore.' },
   { id: 'japan-tokyo-dinners', item: 'tokyo-dinners', due: '2026-10-28', text: 'Japan: book Tokyo dinners for Nov 19–21', notes: 'Blossom Shinjuku will not book for guests. Their picks: Yurakucho Kakida 050-5600-7301, Sushi Ju 050-5872-5877 (sushi); Sagano Sakaba 03-6258-5221, Ika no Sumi 050-5593-0432 (yakitori); Teppanyaki 10 Shibuya 050-5868-7263 (Scramble Square 12F, by Shibuya Sky for Nov 20). Phone or TableCheck.' },
   { id: '1788481434598', item: 'kyoto-tea-ceremony', due: '2026-10-20', text: 'Japan: reserve a Kyoto tea ceremony', notes: 'The Aug 1 email to phkyoto.reservations@hyatt.com bounced (address not found). Resend to kyoto.park.concierge@hyatt.com: private, Higashiyama, honeymoon.' },
   { id: '1788481465609', item: 'cup-noodles-workshop', due: '2026-10-20', text: 'Japan: Cup Noodles Museum workshop (Nov 6), if wanted', notes: 'Chicken Ramen Factory workshop needs a reservation.' },
   { id: '1788481564612', item: 'verify-kyoto-lightups', due: '2026-10-25', text: 'Japan: verify Kyoto light-up dates cover Nov 15–19', notes: 'Kōdai-ji and Eikandō.' },
-  { id: '1788481567612', item: 'transport-passes-seats', due: '2026-10-25', text: 'Japan: decide passes and reserve seats', notes: 'Shinkansen (Nov 8, 19), Kuroshio (Nov 10, 15), Kintetsu to Ise (Nov 18).' },
+  { id: '1788481567612', item: 'transport-passes-seats', due: '2026-10-25', text: 'Japan: book the Nov 15 Kuroshio 16', notes: 'Kii-Katsuura 8:49 to Shin-Osaka 12:51, then JR on to Kyoto. Book on JR-West Online. The other seven rides (Nov 1, 8, 10, 18 both ways, 19, 22) are booked.' },
   { id: '1788481914608', item: 'print-kumano-voucher', due: '2026-10-25', text: 'Japan: print the Kumano Travel voucher', notes: 'From the Kumano Travel MyPage (DP200503).' },
   // Documents & health
   { id: '1788495874655', item: 'visit-japan-web', due: '2026-10-25', text: 'Japan: Visit Japan Web pre-registration for both', notes: 'Immigration and customs QR codes; screenshot them.' },
@@ -43,8 +42,9 @@ const JAPAN_TASKS = [
   { id: 'japan-kumano-first-aid', item: 'kumano-first-aid', due: '2026-10-27', text: 'Japan: build the trail first-aid kit', notes: 'Blister supplies, elastic bandage, antihistamine, tweezers, emergency blanket, two whistles, spare headlamp batteries.' },
   { id: 'japan-kumano-safety-app', item: 'kumano-safety-app', due: '2026-10-28', text: 'Japan: install Safety Tips + offline Nakahechi maps' },
   { id: 'japan-kumano-share-plan', item: 'kumano-share-plan', due: '2026-10-28', text: 'Japan: share the Kumano stage plan with someone at home', notes: 'Lodge names per night and a nightly check-in.' },
-  { id: 'japan-kumano-bus-times', item: 'kumano-bus-times', due: '2026-10-28', text: 'Japan: screenshot Kumano bus times', notes: 'Kii-Tanabe → Takijiri (Nov 10), Chikatsuyu → Hosshinmon-ōji (Nov 12).' },
+  { id: 'japan-kumano-bus-times', item: 'kumano-bus-times', due: '2026-10-28', text: 'Japan: screenshot Kumano bus times', notes: 'Kii-Tanabe → Takijiri (Nov 10, the 10:30 Ryūjin bus, route 81), Chikatsuyu → Hosshinmon-ōji (Nov 12).' },
   { id: 'japan-kumano-conditions', item: 'kumano-conditions', due: '2026-11-09', text: 'Japan: check Kumano forecast + trail closures', notes: 'JMA forecast and the Tanabe tourism bureau trail notices; pick a Plan B for any rainy stage.' },
+  { id: 'japan-kumano-nov14-fallback', item: 'kumano-nov14-fallback', due: '2026-11-13', text: 'Japan: confirm the Nov 14 fallback with @koguchi', notes: 'Ask @koguchi to confirm the Nov 14 fallback (morning bus or taxi to Kii-Katsuura). Phone Hotel Urashima for its last ferry time and dinner seating.' },
 ]
 
 module.exports = { JAPAN_TASKS }
