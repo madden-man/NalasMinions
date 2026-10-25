@@ -76,16 +76,13 @@
   .pill{width:34px;height:34px;border-radius:50%;border:2px solid currentColor;background:#fff;cursor:pointer;font-weight:700;font-size:.85rem;display:grid;place-items:center;padding:0;}
   .pill.tommy{color:var(--tommy);}
   .pill.alison{color:var(--alison);}
-  .pill.either{color:var(--indigo);width:auto;padding:0 10px;border-radius:99px;}
   .pill[aria-pressed="true"]{background:currentColor;}
   .pill[aria-pressed="true"] span{color:#fff;}
-  .pill.either[aria-pressed="true"] span::before{content:"✓ ";}
   .act{flex:none;border:1px solid var(--line);background:#fff;color:var(--rei);border-radius:99px;padding:5px 10px;cursor:pointer;font-size:.8rem;font-weight:700;white-space:nowrap;}
   .act:hover{background:var(--rei-soft);}
   .act.x{color:var(--muted);font-weight:500;padding:5px 9px;}
   .buy{width:22px;height:22px;accent-color:var(--rei);flex:none;cursor:pointer;}
   body.view-tommy .pill.alison,body.view-alison .pill.tommy{display:none;}
-  body.view-tommy .item.only-alison,body.view-alison .item.only-tommy{display:none;}
   body.locked .item button,body.locked .item input,body.locked form button{pointer-events:none;opacity:.45;}
 
   /* Add */
@@ -167,12 +164,6 @@
       <form class="add" data-rei="0" style="border-top:0;margin-top:0">
         <input type="text" name="text" placeholder="Add something to pack…" aria-label="Item to pack" required>
         <select name="cat" aria-label="Category"></select>
-        <select name="who" aria-label="Who packs it">
-          <option value="each">Each of us</option>
-          <option value="shared">One for both</option>
-          <option value="tommy">Tommy only</option>
-          <option value="alison">Alison only</option>
-        </select>
         <button type="submit">Add</button>
       </form>
     </div>
@@ -206,72 +197,83 @@
     ['tech', '🔌 Tech'], ['health', '💊 Health & toiletries'], ['bags', '🧳 Bags & misc'],
   ];
 
-  // From the Must-Pack section on /japan, one line per thing to grab.
-  // who: 'each' (Tommy and Alison each pack one), 'shared' (one for the pair),
-  // or 'tommy' / 'alison' (only that person).
+  // From the Must-Pack section on /japan, one line per thing to grab. Every
+  // item has its own Tommy and Alison check, even ones the pair shares.
   var DEFAULT_ITEMS = [
-    ['documents', 'passport', 'Passport', 'each'],
-    ['documents', 'passport-copies', 'Passport photocopies (separate bag)', 'shared'],
-    ['documents', 'vjw-qr', 'Visit Japan Web QR screenshot', 'each'],
-    ['documents', 'confirmations', 'Printed confirmations, incl. Kumano voucher', 'shared'],
-    ['documents', 'cards', 'No-FX-fee cards + a backup card', 'each'],
-    ['documents', 'yen', '¥30–50k starting cash + coin pouch', 'shared'],
-    ['documents', 'insurance-card', 'Travel insurance card / policy PDF', 'each'],
-    ['clothing', 'coat', 'Medium jacket or wool coat', 'each'],
-    ['clothing', 'rain-shell', 'Rain shell (doubles as trek shell)', 'each'],
-    ['clothing', 'fleece', 'Fleece or light puffy', 'each'],
-    ['clothing', 'sweaters', 'Sweaters ×2', 'each'],
-    ['clothing', 'long-sleeves', 'Long-sleeve tees ×4', 'each'],
-    ['clothing', 'tees', 'Tees ×3', 'each'],
-    ['clothing', 'pants', 'Jeans / chinos ×2', 'each'],
-    ['clothing', 'cold-kit', 'Scarf, beanie, light gloves', 'each'],
-    ['clothing', 'smart-outfit', 'Smart-casual outfit (Park Hyatt, kaiseki, tea ceremony)', 'each'],
-    ['clothing', 'walking-shoes', 'Comfortable walking shoes, easy on/off', 'each'],
-    ['clothing', 'socks', 'Hole-free socks ×8', 'each'],
-    ['clothing', 'swimsuit', 'Swimsuit (Yokohama sky pool)', 'each'],
-    ['clothing', 'underwear', 'Underwear + sleepwear', 'each'],
-    ['trek', 'boots', 'Broken-in hiking boots', 'each'],
-    ['trek', 'wool-socks', 'Wool hiking socks ×3', 'each'],
-    ['trek', 'base-layers', 'Wicking base layers ×2', 'each'],
-    ['trek', 'hiking-pants', 'Hiking pants', 'each'],
-    ['trek', 'daypack', 'Daypack with rain cover', 'each'],
-    ['trek', 'headlamp', 'Headlamp + spare batteries', 'each'],
-    ['trek', 'poles', 'Trekking poles', 'each'],
-    ['trek', 'blister-kit', 'Blister kit', 'shared'],
-    ['trek', 'water-bottle', 'Water bottle', 'each'],
-    ['trek', 'electrolytes', 'Electrolyte tabs + trail snacks', 'shared'],
-    ['trek', 'onsen-towel', 'Small onsen towel', 'each'],
-    ['trek', 'dry-bag', 'Dry bag for phone', 'each'],
-    ['trek', 'first-aid', 'First-aid kit + emergency blanket', 'shared'],
-    ['trek', 'whistle', 'Whistle', 'each'],
-    ['tech', 'phone', 'Phone with eSIM + offline maps', 'each'],
-    ['tech', 'battery', 'Portable battery (20k mAh)', 'each'],
-    ['tech', 'cables', 'Cables + chargers (US plugs fit)', 'each'],
-    ['tech', 'suica', 'Suica / PASMO in Apple Wallet', 'each'],
-    ['tech', 'earbuds', 'Earbuds for the flights', 'each'],
-    ['health', 'prescriptions', '23 days of prescriptions, original bottles', 'each'],
-    ['health', 'meds', 'Ibuprofen, motion-sickness pills, antacids, Imodium', 'shared'],
-    ['health', 'sunscreen', 'Sunscreen + lip balm', 'shared'],
-    ['health', 'sanitizer', 'Hand sanitizer', 'shared'],
-    ['health', 'deodorant', 'Deodorant (hard to find there)', 'each'],
-    ['health', 'contacts', 'Contact lens supplies', 'each'],
-    ['health', 'toiletries', 'Toothbrush + toiletry kit', 'each'],
-    ['health', 'umbrella', 'Compact umbrella', 'shared'],
-    ['bags', 'suitcase', 'Suitcase (2 total: Kumano shuttle limit)', 'each'],
-    ['bags', 'cubes', 'Packing cubes', 'shared'],
-    ['bags', 'tote', 'Foldable tote for souvenirs', 'shared'],
-    ['bags', 'laundry', 'Laundry detergent sheets', 'shared'],
-    ['bags', 'ziplocks', 'Ziplocks for trash', 'shared'],
-    ['bags', 'pen', 'Pen for customs forms', 'shared'],
-    ['bags', 'gifts', 'Small gifts for minshuku hosts (optional)', 'shared'],
+    ['documents', 'passport', 'Passport'],
+    ['documents', 'passport-copies', 'Passport photocopies (separate bag)'],
+    ['documents', 'vjw-qr', 'Visit Japan Web QR screenshot'],
+    ['documents', 'confirmations', 'Printed confirmations, incl. Kumano voucher'],
+    ['documents', 'cards', 'No-FX-fee cards + a backup card'],
+    ['documents', 'yen', '¥30–50k starting cash + coin pouch'],
+    ['documents', 'insurance-card', 'Travel insurance card / policy PDF'],
+    ['clothing', 'coat', 'Medium jacket or wool coat'],
+    ['clothing', 'rain-shell', 'Rain shell (doubles as trek shell)'],
+    ['clothing', 'fleece', 'Fleece or light puffy'],
+    ['clothing', 'sweaters', 'Sweaters ×2'],
+    ['clothing', 'long-sleeves', 'Long-sleeve tees ×4'],
+    ['clothing', 'tees', 'Tees ×3'],
+    ['clothing', 'pants', 'Jeans / chinos ×2'],
+    ['clothing', 'cold-kit', 'Scarf, beanie, light gloves'],
+    ['clothing', 'smart-outfit', 'Smart-casual outfit (Park Hyatt, kaiseki, tea ceremony)'],
+    ['clothing', 'walking-shoes', 'Comfortable walking shoes, easy on/off'],
+    ['clothing', 'socks', 'Hole-free socks ×8'],
+    ['clothing', 'swimsuit', 'Swimsuit (Yokohama sky pool)'],
+    ['clothing', 'underwear', 'Underwear + sleepwear'],
+    ['trek', 'boots', 'Broken-in hiking boots'],
+    ['trek', 'wool-socks', 'Wool hiking socks ×3'],
+    ['trek', 'base-layers', 'Wicking base layers ×2'],
+    ['trek', 'hiking-pants', 'Hiking pants'],
+    ['trek', 'daypack', 'Daypack with rain cover'],
+    ['trek', 'headlamp', 'Headlamp + spare batteries'],
+    ['trek', 'poles', 'Trekking poles'],
+    ['trek', 'blister-kit', 'Blister kit'],
+    ['trek', 'water-bottle', 'Water bottle'],
+    ['trek', 'electrolytes', 'Electrolyte tabs + trail snacks'],
+    ['trek', 'onsen-towel', 'Small onsen towel'],
+    ['trek', 'dry-bag', 'Dry bag for phone'],
+    ['trek', 'first-aid', 'First-aid kit + emergency blanket'],
+    ['trek', 'whistle', 'Whistle'],
+    ['tech', 'phone', 'Phone with eSIM + offline maps'],
+    ['tech', 'battery', 'Portable battery (20k mAh)'],
+    ['tech', 'cables', 'Cables + chargers (US plugs fit)'],
+    ['tech', 'suica', 'Suica / PASMO in Apple Wallet'],
+    ['tech', 'earbuds', 'Earbuds for the flights'],
+    ['health', 'prescriptions', '23 days of prescriptions, original bottles'],
+    ['health', 'meds', 'Ibuprofen, motion-sickness pills, antacids, Imodium'],
+    ['health', 'sunscreen', 'Sunscreen + lip balm'],
+    ['health', 'sanitizer', 'Hand sanitizer'],
+    ['health', 'deodorant', 'Deodorant (hard to find there)'],
+    ['health', 'contacts', 'Contact lens supplies'],
+    ['health', 'toiletries', 'Toothbrush + toiletry kit'],
+    ['health', 'umbrella', 'Compact umbrella'],
+    ['bags', 'suitcase', 'Suitcase (2 total: Kumano shuttle limit)'],
+    ['bags', 'cubes', 'Packing cubes'],
+    ['bags', 'tote', 'Foldable tote for souvenirs'],
+    ['bags', 'laundry', 'Laundry detergent sheets'],
+    ['bags', 'ziplocks', 'Ziplocks for trash'],
+    ['bags', 'pen', 'Pen for customs forms'],
+    ['bags', 'gifts', 'Small gifts for minshuku hosts (optional)'],
   ];
 
   function defaults() {
     return {
       items: DEFAULT_ITEMS.map(function (d) {
-        return { id: d[1], cat: d[0], text: d[2], who: d[3], rei: false, bought: false, packed: {} };
+        return { id: d[1], cat: d[0], text: d[2], rei: false, bought: false, packed: {} };
       }),
     };
+  }
+
+  // Lists saved before every item had a check each could carry a `who` (one
+  // shared "Both" check, or one person only); a shared check counts for both.
+  function normalize(state) {
+    state.items.forEach(function (it) {
+      var p = it.packed = it.packed || {};
+      if (p.shared) { p.tommy = true; p.alison = true; }
+      delete p.shared;
+      delete it.who;
+    });
+    return state;
   }
 
   // ---- Ops: pure changes applied to whichever copy of the list is newest. ----
@@ -314,7 +316,7 @@
       return r.json();
     }).then(function (body) {
       var v = body && body.value;
-      return v && Array.isArray(v.items) ? v : defaults();
+      return v && Array.isArray(v.items) ? normalize(v) : defaults();
     });
   }
 
@@ -377,28 +379,18 @@
   function esc(s) {
     return String(s).replace(/[&<>"]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; });
   }
-  function packers(it) {
-    if (it.who === 'shared') return [];
-    if (it.who === 'tommy' || it.who === 'alison') return people.filter(function (p) { return p[0] === it.who; });
-    return people;
-  }
   function isDone(it) {
     var p = it.packed || {};
-    if (it.who === 'shared') return !!p.shared;
-    return packers(it).every(function (x) { return p[x[0]]; });
+    return people.every(function (x) { return p[x[0]]; });
   }
 
   function packRow(it) {
     var p = it.packed || {};
-    var pills = it.who === 'shared'
-      ? '<button type="button" class="pill either" data-pack="shared" aria-pressed="' + !!p.shared + '" title="One for both of us"><span>Both</span></button>'
-      : packers(it).map(function (x) {
-          return '<button type="button" class="pill ' + x[0] + '" data-pack="' + x[0] + '" aria-pressed="' + !!p[x[0]] + '" aria-label="' + x[2] + ' packed" title="' + x[2] + '"><span>' + x[1] + '</span></button>';
-        }).join('');
-    var tags = (it.who === 'tommy' ? '<span class="tag shared">Tommy</span>' : '') +
-      (it.who === 'alison' ? '<span class="tag shared">Alison</span>' : '') +
-      (it.bought ? '<span class="tag got">REI ✓</span>' : '');
-    return '<li class="item' + (isDone(it) ? ' done' : '') + (it.who === 'tommy' || it.who === 'alison' ? ' only-' + it.who : '') + '" data-id="' + esc(it.id) + '">' +
+    var pills = people.map(function (x) {
+      return '<button type="button" class="pill ' + x[0] + '" data-pack="' + x[0] + '" aria-pressed="' + !!p[x[0]] + '" aria-label="' + x[2] + ' packed" title="' + x[2] + '"><span>' + x[1] + '</span></button>';
+    }).join('');
+    var tags = it.bought ? '<span class="tag got">REI ✓</span>' : '';
+    return '<li class="item' + (isDone(it) ? ' done' : '') + '" data-id="' + esc(it.id) + '">' +
       '<div class="pills">' + pills + '</div>' +
       '<span class="txt">' + esc(it.text) + tags + '</span>' +
       '<button type="button" class="act" data-rei="1" title="Buy this at REI">↑ REI</button>' +
@@ -428,8 +420,8 @@
     });
 
     people.forEach(function (x) {
-      var mine = state.items.filter(function (it) { return !it.rei && (it.who === 'shared' || packers(it).some(function (q) { return q[0] === x[0]; })); });
-      var done = mine.filter(function (it) { var p = it.packed || {}; return it.who === 'shared' ? p.shared : p[x[0]]; }).length;
+      var mine = state.items.filter(function (it) { return !it.rei; });
+      var done = mine.filter(function (it) { return (it.packed || {})[x[0]]; }).length;
       var Name = x[2];
       document.getElementById('prog' + Name).textContent = done + ' / ' + mine.length + (mine.length && done === mine.length ? ' 🎉' : '');
       document.getElementById('bar' + Name).style.width = mine.length ? (100 * done / mine.length) + '%' : '0';
@@ -497,7 +489,7 @@
       var toRei = form.getAttribute('data-rei') === '1';
       var item = {
         id: 'u' + Date.now().toString(36) + Math.random().toString(36).slice(2, 6),
-        cat: form.cat.value, text: text, who: form.who ? form.who.value : 'each',
+        cat: form.cat.value, text: text,
         rei: toRei, bought: false, packed: {},
       };
       change({ type: 'add', item: item });
