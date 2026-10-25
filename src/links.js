@@ -55,6 +55,21 @@ export const PAGES = [
     ],
   },
   {
+    key: 'japan-packing',
+    name: 'Japan packing',
+    file: 'public/japan-packing.html',
+    sections: [
+      { id: 'rei', label: 'To buy at REI' },
+      { id: 'pack', label: 'To pack' },
+      { id: 'cat-documents', label: 'Documents & money' },
+      { id: 'cat-clothing', label: 'Clothing' },
+      { id: 'cat-trek', label: 'Kumano trek kit' },
+      { id: 'cat-tech', label: 'Tech' },
+      { id: 'cat-health', label: 'Health & toiletries' },
+      { id: 'cat-bags', label: 'Bags & misc' },
+    ],
+  },
+  {
     key: 'evergreen',
     name: 'Evergreen prep',
     file: 'public/evergreen.html',

@@ -50,6 +50,14 @@
   to = "/japan.html"
   status = 200
 
+# Japan packing list — same pattern as /japan: a self-contained static page
+# (public/japan-packing.html) at /japan-packing, ahead of the SPA fallback. Its
+# checks are shared through /api/meta/japan-packing.
+[[redirects]]
+  from = "/japan-packing"
+  to = "/japan-packing.html"
+  status = 200
+
 # Standalone moving plan — same pattern as /japan: a self-contained static page
 # (public/moving.html) served at the clean /moving URL, ahead of the SPA fallback.
 [[redirects]]

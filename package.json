@@ -11,6 +11,7 @@
     "seed:meals": "node scripts/seed-meals.cjs",
     "seed:moving": "node scripts/seed-moving-todos.cjs",
     "seed:japan": "node scripts/seed-japan-todos.cjs",
+    "seed:japan-packing": "node scripts/seed-japan-packing-todos.cjs",
     "seed:evergreen": "node scripts/seed-evergreen-todos.cjs",
     "seed:yesathon": "node scripts/seed-yesathon-todos.cjs",
     "build:evergreen": "node scripts/build-evergreen-page.cjs",
