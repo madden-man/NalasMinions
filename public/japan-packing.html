@@ -97,8 +97,14 @@
   .act{flex:none;border:1px solid var(--line);background:#fff;color:var(--rei);border-radius:99px;padding:5px 10px;cursor:pointer;font-size:.8rem;font-weight:700;white-space:nowrap;}
   .act:hover{background:var(--rei-soft);}
   .act.x{color:var(--muted);font-weight:500;padding:5px 9px;}
-  .buy{width:22px;height:22px;accent-color:var(--rei);flex:none;cursor:pointer;}
+  .pill.gone{visibility:hidden;}
+  .pick{flex:1 1 100%;display:flex;flex-wrap:wrap;align-items:center;gap:6px;background:var(--rei-soft);border-radius:12px;padding:8px 10px;}
+  .pick b{font-size:.85rem;color:var(--rei);margin-right:2px;}
+  .pick button{border:1px solid var(--rei);background:#fff;color:var(--rei);border-radius:99px;padding:5px 12px;cursor:pointer;font-weight:700;font-size:.85rem;}
+  .pick button[data-buyfor="both"]{background:var(--rei);color:#fff;}
+  .pick button.cancel{border-color:transparent;background:none;color:var(--muted);font-weight:500;}
   body.view-tommy .pill.alison,body.view-alison .pill.tommy{display:none;}
+  body.view-tommy #reiList .only-alison,body.view-alison #reiList .only-tommy{display:none;}
   body.locked .item button,body.locked .item input,body.locked form button{pointer-events:none;opacity:.45;}
 
   /* Add */
@@ -154,11 +160,16 @@
   <!-- TO BUY AT REI -->
   <section id="rei" class="card">
     <h2 class="section-title"><span>🛒</span> To buy at REI <span class="count" id="reiCount"></span></h2>
-    <p class="subtle">Tap an item's name to edit it or add notes. Tap <strong>↑ REI</strong> on anything below to put it here. Check it off when it's in the cart and it drops back into the packing list.</p>
+    <p class="subtle">Tap an item's name to edit it or add notes. Tap <strong>↑ REI</strong> on anything below to put it here, for both of us or just one. Each of us checks off our own when it's in the cart; once everyone has theirs it drops back into the packing list.</p>
     <ul class="items" id="reiList"></ul>
     <form class="add" data-rei="1">
       <input type="text" name="text" placeholder="Something else to buy…" aria-label="Item to buy" required>
       <select name="cat" aria-label="Category"></select>
+      <select name="for" aria-label="Who needs to buy it">
+        <option value="both">For both of us</option>
+        <option value="tommy">Just Tommy</option>
+        <option value="alison">Just Alison</option>
+      </select>
       <button type="submit" class="to-rei">Add to REI list</button>
     </form>
   </section>
@@ -276,7 +287,7 @@
   function defaults() {
     return {
       items: DEFAULT_ITEMS.map(function (d) {
-        return { id: d[1], cat: d[0], text: d[2], rei: false, bought: false, packed: {} };
+        return { id: d[1], cat: d[0], text: d[2], buy: {}, got: {}, packed: {} };
       }),
     };
   }
@@ -289,6 +300,17 @@
       if (p.shared) { p.tommy = true; p.alison = true; }
       delete p.shared;
       delete it.who;
+      // The REI list used to be one flag for the pair (rei = on the list,
+      // bought = came back off it); now each person has their own.
+      if ('rei' in it || 'bought' in it) {
+        var both = { tommy: true, alison: true };
+        it.buy = it.rei || it.bought ? both : {};
+        it.got = it.bought && !it.rei ? { tommy: true, alison: true } : {};
+        delete it.rei;
+        delete it.bought;
+      }
+      it.buy = it.buy || {};
+      it.got = it.got || {};
     });
     return state;
   }
@@ -309,12 +331,14 @@
     } else if (op.type === 'pack') {
       it.packed = it.packed || {};
       it.packed[op.who] = !!op.value;
-    } else if (op.type === 'rei') {
-      it.rei = !!op.value;
-      if (op.value) it.bought = false;
-    } else if (op.type === 'bought') {
-      it.bought = !!op.value;
-      it.rei = !op.value;
+    } else if (op.type === 'buy') {
+      // Who needs to buy it at REI, and who has: set together (move to the
+      // REI list, skip, undo).
+      it.buy = JSON.parse(JSON.stringify(op.buy));
+      it.got = JSON.parse(JSON.stringify(op.got));
+    } else if (op.type === 'got') {
+      it.got = it.got || {};
+      it.got[op.who] = !!op.value;
     } else if (op.type === 'text') {
       if (op.value) it.text = op.value;
     } else if (op.type === 'note') {
@@ -401,6 +425,21 @@
   function esc(s) {
     return String(s).replace(/[&<>"]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; });
   }
+  // On the REI list while anyone it's for still hasn't bought it.
+  function buyers(it) {
+    return people.filter(function (x) { return (it.buy || {})[x[0]]; });
+  }
+  function onRei(it) {
+    return buyers(it).some(function (x) { return !(it.got || {})[x[0]]; });
+  }
+  function reiDone(it) {
+    return buyers(it).length > 0 && !onRei(it);
+  }
+  function buyFor(who) {
+    return who === 'both' ? { tommy: true, alison: true } : (function (o) { o[who] = true; return o; })({});
+  }
+  var reiPick = null;
+
   function isDone(it) {
     var p = it.packed || {};
     return people.every(function (x) { return p[x[0]]; });
@@ -429,20 +468,36 @@
     var pills = people.map(function (x) {
       return '<button type="button" class="pill ' + x[0] + '" data-pack="' + x[0] + '" aria-pressed="' + !!p[x[0]] + '" aria-label="' + x[2] + ' packed" title="' + x[2] + '"><span>' + x[1] + '</span></button>';
     }).join('');
-    var tags = it.bought ? '<span class="tag got">REI ✓</span>' : '';
+    var tags = reiDone(it) ? '<span class="tag got">REI ✓</span>' : '';
+    var pick = it.id === reiPick
+      ? '<div class="pick"><b>Buy at REI for</b>' +
+        '<button type="button" data-buyfor="both">Both</button>' +
+        '<button type="button" data-buyfor="tommy">Just Tommy</button>' +
+        '<button type="button" data-buyfor="alison">Just Alison</button>' +
+        '<button type="button" class="cancel" data-cancelpick="1">Cancel</button></div>'
+      : '';
     return '<li class="item' + (isDone(it) ? ' done' : '') + '" data-id="' + esc(it.id) + '">' +
       '<div class="pills">' + pills + '</div>' +
       '<span class="txt">' + esc(it.text) + tags + '</span>' +
       '<button type="button" class="act" data-rei="1" title="Buy this at REI">↑ REI</button>' +
       '<button type="button" class="act x" data-remove="1" aria-label="Remove ' + esc(it.text) + '" title="Remove">×</button>' +
-      details(it) + '</li>';
+      pick + details(it) + '</li>';
   }
 
   function reiRow(it) {
     var cat = CATS.filter(function (c) { return c[0] === it.cat; })[0];
-    return '<li class="item" data-id="' + esc(it.id) + '">' +
-      '<input type="checkbox" class="buy" data-bought="1" aria-label="Bought ' + esc(it.text) + '" title="Bought it">' +
-      '<span class="txt">' + esc(it.text) + (cat ? ' <span class="tag shared">' + cat[1] + '</span>' : '') + '</span>' +
+    var b = it.buy || {}, g = it.got || {};
+    // Same T / A pills as packing, meaning "bought"; a slot stays blank for
+    // whoever it isn't for, so the names line up down the list.
+    var pills = people.map(function (x) {
+      return b[x[0]]
+        ? '<button type="button" class="pill ' + x[0] + '" data-got="' + x[0] + '" aria-pressed="' + !!g[x[0]] + '" aria-label="' + x[2] + ' bought" title="' + x[2] + ' bought it"><span>' + x[1] + '</span></button>'
+        : '<span class="pill ' + x[0] + ' gone" aria-hidden="true"></span>';
+    }).join('');
+    var only = buyers(it).length === 1 ? buyers(it)[0] : null;
+    return '<li class="item' + (only ? ' only-' + only[0] : '') + '" data-id="' + esc(it.id) + '">' +
+      '<div class="pills">' + pills + '</div>' +
+      '<span class="txt">' + esc(it.text) + (only ? ' <span class="tag shared">just ' + only[2] + '</span>' : '') + (cat ? ' <span class="tag shared">' + cat[1] + '</span>' : '') + '</span>' +
       '<button type="button" class="act x" data-unrei="1" title="Don\'t need to buy it">↓ skip</button>' +
       details(it) + '</li>';
   }
@@ -457,18 +512,18 @@
     if (!state) return;
     if (editing()) { renderLater = true; return; }
     renderLater = false;
-    var rei = state.items.filter(function (it) { return it.rei; });
+    var rei = state.items.filter(onRei);
     reiList.innerHTML = rei.length ? rei.map(reiRow).join('') : '<li class="empty">Nothing yet.</li>';
     document.getElementById('reiCount').textContent = rei.length ? rei.length + ' to buy' : '';
 
     CATS.forEach(function (c) {
       var ul = document.querySelector('ul[data-cat="' + c[0] + '"]');
-      var rows = state.items.filter(function (it) { return it.cat === c[0] && !it.rei; });
+      var rows = state.items.filter(function (it) { return it.cat === c[0] && !onRei(it); });
       ul.innerHTML = rows.length ? rows.map(packRow).join('') : '<li class="empty">All on the REI list.</li>';
     });
 
     people.forEach(function (x) {
-      var mine = state.items.filter(function (it) { return !it.rei; });
+      var mine = state.items.filter(function (it) { return !onRei(it); });
       var done = mine.filter(function (it) { return (it.packed || {})[x[0]]; }).length;
       var Name = x[2];
       document.getElementById('prog' + Name).textContent = done + ' / ' + mine.length + (mine.length && done === mine.length ? ' 🎉' : '');
@@ -565,19 +620,31 @@
       var who = btn.getAttribute('data-pack');
       change({ type: 'pack', id: id, who: who, value: !(it.packed || {})[who] });
     } else if (btn && btn.hasAttribute('data-rei')) {
-      change({ type: 'rei', id: id, value: true });
-      toast('Moved “' + it.text + '” to the REI list', { type: 'rei', id: id, value: false });
+      reiPick = reiPick === id ? null : id;
+      render();
+    } else if (btn && btn.hasAttribute('data-cancelpick')) {
+      reiPick = null;
+      render();
+    } else if (btn && btn.hasAttribute('data-buyfor')) {
+      var forWho = btn.getAttribute('data-buyfor');
+      var before = { type: 'buy', id: id, buy: it.buy || {}, got: it.got || {} };
+      reiPick = null;
+      change({ type: 'buy', id: id, buy: buyFor(forWho), got: {} });
+      toast('Moved “' + it.text + '” to the REI list' + (forWho === 'both' ? '' : ' for just ' + (forWho === 'tommy' ? 'Tommy' : 'Alison')), before);
     } else if (btn && btn.hasAttribute('data-unrei')) {
-      change({ type: 'rei', id: id, value: false });
-      toast('Back on the packing list', { type: 'rei', id: id, value: true });
+      var prior = { type: 'buy', id: id, buy: it.buy || {}, got: it.got || {} };
+      change({ type: 'buy', id: id, buy: {}, got: {} });
+      toast('Back on the packing list', prior);
+    } else if (btn && btn.hasAttribute('data-got')) {
+      var buyer = btn.getAttribute('data-got');
+      var value = !(it.got || {})[buyer];
+      change({ type: 'got', id: id, who: buyer, value: value });
+      if (value && !onRei(it)) toast('Everyone has “' + it.text + '”. It\'s back on the packing list', { type: 'got', id: id, who: buyer, value: false });
     } else if (btn && btn.hasAttribute('data-remove')) {
       var index = state.items.indexOf(it);
       var copy = JSON.parse(JSON.stringify(it));
       change({ type: 'remove', id: id });
       toast('Removed “' + it.text + '”', { type: 'restore', item: copy, index: index });
-    } else if (e.target.hasAttribute('data-bought')) {
-      change({ type: 'bought', id: id, value: true });
-      toast('Got it. “' + it.text + '” is back on the packing list', { type: 'rei', id: id, value: true });
     }
   });
 
@@ -593,7 +660,7 @@
       var item = {
         id: 'u' + Date.now().toString(36) + Math.random().toString(36).slice(2, 6),
         cat: form.cat.value, text: text,
-        rei: toRei, bought: false, packed: {},
+        buy: toRei ? buyFor(form['for'].value) : {}, got: {}, packed: {},
       };
       change({ type: 'add', item: item });
       form.text.value = '';
