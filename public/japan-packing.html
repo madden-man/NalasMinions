@@ -22,7 +22,7 @@
   [id]{scroll-margin-top:64px;}
   body{margin:0;font-family:'Zen Kaku Gothic New',system-ui,-apple-system,'Segoe UI',sans-serif;color:var(--ink);background:var(--cream);line-height:1.5;-webkit-text-size-adjust:100%;}
   h1,h2,h3{font-family:'Shippori Mincho','Hiragino Mincho ProN',Georgia,serif;line-height:1.25;}
-  button,input,select{font:inherit;}
+  button,input,select,textarea{font:inherit;}
 
   .hero{background:linear-gradient(135deg,var(--indigo-deep) 0%,var(--indigo) 55%,var(--vermillion) 140%);color:#fff;padding:36px 16px 40px;text-align:center;}
   .hero h1{margin:0 0 6px;font-size:clamp(1.8rem,5vw,2.8rem);font-weight:800;}
@@ -65,9 +65,25 @@
   /* Items */
   .group h3{margin:14px 0 4px;font-size:1.05rem;}
   ul.items{list-style:none;margin:0 0 6px;padding:0;}
-  .item{display:flex;align-items:center;gap:10px;padding:8px 0;border-top:1px solid #f4ece0;}
+  .item{display:flex;flex-wrap:wrap;align-items:center;gap:10px;padding:8px 0;border-top:1px solid #f4ece0;}
   .item:first-child{border-top:0;}
-  .item .txt{flex:1;min-width:0;}
+  .item .txt{flex:1;min-width:0;cursor:text;border-radius:6px;}
+  .item .txt:hover{background:#faf4ea;}
+  .item .txt::after{content:" ✎";color:#c9b9a3;font-size:.8em;}
+  .notes{flex:1 1 100%;margin:-4px 0 0 84px;font-size:.86rem;line-height:1.4;}
+  .note{white-space:pre-wrap;margin:2px 0;padding-left:8px;border-left:3px solid currentColor;}
+  .note b{font-weight:700;}
+  .note.tommy{color:var(--tommy);}
+  .note.alison{color:var(--alison);}
+  .note span{color:var(--ink);}
+  .edit{flex:1 1 100%;display:grid;gap:8px;background:#faf4ea;border:1px solid var(--line);border-radius:12px;padding:10px;}
+  .edit label{display:grid;gap:3px;font-size:.8rem;font-weight:700;}
+  .edit label.tommy{color:var(--tommy);}
+  .edit label.alison{color:var(--alison);}
+  .edit input,.edit textarea{width:100%;padding:8px 10px;border:1px solid var(--line);border-radius:8px;background:#fff;color:var(--ink);font-weight:400;resize:vertical;}
+  .edit label.tommy textarea{border-left:4px solid var(--tommy);}
+  .edit label.alison textarea{border-left:4px solid var(--alison);}
+  .edit .done-edit{justify-self:end;border:0;border-radius:8px;padding:7px 16px;background:var(--indigo);color:#fff;font-weight:700;cursor:pointer;}
   .item.done .txt{color:var(--muted);text-decoration:line-through;}
   .tag{display:inline-block;font-size:.72rem;font-weight:700;padding:1px 7px;border-radius:99px;margin-left:6px;vertical-align:1px;text-decoration:none;}
   .tag.got{background:var(--rei-soft);color:var(--rei);}
@@ -104,6 +120,7 @@
     .pills{gap:4px;}
     .act{padding:5px 8px;}
     .act.x{padding:5px 6px;border-color:transparent;}
+    .notes{margin-left:0;}
     nav .inner{gap:2px;padding:8px;}
     nav a{padding:6px 8px;}
     nav a .lbl{display:none;}
@@ -137,7 +154,7 @@
   <!-- TO BUY AT REI -->
   <section id="rei" class="card">
     <h2 class="section-title"><span>🛒</span> To buy at REI <span class="count" id="reiCount"></span></h2>
-    <p class="subtle">Tap <strong>↑ REI</strong> on anything below to put it here. Check it off when it's in the cart and it drops back into the packing list.</p>
+    <p class="subtle">Tap an item's name to edit it or add notes. Tap <strong>↑ REI</strong> on anything below to put it here. Check it off when it's in the cart and it drops back into the packing list.</p>
     <ul class="items" id="reiList"></ul>
     <form class="add" data-rei="1">
       <input type="text" name="text" placeholder="Something else to buy…" aria-label="Item to buy" required>
@@ -298,6 +315,11 @@
     } else if (op.type === 'bought') {
       it.bought = !!op.value;
       it.rei = !op.value;
+    } else if (op.type === 'text') {
+      if (op.value) it.text = op.value;
+    } else if (op.type === 'note') {
+      it.notes = it.notes || {};
+      it.notes[op.who] = op.value;
     } else if (op.type === 'remove') {
       state.items.splice(state.items.indexOf(it), 1);
     }
@@ -384,6 +406,24 @@
     return people.every(function (x) { return p[x[0]]; });
   }
 
+  // Under each item: Tommy's and Alison's notes, or the editor when it's open.
+  var openId = null;
+  function details(it) {
+    var n = it.notes || {};
+    if (it.id === openId) {
+      return '<div class="edit">' +
+        '<label>Item<input type="text" data-field="text" value="' + esc(it.text) + '"></label>' +
+        people.map(function (x) {
+          return '<label class="' + x[0] + '">' + x[2] + '\'s notes<textarea rows="2" data-note="' + x[0] + '" placeholder="Size, which one, where it is…">' + esc(n[x[0]] || '') + '</textarea></label>';
+        }).join('') +
+        '<button type="button" class="done-edit">Done</button></div>';
+    }
+    var lines = people.filter(function (x) { return n[x[0]]; }).map(function (x) {
+      return '<div class="note ' + x[0] + '"><b>' + x[2] + ':</b> <span>' + esc(n[x[0]]) + '</span></div>';
+    }).join('');
+    return lines ? '<div class="notes">' + lines + '</div>' : '';
+  }
+
   function packRow(it) {
     var p = it.packed || {};
     var pills = people.map(function (x) {
@@ -395,7 +435,7 @@
       '<span class="txt">' + esc(it.text) + tags + '</span>' +
       '<button type="button" class="act" data-rei="1" title="Buy this at REI">↑ REI</button>' +
       '<button type="button" class="act x" data-remove="1" aria-label="Remove ' + esc(it.text) + '" title="Remove">×</button>' +
-      '</li>';
+      details(it) + '</li>';
   }
 
   function reiRow(it) {
@@ -404,11 +444,19 @@
       '<input type="checkbox" class="buy" data-bought="1" aria-label="Bought ' + esc(it.text) + '" title="Bought it">' +
       '<span class="txt">' + esc(it.text) + (cat ? ' <span class="tag shared">' + cat[1] + '</span>' : '') + '</span>' +
       '<button type="button" class="act x" data-unrei="1" title="Don\'t need to buy it">↓ skip</button>' +
-      '</li>';
+      details(it) + '</li>';
   }
 
+  // A re-render would wipe the box someone is typing in, so it waits for blur.
+  var renderLater = false;
+  function editing() {
+    var a = document.activeElement;
+    return !!(a && a.closest && a.closest('.edit'));
+  }
   function render() {
     if (!state) return;
+    if (editing()) { renderLater = true; return; }
+    renderLater = false;
     var rei = state.items.filter(function (it) { return it.rei; });
     reiList.innerHTML = rei.length ? rei.map(reiRow).join('') : '<li class="empty">Nothing yet.</li>';
     document.getElementById('reiCount').textContent = rei.length ? rei.length + ' to buy' : '';
@@ -451,6 +499,51 @@
     el.className = 'status' + (msg ? ' show ' + (kind || 'ok') : '');
   }
 
+  // Inline edits save as you type (after a pause) and on leaving the box.
+  var editTimers = {};
+  function commitField(el) {
+    var row = el.closest('.item[data-id]');
+    var it = row && find(state, row.getAttribute('data-id'));
+    if (!it || !loaded) return;
+    clearTimeout(editTimers[it.id + (el.getAttribute('data-note') || 'text')]);
+    if (el.hasAttribute('data-field')) {
+      var text = el.value.trim();
+      if (text && text !== it.text) change({ type: 'text', id: it.id, value: text });
+    } else {
+      var who = el.getAttribute('data-note');
+      var note = el.value.trim();
+      if (note !== ((it.notes || {})[who] || '')) change({ type: 'note', id: it.id, who: who, value: note });
+    }
+  }
+  document.addEventListener('input', function (e) {
+    var el = e.target;
+    if (!el.closest('.edit')) return;
+    var row = el.closest('.item[data-id]');
+    var key = row.getAttribute('data-id') + (el.getAttribute('data-note') || 'text');
+    clearTimeout(editTimers[key]);
+    editTimers[key] = setTimeout(function () { commitField(el); }, 700);
+  });
+  // Saved after focus has moved, so going from Tommy's box to Alison's
+  // doesn't re-render the editor out from under the box just tapped.
+  document.addEventListener('focusout', function (e) {
+    var el = e.target;
+    if (!el.closest || !el.closest('.edit')) return;
+    setTimeout(function () {
+      commitField(el);
+      if (renderLater && !editing()) render();
+    }, 0);
+  });
+  document.addEventListener('keydown', function (e) {
+    if (e.key === 'Enter' && e.target.matches && e.target.matches('.edit input')) e.target.blur();
+    if (e.key === 'Escape' && openId) closeEditor();
+  });
+  function closeEditor() {
+    var a = document.activeElement;
+    if (a && a.closest && a.closest('.edit')) a.blur();
+    openId = null;
+    render();
+  }
+
   document.addEventListener('click', function (e) {
     var row = e.target.closest('.item[data-id]');
     if (!row) return;
@@ -458,7 +551,17 @@
     var it = find(state, id);
     if (!it) return;
     var btn = e.target.closest('button');
-    if (btn && btn.hasAttribute('data-pack')) {
+    if (e.target.closest('.txt') && loaded) {
+      if (openId === id) return;
+      var prev = document.activeElement;
+      if (prev && prev.closest && prev.closest('.edit')) prev.blur();
+      openId = id;
+      render();
+      var input = document.querySelector('.item[data-id="' + id + '"] .edit input');
+      if (input) input.focus();
+    } else if (btn && btn.classList.contains('done-edit')) {
+      closeEditor();
+    } else if (btn && btn.hasAttribute('data-pack')) {
       var who = btn.getAttribute('data-pack');
       change({ type: 'pack', id: id, who: who, value: !(it.packed || {})[who] });
     } else if (btn && btn.hasAttribute('data-rei')) {
