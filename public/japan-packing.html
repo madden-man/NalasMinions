@@ -1,0 +1,535 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>🧳 Japan Packing List — Tommy & Alison</title>
+<link rel="icon" href="/favicon-32.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Shippori+Mincho:wght@600;700;800&family=Zen+Kaku+Gothic+New:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+  /* Same palette and type as /japan. */
+  :root{
+    --indigo:#1f3a5f;--indigo-deep:#152a45;--vermillion:#c1432c;--gold:#dca34a;
+    --cream:#fdf7ee;--paper:#fff;--ink:#2c2c2c;--muted:#6b6b6b;--line:#ecdfce;
+    --green:#3f8f5b;--rei:#2f6b3a;--rei-soft:#e8f2ea;
+    --tommy:#1f6fb2;--alison:#b0457a;
+    --shadow:0 6px 24px rgba(31,58,95,.10);
+  }
+  *{box-sizing:border-box;}
+  html{scroll-behavior:smooth;}
+  [id]{scroll-margin-top:64px;}
+  body{margin:0;font-family:'Zen Kaku Gothic New',system-ui,-apple-system,'Segoe UI',sans-serif;color:var(--ink);background:var(--cream);line-height:1.5;-webkit-text-size-adjust:100%;}
+  h1,h2,h3{font-family:'Shippori Mincho','Hiragino Mincho ProN',Georgia,serif;line-height:1.25;}
+  button,input,select{font:inherit;}
+
+  .hero{background:linear-gradient(135deg,var(--indigo-deep) 0%,var(--indigo) 55%,var(--vermillion) 140%);color:#fff;padding:36px 16px 40px;text-align:center;}
+  .hero h1{margin:0 0 6px;font-size:clamp(1.8rem,5vw,2.8rem);font-weight:800;}
+  .hero p{margin:0;opacity:.9;}
+  .hero a{color:#fff;}
+
+  nav{position:sticky;top:0;z-index:20;background:var(--indigo-deep);box-shadow:0 2px 10px rgba(0,0,0,.15);}
+  nav .inner{max-width:900px;margin:0 auto;display:flex;align-items:center;gap:8px;padding:8px 12px;overflow-x:auto;}
+  nav a{color:#fff;text-decoration:none;font-size:.9rem;padding:6px 10px;border-radius:999px;white-space:nowrap;}
+  nav a:hover{background:rgba(255,255,255,.12);}
+  .who-toggle{margin-left:auto;display:flex;background:rgba(255,255,255,.12);border-radius:999px;padding:2px;flex:none;}
+  .who-toggle button{border:0;background:none;color:#fff;padding:5px 12px;border-radius:999px;cursor:pointer;font-size:.85rem;}
+  .who-toggle button[aria-pressed="true"]{background:#fff;color:var(--indigo-deep);font-weight:700;}
+
+  main{max-width:900px;margin:0 auto;padding:18px 16px 60px;}
+  .card{background:var(--paper);border:1px solid var(--line);border-radius:16px;box-shadow:var(--shadow);padding:18px 18px 8px;margin:0 0 18px;}
+  .section-title{margin:0 0 4px;font-size:1.35rem;display:flex;align-items:center;gap:8px;flex-wrap:wrap;}
+  .subtle{color:var(--muted);margin:0 0 12px;font-size:.92rem;}
+  .count{margin-left:auto;font-family:'Zen Kaku Gothic New',sans-serif;font-size:.85rem;font-weight:500;color:var(--muted);}
+
+  .status{display:none;margin:0 0 14px;padding:10px 14px;border-radius:12px;font-size:.92rem;}
+  .status.show{display:block;}
+  .status.err{background:#fdecea;color:#8a1f12;border:1px solid #f3c3bb;}
+  .status.ok{background:#eef6f0;color:var(--green);border:1px solid #cfe5d5;}
+
+  /* REI */
+  #rei{border:2px solid var(--rei);background:linear-gradient(180deg,var(--rei-soft),#fff 120px);}
+  #rei .section-title{color:var(--rei);}
+  .empty{color:var(--muted);font-style:italic;padding:6px 0 12px;margin:0;}
+
+  /* Progress */
+  .progress{display:flex;gap:10px;flex-wrap:wrap;margin:0 0 18px;}
+  .prog{flex:1 1 200px;background:var(--paper);border:1px solid var(--line);border-radius:14px;padding:10px 14px;}
+  .prog .lbl{display:flex;justify-content:space-between;font-weight:700;font-size:.95rem;}
+  .bar{height:8px;background:#f1e8db;border-radius:99px;margin-top:6px;overflow:hidden;}
+  .bar i{display:block;height:100%;width:0;border-radius:99px;transition:width .3s;}
+  .prog.tommy .bar i{background:var(--tommy);}
+  .prog.alison .bar i{background:var(--alison);}
+
+  /* Items */
+  .group h3{margin:14px 0 4px;font-size:1.05rem;}
+  ul.items{list-style:none;margin:0 0 6px;padding:0;}
+  .item{display:flex;align-items:center;gap:10px;padding:8px 0;border-top:1px solid #f4ece0;}
+  .item:first-child{border-top:0;}
+  .item .txt{flex:1;min-width:0;}
+  .item.done .txt{color:var(--muted);text-decoration:line-through;}
+  .tag{display:inline-block;font-size:.72rem;font-weight:700;padding:1px 7px;border-radius:99px;margin-left:6px;vertical-align:1px;text-decoration:none;}
+  .tag.got{background:var(--rei-soft);color:var(--rei);}
+  .tag.shared{background:#f4ece0;color:var(--muted);}
+  .pills{display:flex;gap:6px;flex:none;}
+  .pill{width:34px;height:34px;border-radius:50%;border:2px solid currentColor;background:#fff;cursor:pointer;font-weight:700;font-size:.85rem;display:grid;place-items:center;padding:0;}
+  .pill.tommy{color:var(--tommy);}
+  .pill.alison{color:var(--alison);}
+  .pill.either{color:var(--indigo);width:auto;padding:0 10px;border-radius:99px;}
+  .pill[aria-pressed="true"]{background:currentColor;}
+  .pill[aria-pressed="true"] span{color:#fff;}
+  .pill.either[aria-pressed="true"] span::before{content:"✓ ";}
+  .act{flex:none;border:1px solid var(--line);background:#fff;color:var(--rei);border-radius:99px;padding:5px 10px;cursor:pointer;font-size:.8rem;font-weight:700;white-space:nowrap;}
+  .act:hover{background:var(--rei-soft);}
+  .act.x{color:var(--muted);font-weight:500;padding:5px 9px;}
+  .buy{width:22px;height:22px;accent-color:var(--rei);flex:none;cursor:pointer;}
+  body.view-tommy .pill.alison,body.view-alison .pill.tommy{display:none;}
+  body.view-tommy .item.only-alison,body.view-alison .item.only-tommy{display:none;}
+  body.locked .item button,body.locked .item input,body.locked form button{pointer-events:none;opacity:.45;}
+
+  /* Add */
+  form.add{display:flex;gap:8px;flex-wrap:wrap;padding:12px 0 10px;border-top:1px dashed var(--line);margin-top:6px;}
+  form.add input[type=text]{flex:1 1 220px;padding:9px 12px;border:1px solid var(--line);border-radius:10px;min-width:0;}
+  form.add select{padding:9px 8px;border:1px solid var(--line);border-radius:10px;background:#fff;max-width:100%;}
+  form.add button{border:0;border-radius:10px;padding:9px 14px;cursor:pointer;font-weight:700;color:#fff;background:var(--indigo);}
+  form.add button.to-rei{background:var(--rei);}
+
+  .toast{position:fixed;left:50%;bottom:18px;transform:translateX(-50%) translateY(120%);background:var(--indigo-deep);color:#fff;padding:10px 14px;border-radius:12px;display:flex;gap:12px;align-items:center;box-shadow:var(--shadow);transition:transform .25s;z-index:30;max-width:calc(100% - 32px);}
+  .toast.show{transform:translateX(-50%) translateY(0);}
+  .toast button{background:none;border:1px solid rgba(255,255,255,.5);color:#fff;border-radius:8px;padding:3px 10px;cursor:pointer;}
+  .footer{text-align:center;color:var(--muted);font-size:.85rem;padding:0 16px 30px;}
+  .footer a{color:var(--indigo);}
+  @media (max-width:560px){
+    .card{padding:14px 12px 6px;}
+    .item{gap:8px;}
+    .pill{width:32px;height:32px;}
+    .pills{gap:4px;}
+    .act{padding:5px 8px;}
+    .act.x{padding:5px 6px;border-color:transparent;}
+    nav .inner{gap:2px;padding:8px;}
+    nav a{padding:6px 8px;}
+    nav a .lbl{display:none;}
+    .who-toggle button{padding:5px 10px;}
+  }
+</style>
+</head>
+<body class="locked">
+
+<header class="hero">
+  <h1>🧳 Japan Packing List</h1>
+  <p>Tommy &amp; Alison · fly Fri Oct 30 · <a href="/japan">back to the trip plan</a></p>
+</header>
+
+<nav>
+  <div class="inner">
+    <a href="#rei">🛒<span class="lbl"> REI</span></a>
+    <a href="#pack">🎒<span class="lbl"> To pack</span></a>
+    <a href="/japan">🇯🇵<span class="lbl"> Trip</span></a>
+    <div class="who-toggle" role="group" aria-label="Whose list">
+      <button type="button" data-view="both" aria-pressed="true">Both</button>
+      <button type="button" data-view="tommy" aria-pressed="false">Tommy</button>
+      <button type="button" data-view="alison" aria-pressed="false">Alison</button>
+    </div>
+  </div>
+</nav>
+
+<main>
+  <div class="status" id="status" role="status"></div>
+
+  <!-- TO BUY AT REI -->
+  <section id="rei" class="card">
+    <h2 class="section-title"><span>🛒</span> To buy at REI <span class="count" id="reiCount"></span></h2>
+    <p class="subtle">Tap <strong>↑ REI</strong> on anything below to put it here. Check it off when it's in the cart and it drops back into the packing list.</p>
+    <ul class="items" id="reiList"></ul>
+    <form class="add" data-rei="1">
+      <input type="text" name="text" placeholder="Something else to buy…" aria-label="Item to buy" required>
+      <select name="cat" aria-label="Category"></select>
+      <button type="submit" class="to-rei">Add to REI list</button>
+    </form>
+  </section>
+
+  <!-- TO PACK -->
+  <section id="pack">
+    <div class="progress">
+      <div class="prog tommy"><div class="lbl"><span>Tommy</span><span id="progTommy">0 / 0</span></div><div class="bar"><i id="barTommy"></i></div></div>
+      <div class="prog alison"><div class="lbl"><span>Alison</span><span id="progAlison">0 / 0</span></div><div class="bar"><i id="barAlison"></i></div></div>
+    </div>
+
+    <div class="card group" id="cat-documents"><h3>🛂 Documents &amp; money</h3><ul class="items" data-cat="documents"></ul></div>
+    <div class="card group" id="cat-clothing"><h3>👕 Clothing</h3><ul class="items" data-cat="clothing"></ul></div>
+    <div class="card group" id="cat-trek"><h3>🥾 Kumano trek kit</h3><ul class="items" data-cat="trek"></ul></div>
+    <div class="card group" id="cat-tech"><h3>🔌 Tech</h3><ul class="items" data-cat="tech"></ul></div>
+    <div class="card group" id="cat-health"><h3>💊 Health &amp; toiletries</h3><ul class="items" data-cat="health"></ul></div>
+    <div class="card group" id="cat-bags"><h3>🧳 Bags &amp; misc</h3><ul class="items" data-cat="bags"></ul></div>
+
+    <div class="card">
+      <form class="add" data-rei="0" style="border-top:0;margin-top:0">
+        <input type="text" name="text" placeholder="Add something to pack…" aria-label="Item to pack" required>
+        <select name="cat" aria-label="Category"></select>
+        <select name="who" aria-label="Who packs it">
+          <option value="each">Each of us</option>
+          <option value="shared">One for both</option>
+          <option value="tommy">Tommy only</option>
+          <option value="alison">Alison only</option>
+        </select>
+        <button type="submit">Add</button>
+      </form>
+    </div>
+  </section>
+</main>
+
+<div class="footer">Checks save for both of us · trip details on <a href="/japan#packing">/japan</a></div>
+<div class="toast" id="toast" role="status"><span id="toastMsg"></span><button type="button" id="toastUndo">Undo</button></div>
+
+<script>
+/* =========================================================================
+   Shared packing list
+   -------------------------------------------------------------------------
+   The list lives in the app's Mongo `meta` collection under one key
+   (GET/PUT /api/meta/japan-packing), so Tommy's and Alison's phones see the
+   same checks. Every change is an op ({ type, ... }) applied to a fresh copy
+   from the server before the PUT, so two people checking things at once only
+   race on the few milliseconds between that GET and PUT, never on whole-list
+   staleness. A failed load never saves (the 2026-10 chores wipe came from a
+   client that saved after its load failed). Until anything is saved, the
+   server has no value and DEFAULT_ITEMS below is the list.
+   ========================================================================= */
+(function () {
+  var KEY = 'japan-packing';
+  var API = '/api/meta/' + KEY;
+  var VIEW_KEY = 'japan-packing-view';
+  var POLL_MS = 20000;
+
+  var CATS = [
+    ['documents', '🛂 Documents & money'], ['clothing', '👕 Clothing'], ['trek', '🥾 Kumano trek kit'],
+    ['tech', '🔌 Tech'], ['health', '💊 Health & toiletries'], ['bags', '🧳 Bags & misc'],
+  ];
+
+  // From the Must-Pack section on /japan, one line per thing to grab.
+  // who: 'each' (Tommy and Alison each pack one), 'shared' (one for the pair),
+  // or 'tommy' / 'alison' (only that person).
+  var DEFAULT_ITEMS = [
+    ['documents', 'passport', 'Passport', 'each'],
+    ['documents', 'passport-copies', 'Passport photocopies (separate bag)', 'shared'],
+    ['documents', 'vjw-qr', 'Visit Japan Web QR screenshot', 'each'],
+    ['documents', 'confirmations', 'Printed confirmations, incl. Kumano voucher', 'shared'],
+    ['documents', 'cards', 'No-FX-fee cards + a backup card', 'each'],
+    ['documents', 'yen', '¥30–50k starting cash + coin pouch', 'shared'],
+    ['documents', 'insurance-card', 'Travel insurance card / policy PDF', 'each'],
+    ['clothing', 'coat', 'Medium jacket or wool coat', 'each'],
+    ['clothing', 'rain-shell', 'Rain shell (doubles as trek shell)', 'each'],
+    ['clothing', 'fleece', 'Fleece or light puffy', 'each'],
+    ['clothing', 'sweaters', 'Sweaters ×2', 'each'],
+    ['clothing', 'long-sleeves', 'Long-sleeve tees ×4', 'each'],
+    ['clothing', 'tees', 'Tees ×3', 'each'],
+    ['clothing', 'pants', 'Jeans / chinos ×2', 'each'],
+    ['clothing', 'cold-kit', 'Scarf, beanie, light gloves', 'each'],
+    ['clothing', 'smart-outfit', 'Smart-casual outfit (Park Hyatt, kaiseki, tea ceremony)', 'each'],
+    ['clothing', 'walking-shoes', 'Comfortable walking shoes, easy on/off', 'each'],
+    ['clothing', 'socks', 'Hole-free socks ×8', 'each'],
+    ['clothing', 'swimsuit', 'Swimsuit (Yokohama sky pool)', 'each'],
+    ['clothing', 'underwear', 'Underwear + sleepwear', 'each'],
+    ['trek', 'boots', 'Broken-in hiking boots', 'each'],
+    ['trek', 'wool-socks', 'Wool hiking socks ×3', 'each'],
+    ['trek', 'base-layers', 'Wicking base layers ×2', 'each'],
+    ['trek', 'hiking-pants', 'Hiking pants', 'each'],
+    ['trek', 'daypack', 'Daypack with rain cover', 'each'],
+    ['trek', 'headlamp', 'Headlamp + spare batteries', 'each'],
+    ['trek', 'poles', 'Trekking poles', 'each'],
+    ['trek', 'blister-kit', 'Blister kit', 'shared'],
+    ['trek', 'water-bottle', 'Water bottle', 'each'],
+    ['trek', 'electrolytes', 'Electrolyte tabs + trail snacks', 'shared'],
+    ['trek', 'onsen-towel', 'Small onsen towel', 'each'],
+    ['trek', 'dry-bag', 'Dry bag for phone', 'each'],
+    ['trek', 'first-aid', 'First-aid kit + emergency blanket', 'shared'],
+    ['trek', 'whistle', 'Whistle', 'each'],
+    ['tech', 'phone', 'Phone with eSIM + offline maps', 'each'],
+    ['tech', 'battery', 'Portable battery (20k mAh)', 'each'],
+    ['tech', 'cables', 'Cables + chargers (US plugs fit)', 'each'],
+    ['tech', 'suica', 'Suica / PASMO in Apple Wallet', 'each'],
+    ['tech', 'earbuds', 'Earbuds for the flights', 'each'],
+    ['health', 'prescriptions', '23 days of prescriptions, original bottles', 'each'],
+    ['health', 'meds', 'Ibuprofen, motion-sickness pills, antacids, Imodium', 'shared'],
+    ['health', 'sunscreen', 'Sunscreen + lip balm', 'shared'],
+    ['health', 'sanitizer', 'Hand sanitizer', 'shared'],
+    ['health', 'deodorant', 'Deodorant (hard to find there)', 'each'],
+    ['health', 'contacts', 'Contact lens supplies', 'each'],
+    ['health', 'toiletries', 'Toothbrush + toiletry kit', 'each'],
+    ['health', 'umbrella', 'Compact umbrella', 'shared'],
+    ['bags', 'suitcase', 'Suitcase (2 total: Kumano shuttle limit)', 'each'],
+    ['bags', 'cubes', 'Packing cubes', 'shared'],
+    ['bags', 'tote', 'Foldable tote for souvenirs', 'shared'],
+    ['bags', 'laundry', 'Laundry detergent sheets', 'shared'],
+    ['bags', 'ziplocks', 'Ziplocks for trash', 'shared'],
+    ['bags', 'pen', 'Pen for customs forms', 'shared'],
+    ['bags', 'gifts', 'Small gifts for minshuku hosts (optional)', 'shared'],
+  ];
+
+  function defaults() {
+    return {
+      items: DEFAULT_ITEMS.map(function (d) {
+        return { id: d[1], cat: d[0], text: d[2], who: d[3], rei: false, bought: false, packed: {} };
+      }),
+    };
+  }
+
+  // ---- Ops: pure changes applied to whichever copy of the list is newest. ----
+  function find(state, id) {
+    for (var i = 0; i < state.items.length; i++) if (state.items[i].id === id) return state.items[i];
+    return null;
+  }
+  function apply(state, op) {
+    var it = op.id ? find(state, op.id) : null;
+    if (op.type === 'add') {
+      if (!find(state, op.item.id)) state.items.push(JSON.parse(JSON.stringify(op.item)));
+    } else if (op.type === 'restore') {
+      if (!find(state, op.item.id)) state.items.splice(Math.min(op.index, state.items.length), 0, JSON.parse(JSON.stringify(op.item)));
+    } else if (!it) {
+      // Someone else removed it; nothing to do.
+    } else if (op.type === 'pack') {
+      it.packed = it.packed || {};
+      it.packed[op.who] = !!op.value;
+    } else if (op.type === 'rei') {
+      it.rei = !!op.value;
+      if (op.value) it.bought = false;
+    } else if (op.type === 'bought') {
+      it.bought = !!op.value;
+      it.rei = !op.value;
+    } else if (op.type === 'remove') {
+      state.items.splice(state.items.indexOf(it), 1);
+    }
+    return state;
+  }
+
+  // ---- Server sync ----
+  var state = null;      // last known list (server value, or defaults)
+  var pending = [];      // ops not yet confirmed saved
+  var flushing = false;
+  var loaded = false;
+
+  function getRemote() {
+    return fetch(API, { cache: 'no-store' }).then(function (r) {
+      if (!r.ok) throw new Error('HTTP ' + r.status);
+      return r.json();
+    }).then(function (body) {
+      var v = body && body.value;
+      return v && Array.isArray(v.items) ? v : defaults();
+    });
+  }
+
+  function load() {
+    return getRemote().then(function (remote) {
+      loaded = true;
+      document.body.classList.remove('locked');
+      if (!pending.length) { state = remote; render(); }
+      status('');
+    }).catch(function () {
+      if (!loaded) {
+        state = state || defaults();
+        render();
+        status("Couldn't reach the shared list, so checks are paused until it reconnects. Retrying…", 'err');
+      }
+    });
+  }
+
+  function flush() {
+    if (flushing || !pending.length || !loaded) return;
+    flushing = true;
+    var batch = pending.slice();
+    getRemote().then(function (remote) {
+      batch.forEach(function (op) { apply(remote, op); });
+      remote.updatedAt = new Date().toISOString();
+      return fetch(API, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ value: remote }),
+      }).then(function (r) {
+        if (!r.ok) throw new Error('HTTP ' + r.status);
+        pending = pending.slice(batch.length);
+        // Re-apply anything queued during the round trip on top of the saved copy.
+        state = JSON.parse(JSON.stringify(remote));
+        pending.forEach(function (op) { apply(state, op); });
+        render();
+        status('');
+      });
+    }).catch(function () {
+      status('Not saved yet, will retry in a few seconds.', 'err');
+      setTimeout(flush, 5000);
+    }).then(function () {
+      flushing = false;
+      if (pending.length) flush();
+    });
+  }
+
+  function change(op) {
+    if (!loaded) return;
+    apply(state, op);
+    pending.push(op);
+    render();
+    flush();
+  }
+
+  // ---- Rendering ----
+  var reiList = document.getElementById('reiList');
+  var people = [['tommy', 'T', 'Tommy'], ['alison', 'A', 'Alison']];
+
+  function esc(s) {
+    return String(s).replace(/[&<>"]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; });
+  }
+  function packers(it) {
+    if (it.who === 'shared') return [];
+    if (it.who === 'tommy' || it.who === 'alison') return people.filter(function (p) { return p[0] === it.who; });
+    return people;
+  }
+  function isDone(it) {
+    var p = it.packed || {};
+    if (it.who === 'shared') return !!p.shared;
+    return packers(it).every(function (x) { return p[x[0]]; });
+  }
+
+  function packRow(it) {
+    var p = it.packed || {};
+    var pills = it.who === 'shared'
+      ? '<button type="button" class="pill either" data-pack="shared" aria-pressed="' + !!p.shared + '" title="One for both of us"><span>Both</span></button>'
+      : packers(it).map(function (x) {
+          return '<button type="button" class="pill ' + x[0] + '" data-pack="' + x[0] + '" aria-pressed="' + !!p[x[0]] + '" aria-label="' + x[2] + ' packed" title="' + x[2] + '"><span>' + x[1] + '</span></button>';
+        }).join('');
+    var tags = (it.who === 'tommy' ? '<span class="tag shared">Tommy</span>' : '') +
+      (it.who === 'alison' ? '<span class="tag shared">Alison</span>' : '') +
+      (it.bought ? '<span class="tag got">REI ✓</span>' : '');
+    return '<li class="item' + (isDone(it) ? ' done' : '') + (it.who === 'tommy' || it.who === 'alison' ? ' only-' + it.who : '') + '" data-id="' + esc(it.id) + '">' +
+      '<div class="pills">' + pills + '</div>' +
+      '<span class="txt">' + esc(it.text) + tags + '</span>' +
+      '<button type="button" class="act" data-rei="1" title="Buy this at REI">↑ REI</button>' +
+      '<button type="button" class="act x" data-remove="1" aria-label="Remove ' + esc(it.text) + '" title="Remove">×</button>' +
+      '</li>';
+  }
+
+  function reiRow(it) {
+    var cat = CATS.filter(function (c) { return c[0] === it.cat; })[0];
+    return '<li class="item" data-id="' + esc(it.id) + '">' +
+      '<input type="checkbox" class="buy" data-bought="1" aria-label="Bought ' + esc(it.text) + '" title="Bought it">' +
+      '<span class="txt">' + esc(it.text) + (cat ? ' <span class="tag shared">' + cat[1] + '</span>' : '') + '</span>' +
+      '<button type="button" class="act x" data-unrei="1" title="Don\'t need to buy it">↓ skip</button>' +
+      '</li>';
+  }
+
+  function render() {
+    if (!state) return;
+    var rei = state.items.filter(function (it) { return it.rei; });
+    reiList.innerHTML = rei.length ? rei.map(reiRow).join('') : '<li class="empty">Nothing yet.</li>';
+    document.getElementById('reiCount').textContent = rei.length ? rei.length + ' to buy' : '';
+
+    CATS.forEach(function (c) {
+      var ul = document.querySelector('ul[data-cat="' + c[0] + '"]');
+      var rows = state.items.filter(function (it) { return it.cat === c[0] && !it.rei; });
+      ul.innerHTML = rows.length ? rows.map(packRow).join('') : '<li class="empty">All on the REI list.</li>';
+    });
+
+    people.forEach(function (x) {
+      var mine = state.items.filter(function (it) { return !it.rei && (it.who === 'shared' || packers(it).some(function (q) { return q[0] === x[0]; })); });
+      var done = mine.filter(function (it) { var p = it.packed || {}; return it.who === 'shared' ? p.shared : p[x[0]]; }).length;
+      var Name = x[2];
+      document.getElementById('prog' + Name).textContent = done + ' / ' + mine.length + (mine.length && done === mine.length ? ' 🎉' : '');
+      document.getElementById('bar' + Name).style.width = mine.length ? (100 * done / mine.length) + '%' : '0';
+    });
+  }
+
+  // ---- Interaction ----
+  var toastTimer, undoOp;
+  function toast(msg, undo) {
+    var t = document.getElementById('toast');
+    document.getElementById('toastMsg').textContent = msg;
+    undoOp = undo || null;
+    document.getElementById('toastUndo').style.display = undo ? '' : 'none';
+    t.classList.add('show');
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(function () { t.classList.remove('show'); }, 5000);
+  }
+  document.getElementById('toastUndo').addEventListener('click', function () {
+    if (undoOp) change(undoOp);
+    undoOp = null;
+    document.getElementById('toast').classList.remove('show');
+  });
+
+  function status(msg, kind) {
+    var el = document.getElementById('status');
+    el.textContent = msg;
+    el.className = 'status' + (msg ? ' show ' + (kind || 'ok') : '');
+  }
+
+  document.addEventListener('click', function (e) {
+    var row = e.target.closest('.item[data-id]');
+    if (!row) return;
+    var id = row.getAttribute('data-id');
+    var it = find(state, id);
+    if (!it) return;
+    var btn = e.target.closest('button');
+    if (btn && btn.hasAttribute('data-pack')) {
+      var who = btn.getAttribute('data-pack');
+      change({ type: 'pack', id: id, who: who, value: !(it.packed || {})[who] });
+    } else if (btn && btn.hasAttribute('data-rei')) {
+      change({ type: 'rei', id: id, value: true });
+      toast('Moved “' + it.text + '” to the REI list', { type: 'rei', id: id, value: false });
+    } else if (btn && btn.hasAttribute('data-unrei')) {
+      change({ type: 'rei', id: id, value: false });
+      toast('Back on the packing list', { type: 'rei', id: id, value: true });
+    } else if (btn && btn.hasAttribute('data-remove')) {
+      var index = state.items.indexOf(it);
+      var copy = JSON.parse(JSON.stringify(it));
+      change({ type: 'remove', id: id });
+      toast('Removed “' + it.text + '”', { type: 'restore', item: copy, index: index });
+    } else if (e.target.hasAttribute('data-bought')) {
+      change({ type: 'bought', id: id, value: true });
+      toast('Got it. “' + it.text + '” is back on the packing list', { type: 'rei', id: id, value: true });
+    }
+  });
+
+  var catOptions = CATS.map(function (c) { return '<option value="' + c[0] + '">' + c[1] + '</option>'; }).join('');
+  Array.prototype.forEach.call(document.querySelectorAll('form.add'), function (form) {
+    form.querySelector('select[name=cat]').innerHTML = catOptions;
+    if (form.getAttribute('data-rei') === '1') form.querySelector('select[name=cat]').value = 'trek';
+    form.addEventListener('submit', function (e) {
+      e.preventDefault();
+      var text = form.text.value.trim();
+      if (!text || !loaded) return;
+      var toRei = form.getAttribute('data-rei') === '1';
+      var item = {
+        id: 'u' + Date.now().toString(36) + Math.random().toString(36).slice(2, 6),
+        cat: form.cat.value, text: text, who: form.who ? form.who.value : 'each',
+        rei: toRei, bought: false, packed: {},
+      };
+      change({ type: 'add', item: item });
+      form.text.value = '';
+      form.text.focus();
+    });
+  });
+
+  // Whose list: a per-phone view filter (Tommy's phone can hide Alison's checks).
+  function setView(v) {
+    document.body.classList.remove('view-both', 'view-tommy', 'view-alison');
+    document.body.classList.add('view-' + v);
+    Array.prototype.forEach.call(document.querySelectorAll('.who-toggle button'), function (b) {
+      b.setAttribute('aria-pressed', String(b.getAttribute('data-view') === v));
+    });
+    try { localStorage.setItem(VIEW_KEY, v); } catch (e) {}
+  }
+  Array.prototype.forEach.call(document.querySelectorAll('.who-toggle button'), function (b) {
+    b.addEventListener('click', function () { setView(b.getAttribute('data-view')); });
+  });
+  var savedView = 'both';
+  try { savedView = localStorage.getItem(VIEW_KEY) || 'both'; } catch (e) {}
+  setView(/^(both|tommy|alison)$/.test(savedView) ? savedView : 'both');
+
+  // Pick up the other person's checks.
+  setInterval(function () { if (!flushing && !pending.length) load(); }, POLL_MS);
+  document.addEventListener('visibilitychange', function () { if (!document.hidden && !pending.length) load(); });
+
+  state = defaults();
+  render();
+  load();
+})();
+</script>
+</body>
+</html>

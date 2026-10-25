@@ -81,3 +81,13 @@ test('every Japan chore links to a checklist item on /japan', () => {
     assert.match(t.due, /^\d{4}-\d{2}-\d{2}$/)
   }
 })
+
+test('every Japan packing chore links to a registered /japan-packing section', () => {
+  const { JAPAN_PACKING_TASKS } = createRequire(import.meta.url)('../scripts/japan-packing-tasks.cjs')
+  const page = PAGES.find((p) => p.key === 'japan-packing')
+  for (const t of JAPAN_PACKING_TASKS) {
+    assert.ok(page.sections.some((s) => s.id === t.section), `${t.id}: #${t.section} is not a /japan-packing section`)
+    assert.match(t.due, /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}$/)
+    assert.ok(['Tommy', 'Alison'].includes(t.assignee))
+  }
+})
