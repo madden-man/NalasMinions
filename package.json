@@ -15,6 +15,7 @@
     "seed:evergreen": "node scripts/seed-evergreen-todos.cjs",
     "seed:yesathon": "node scripts/seed-yesathon-todos.cjs",
     "build:evergreen": "node scripts/build-evergreen-page.cjs",
+    "build:pages": "node scripts/build-pages-index.mjs",
     "pull:ingredients": "node scripts/pull-ingredients.cjs",
     "check:links": "node scripts/check-links.cjs",
     "dev:web": "concurrently -k \"npm run server\" \"vite\"",

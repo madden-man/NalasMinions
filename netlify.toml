@@ -72,6 +72,12 @@
   to = "/yesathon.html"
   status = 200
 
+# Index of every public page — generated from PAGES (scripts/build-pages-index.mjs).
+[[redirects]]
+  from = "/pages"
+  to = "/pages.html"
+  status = 200
+
 # SPA fallback: serve index.html for any non-file, non-API path.
 [[redirects]]
   from = "/*"

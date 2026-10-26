@@ -12,17 +12,29 @@ import { fileURLToPath } from 'node:url'
 import { createRequire } from 'node:module'
 
 import { PAGES, PAGE_SECTIONS, pageForTask } from '../src/links.js'
+import { INDEX_FILE, renderIndex } from '../scripts/build-pages-index.mjs'
 
 const root = path.join(path.dirname(fileURLToPath(import.meta.url)), '..')
 const read = (rel) => readFileSync(path.join(root, rel), 'utf8')
 
-const htmlPages = readdirSync(path.join(root, 'public')).filter((f) => f.endsWith('.html'))
+// The /pages index is generated from PAGES rather than registered in it.
+const htmlPages = readdirSync(path.join(root, 'public')).filter(
+  (f) => f.endsWith('.html') && `public/${f}` !== INDEX_FILE,
+)
 
 test('every public/*.html is a registered page', () => {
   const registered = new Set(PAGES.map((p) => p.file))
   for (const f of htmlPages) {
     assert.ok(registered.has(`public/${f}`), `public/${f} is not in PAGES (src/links.js) — see CLAUDE.md, "Public pages"`)
   }
+})
+
+test('the /pages index is current with PAGES and served ahead of the SPA fallback', () => {
+  assert.equal(read(INDEX_FILE), renderIndex(), `${INDEX_FILE} is stale — run npm run build:pages`)
+  const toml = read('netlify.toml')
+  const at = toml.indexOf('from = "/pages"')
+  assert.ok(at > 0 && at < toml.indexOf('from = "/*"'), 'netlify.toml needs /pages before the SPA fallback')
+  for (const p of PAGES) assert.ok(p.blurb, `${p.key}: needs a blurb for the /pages index`)
 })
 
 test('every registered page exists, has a key matching its file, and a name', () => {

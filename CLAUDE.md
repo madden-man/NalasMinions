@@ -28,6 +28,10 @@ all of these are done:
    (a section, or an item id like `/japan#item-ghibli-tickets`); label with the section's
    label from `sectionFor(...)`.
 
+5. **The index**: give the `PAGES` entry a one-line `blurb`, then `npm run build:pages` to
+   regenerate `public/pages.html` (the `/pages` index of every page) and commit it. Never
+   edit that file by hand; the test fails when it is stale.
+
 `/evergreen` (Evergreen emergency prep) is generated: edit `scripts/evergreen-tasks.cjs`
 (tasks), `scripts/evergreen-guides.cjs` (the how-to sections),
 `scripts/evergreen-budget.cjs` (costs) or
