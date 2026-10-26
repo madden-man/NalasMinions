@@ -20,11 +20,13 @@ export const SITE_ORIGIN = 'https://nalasminions.netlify.app'
 
 // One entry per standalone page under public/. `key` doubles as the URL path
 // (/<key>, rewritten from /<key>.html in netlify.toml) and the chore `project`
-// value; `sections` are ids on the page a chore can link to.
+// value; `blurb` is its one line on the /pages index; `sections` are ids on
+// the page a chore can link to.
 export const PAGES = [
   {
     key: 'moving',
     name: 'Moving plan',
+    blurb: 'Allison to Woods Dr: week-by-week plan, packing order, rental path, budget.',
     file: 'public/moving.html',
     sections: [
       { id: 'plan', label: 'Week by week' },
@@ -41,6 +43,7 @@ export const PAGES = [
   {
     key: 'japan',
     name: 'Japan',
+    blurb: 'Japan 2026 itinerary: flights, stays, bookings, day by day, and the pre-trip checklist.',
     file: 'public/japan.html',
     sections: [
       { id: 'flights', label: 'Flights' },
@@ -57,6 +60,7 @@ export const PAGES = [
   {
     key: 'japan-packing',
     name: 'Japan packing',
+    blurb: 'Shared packing list for Japan, with REI buys and per-person checks.',
     file: 'public/japan-packing.html',
     sections: [
       { id: 'rei', label: 'To buy at REI' },
@@ -72,6 +76,7 @@ export const PAGES = [
   {
     key: 'evergreen',
     name: 'Evergreen prep',
+    blurb: 'Ready on Woods Dr: hazards, seasonal tasks, go-bags, and the grab sheet.',
     file: 'public/evergreen.html',
     sections: [
       { id: 'now', label: 'This month' },
@@ -100,6 +105,7 @@ export const PAGES = [
   {
     key: 'yesathon',
     name: 'Yes-a-thon food',
+    blurb: 'Yes-a-thon weekend food: menu, grocery list, and recipe cards.',
     file: 'public/yesathon.html',
     sections: [
       { id: 'menu', label: 'Weekend menu' },

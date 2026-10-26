@@ -622,6 +622,9 @@ function ChoresPage({ navigate }) {
               </ToggleButton>
             ))}
           </ToggleButtonGroup>
+          <Button size="small" href={resolveLink('/pages')} target="_blank" rel="noopener" startIcon={<LinkIcon fontSize="small" />}>
+            All pages
+          </Button>
         </Stack>
 
         {/* Task list — calendar + all-tasks list side by side in monthly view,
