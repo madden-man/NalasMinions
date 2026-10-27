@@ -25,7 +25,7 @@ all of these are done:
    chores and is safe to re-run, following `seed-moving-todos.cjs` (chores defined in a
    data file and upserted by stable id) or `seed-japan-todos.cjs` (one chore per
    checklist item, linked to its `#item-<id>`). Add an npm script for it. Link to the most specific anchor that exists
-   (a section, or an item id like `/japan#item-ghibli-tickets`); label with the section's
+   (a section, or an item id like `/japan#item-shibuya-sky`); label with the section's
    label from `sectionFor(...)`.
 
 5. **The index**: give the `PAGES` entry a one-line `blurb`, then `npm run build:pages` to

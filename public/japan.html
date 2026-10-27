@@ -400,7 +400,7 @@
       <tr><td>Food (everything else)</td><td>~$4,400</td><td>many meals already included in lodging</td></tr>
       <tr><td>Souvenirs</td><td>~$1,000</td><td></td></tr>
       <tr><td>Transportation</td><td>~$642</td><td>Suica base fares, Skyliner, local trains, buses, taxis (all 9 reserved rides now paid)</td></tr>
-      <tr><td>Admissions</td><td>~$1,000</td><td>Shibuya Sky, USJ if you go, temples (teamLab ×2 now paid; Ghibli dropped)</td></tr>
+      <tr><td>Admissions</td><td>~$1,000</td><td>Shibuya Sky, USJ if you go, temples (teamLab ×2 now paid)</td></tr>
       <tr><td>eSIM / pocket Wi-Fi <span class="tag">new</span></td><td>~$40</td><td></td></tr>
       <tr><td>Printing the trip package <span class="tag">new</span></td><td>~$60</td><td>78 pages, double-sided color, The UPS Store, Bergen Park</td></tr>
     </table>
@@ -690,7 +690,7 @@
         </div>
         <div class="day"><span class="date">Sat Nov 21</span>Tokyo, Skytree or Ueno, then Shinjuku.
           <ul class="fun">
-            <li><strong>Flow:</strong> slow morning at <strong>Tokyo Skytree</strong> or the <strong>Ueno</strong> museums (no Ghibli: no tickets) → <strong>Shinjuku Gyoen</strong> foliage early afternoon → sunset from the free <strong>Metropolitan Gov't observation deck</strong> → <strong>Omoide Yokocho</strong> (yakitori alley) + <strong>Golden Gai</strong> (280 tiny bars) after.</li>
+            <li><strong>Flow:</strong> slow morning at <strong>Tokyo Skytree</strong> or the <strong>Ueno</strong> museums → <strong>Shinjuku Gyoen</strong> foliage early afternoon → sunset from the free <strong>Metropolitan Gov't observation deck</strong> → <strong>Omoide Yokocho</strong> (yakitori alley) + <strong>Golden Gai</strong> (280 tiny bars) after.</li>
             <li>Dinner option: sushi omakase (hotel picks: <strong>Yurakucho Kakida</strong> 050-5600-7301 or <strong>Sushi Ju</strong> 050-5872-5877; book direct, the hotel won't).</li>
           </ul>
           <p class="prep">Prep: cash for Golden Gai (some bars have cover charges).</p>
@@ -885,7 +885,6 @@
 
     <div class="chk-group">
       <h3>⏰ Do now — time-sensitive</h3>
-      <label class="chk" id="item-ghibli-tickets"><input type="checkbox" data-checklist-id="ghibli-tickets" data-category="time-sensitive"><span class="txt"><strong>Ghibli Museum tickets</strong>: dropped, no tickets. Nov 21 starts at Skytree or the Ueno museums instead.</span></label>
       <label class="chk" id="item-teamlab-planets"><input type="checkbox" data-checklist-id="teamlab-planets" data-category="time-sensitive"><span class="txt"><strong>teamLab Planets (Tokyo)</strong> — ✅ booked: Nov 20, 9:00–9:30 am entry, 2 adults, ¥10,400.</span></label>
       <label class="chk" id="item-shibuya-sky"><input type="checkbox" data-checklist-id="shibuya-sky" data-category="time-sensitive"><span class="txt"><strong>Shibuya Sky</strong>, reserve a timed slot for Nov 20 with a 3:30 to 4 pm entry, for the 4:30 sunset (still open).</span></label>
       <label class="chk" id="item-teamlab-osaka"><input type="checkbox" data-checklist-id="teamlab-osaka" data-category="time-sensitive"><span class="txt"><strong>teamLab Botanical Garden (Osaka)</strong> — ✅ booked: Nov 8, 8:30 pm, 2 adults, ¥4,400 (NNF77F7NPXAH-0001).</span></label>
@@ -974,7 +973,7 @@
 
   function loadState() {
     // TODO(db): fetch saved checkbox states from the database and return
-    //           an object like { "ghibli-tickets": true, ... }
+    //           an object like { "shibuya-sky": true, ... }
     try { return JSON.parse(localStorage.getItem(STORAGE_KEY)) || {}; }
     catch (e) { return {}; }
   }

@@ -183,7 +183,7 @@ describe('filter by connected page', () => {
   const mixed = [
     { id: '1', text: 'Vacuum upstairs', done: false, recurrence: 'weekly', dueAt: '2026-01-05T09:00' },
     { id: '2', text: 'Get three tile bids', done: false, recurrence: 'once', project: 'moving', link: { href: '/moving#bids', label: 'Moving plan · Tile bids' } },
-    { id: '3', text: 'Japan: Buy Ghibli tickets', done: false, recurrence: 'once', link: { href: '/japan#item-ghibli-tickets', label: 'Japan' } },
+    { id: '3', text: 'Japan: Reserve Shibuya Sky', done: false, recurrence: 'once', link: { href: '/japan#item-shibuya-sky', label: 'Japan' } },
   ]
 
   beforeEach(() => window.localStorage.clear())
@@ -197,11 +197,11 @@ describe('filter by connected page', () => {
     await userEvent.click(screen.getByRole('button', { name: /moving plan chores only/i }))
     expect(screen.getByText('Get three tile bids')).toBeInTheDocument()
     expect(screen.queryByText('Vacuum upstairs')).not.toBeInTheDocument()
-    expect(screen.queryByText('Japan: Buy Ghibli tickets')).not.toBeInTheDocument()
+    expect(screen.queryByText('Japan: Reserve Shibuya Sky')).not.toBeInTheDocument()
 
     // A link alone (no project field) is enough to connect a chore to a page.
     await userEvent.click(screen.getByRole('button', { name: /japan chores only/i }))
-    expect(screen.getByText('Japan: Buy Ghibli tickets')).toBeInTheDocument()
+    expect(screen.getByText('Japan: Reserve Shibuya Sky')).toBeInTheDocument()
     expect(screen.queryByText('Get three tile bids')).not.toBeInTheDocument()
 
     // Tapping the active page again clears the filter.
