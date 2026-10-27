@@ -24,7 +24,7 @@ const JAPAN_TASKS = [
   // Documents & health
   { id: '1788495874655', item: 'visit-japan-web', due: '2026-10-25', text: 'Japan: Visit Japan Web pre-registration for both', notes: 'Immigration and customs QR codes; screenshot them.' },
   { id: '1788495877654', item: 'medication-check', due: '2026-10-20', text: 'Japan: medication check', notes: 'Adderall/Vyvanse and pseudoephedrine are restricted; may need a Yakkan Shōmei. Bring 23 days of prescriptions + motion-sickness pills.' },
-  { id: '1788495889651', item: 'travel-insurance', due: '2026-10-20', text: 'Japan: travel medical/evacuation insurance', notes: 'Confirm it is bought and covers hiking and emergency evacuation (Kumano Kodo).' },
+  { id: '1788495889651', item: 'travel-insurance', due: '2026-10-20', text: 'Japan: travel medical/evacuation insurance', notes: 'Bought Sep 26: IMG Patriot International Lite, PATII86911273, both of you, Oct 31 to Nov 22, $53.48. 24/7 +1 317 655 4500. Print ID cards from MyIMG plan documents.' },
   // Money & connectivity
   { id: '1788495892654', item: 'esim-wifi', due: '2026-10-28', text: 'Japan: eSIM / pocket Wi-Fi + offline maps', notes: 'Trail signal is patchy.' },
   { id: '1788495904654', item: 'trail-cash', due: '2026-11-10', text: 'Japan: withdraw trail cash before leaving Tanabe', notes: '7-Eleven / Japan Post ATMs. Keep ¥10k aside for an emergency taxi.' },
