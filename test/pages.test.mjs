@@ -78,7 +78,7 @@ test('section hrefs are unique and site-relative', () => {
 
 test('a chore connects to a page by project or by link', () => {
   assert.equal(pageForTask({ project: 'moving' })?.key, 'moving')
-  assert.equal(pageForTask({ link: { href: '/japan#item-ghibli-tickets' } })?.key, 'japan')
+  assert.equal(pageForTask({ link: { href: '/japan#item-shibuya-sky' } })?.key, 'japan')
   assert.equal(pageForTask({ project: 'household' }), null)
   assert.equal(pageForTask({ text: 'Vacuum' }), null)
 })

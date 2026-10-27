@@ -12,7 +12,7 @@ test('known sections label themselves', () => {
 
 test('a deeper anchor on a known page falls back to the page name', () => {
   assert.equal(linkLabel('/evergreen#task-house-1'), 'Evergreen prep')
-  assert.equal(linkLabel('/japan#item-ghibli-tickets'), 'Japan')
+  assert.equal(linkLabel('/japan#item-shibuya-sky'), 'Japan')
   assert.equal(linkLabel('/moving#chk-r1'), 'Moving plan')
 })
 

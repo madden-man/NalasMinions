@@ -10,7 +10,6 @@
 
 const JAPAN_TASKS = [
   // Do now — time-sensitive
-  { id: '1788481127023', item: 'ghibli-tickets', due: '2026-10-10', text: 'Japan: Ghibli Museum tickets', notes: 'Dropped, no tickets. Nov 21 starts at Skytree or the Ueno museums instead.' },
   { id: '1788481299463', item: 'teamlab-planets', due: '2026-10-20', text: 'Japan: teamLab Planets tickets for Nov 20', notes: 'Booked Oct 22: Nov 20, 9:00–9:30 am entry, 2 adults, ¥10,400. QR on My Tickets from midnight; changeable up to 3× until 2 h before.' },
   { id: '1788481347599', item: 'shibuya-sky', due: '2026-10-20', text: 'Japan: reserve a Shibuya Sky slot for Nov 20', notes: 'Pick a 3:30 to 4 pm entry for the 4:30 sunset.' },
   { id: '1788481374598', item: 'teamlab-osaka', due: '2026-10-20', text: 'Japan: teamLab Botanical Garden (Osaka) tickets for Nov 8/9', notes: 'Booked Oct 22: Sun Nov 8, 8:30–9:30 pm, 2 adults, ¥4,400, inquiry no. NNF77F7NPXAH-0001.' },
