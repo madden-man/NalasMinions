@@ -10,7 +10,7 @@
 
 const JAPAN_TASKS = [
   // Do now — time-sensitive
-  { id: '1788481127023', item: 'ghibli-tickets', due: '2026-10-10', text: 'Japan: Ghibli Museum tickets', notes: 'Released Oct 10, 10 am JST on Lawson; sell out fast.' },
+  { id: '1788481127023', item: 'ghibli-tickets', due: '2026-10-10', text: 'Japan: Ghibli Museum tickets', notes: 'Dropped, no tickets. Nov 21 starts at Skytree or the Ueno museums instead.' },
   { id: '1788481299463', item: 'teamlab-planets', due: '2026-10-20', text: 'Japan: teamLab Planets tickets for Nov 20', notes: 'Booked Oct 22: Nov 20, 9:00–9:30 am entry, 2 adults, ¥10,400. QR on My Tickets from midnight; changeable up to 3× until 2 h before.' },
   { id: '1788481347599', item: 'shibuya-sky', due: '2026-10-20', text: 'Japan: reserve a Shibuya Sky slot for Nov 20', notes: 'Pick a 3:30 to 4 pm entry for the 4:30 sunset.' },
   { id: '1788481374598', item: 'teamlab-osaka', due: '2026-10-20', text: 'Japan: teamLab Botanical Garden (Osaka) tickets for Nov 8/9', notes: 'Booked Oct 22: Sun Nov 8, 8:30–9:30 pm, 2 adults, ¥4,400, inquiry no. NNF77F7NPXAH-0001.' },
@@ -20,11 +20,11 @@ const JAPAN_TASKS = [
   { id: '1788481465609', item: 'cup-noodles-workshop', due: '2026-10-20', text: 'Japan: Cup Noodles Museum workshop (Nov 6), if wanted', notes: 'Chicken Ramen Factory workshop needs a reservation.' },
   { id: '1788481564612', item: 'verify-kyoto-lightups', due: '2026-10-25', text: 'Japan: verify Kyoto light-up dates cover Nov 15–19', notes: 'Kōdai-ji and Eikandō.' },
   { id: '1788481567612', item: 'transport-passes-seats', due: '2026-10-25', text: 'Japan: book the Nov 15 Kuroshio', notes: 'Booked Oct 27: Kuroshio 22, Shingū 11:27 to Shin-Osaka 15:51, car 3 seats 8-C/8-D, JR-West 45822. All nine rides are booked, including the Nov 6 Odoriko 2 (Itō 11:08, car 1 seats 5-A/5-B). Collect both Kuroshio paper tickets (43453, 45822) at a 5489 machine before Nov 10.' },
-  { id: '1788481914608', item: 'print-kumano-voucher', due: '2026-10-25', text: 'Japan: print the Kumano Travel voucher', notes: 'From the Kumano Travel MyPage (DP200503).' },
+  { id: '1788481914608', item: 'print-kumano-voucher', due: '2026-10-25', text: 'Japan: print the Kumano Travel voucher', notes: 'Done: voucher and reservation outline are in the print package (pages 32 to 40).' },
   // Documents & health
-  { id: '1788495874655', item: 'visit-japan-web', due: '2026-10-25', text: 'Japan: Visit Japan Web pre-registration for both', notes: 'Immigration and customs QR codes; screenshot them.' },
+  { id: '1788495874655', item: 'visit-japan-web', due: '2026-10-25', text: 'Japan: Visit Japan Web pre-registration for both', notes: 'Done Oct 27: both immigration and customs QR codes issued, printed on page 2 of the print package. Any edit in Visit Japan Web makes new codes, so reprint after changes.' },
   { id: '1788495877654', item: 'medication-check', due: '2026-10-20', text: 'Japan: medication check', notes: 'Adderall/Vyvanse and pseudoephedrine are restricted; may need a Yakkan Shōmei. Bring 23 days of prescriptions + motion-sickness pills.' },
-  { id: '1788495889651', item: 'travel-insurance', due: '2026-10-20', text: 'Japan: travel medical/evacuation insurance', notes: 'Bought Sep 26: IMG Patriot International Lite, PATII86911273, both of you, Oct 31 to Nov 22, $53.48. 24/7 +1 317 655 4500. Print ID cards from MyIMG plan documents.' },
+  { id: '1788495889651', item: 'travel-insurance', due: '2026-10-20', text: 'Japan: travel medical/evacuation insurance', notes: 'Bought Sep 26: IMG Patriot International Lite, PATII86911273, both of you, Oct 31 to Nov 22, $53.48. 24/7 +1 317 655 4500. ID cards and declaration are pages 3 to 5 of the print package.' },
   // Money & connectivity
   { id: '1788495892654', item: 'esim-wifi', due: '2026-10-28', text: 'Japan: eSIM / pocket Wi-Fi + offline maps', notes: 'Trail signal is patchy.' },
   { id: '1788495904654', item: 'trail-cash', due: '2026-11-10', text: 'Japan: withdraw trail cash before leaving Tanabe', notes: '7-Eleven / Japan Post ATMs. Keep ¥10k aside for an emergency taxi.' },
@@ -34,7 +34,7 @@ const JAPAN_TASKS = [
   // Packing
   { id: '1788495932655', item: 'packing-hiking-gear', due: '2026-10-28', text: 'Japan: pack hiking gear', notes: 'Broken-in boots, headlamp, poles, rain shell, quick-dry layers, blister kit.' },
   { id: '1788495935654', item: 'packing-battery-adapter', due: '2026-10-28', text: 'Japan: portable battery + chargers', notes: 'Japan is Type-A, 100 V; US plugs fit.' },
-  { id: '1788495946655', item: 'packing-copies', due: '2026-10-28', text: 'Japan: printed/offline copies of reservations + passport photocopies' },
+  { id: '1788495946655', item: 'packing-copies', due: '2026-10-28', text: 'Japan: printed/offline copies of reservations + passport photocopies', notes: 'Print package ready: Japan print package (print this).pdf, 78 pages, Desktop > Japan trip printouts. Print double-sided in color at The UPS Store, 1153 Bergen Pkwy. Passport photocopies still to do.' },
   // Home
   { id: '1788495949655', item: 'home-logistics', due: '2026-10-27', text: 'Japan: home logistics for 23 days away', notes: 'Mail hold, home/pet/plant care, autopay/bills, thermostat.' },
   // Kumano safety
